@@ -120,7 +120,7 @@
 </div>
 <div>
 <div class="font-stat-value text-body-sm text-on-surface">{{ Auth::user()->name }}</div>
-<div class="font-body-sm text-xs text-slate-400">Academic Excellence</div>
+<div class="font-body-sm text-xs text-slate-400 uppercase">{{ ucfirst(Auth::user()->role) }}</div>
 </div>
 </div>
 </div>

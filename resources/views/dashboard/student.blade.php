@@ -184,6 +184,7 @@
 <div class="flex items-center gap-3">
 <div class="text-right">
 <p class="font-bold text-on-surface leading-tight">{{ Auth::user()->name }}</p>
+<p class="text-[11px] text-primary-fixed-dim uppercase tracking-wider">{{ ucfirst(Auth::user()->role) }}</p>
 <p class="text-[11px] text-primary-fixed-dim uppercase tracking-wider">Lead Instructor</p>
 </div>
 <img alt="Instructor avatar" class="w-10 h-10 rounded-full border-2 border-primary-fixed-dim object-cover" data-alt="A professional portrait of a middle-aged male instructor with a confident smile, wearing a charcoal grey blazer. The background is a blurred high-end academic office with soft bokeh lighting. The overall color palette is dominated by deep navy and professional grey tones to match the dashboard's sophisticated aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_wncbssanXGL5-y2BIvE2BB17RNh6k0wLCe9-LzuzJaSYR_2wRGLLeOMEGD-KUpajCi16gVobYkFt1mzZntK11jZxaawEg2ZBtaeinoLJ7Yn6nP8LwHNDDchp6I2RlTWpmoYHbMy4MJ8xdpVclbSwPhVvSB61yiAoixdhxqQmA7PP5ulrSteeI323LJNp9pp11Ay_XCB_fwM1yW5JFkO6neTUCib1G6qu4M82vFxD3xtMoZwV8d2mk5Edlk3qDaF2023M5OP9puY"/>
