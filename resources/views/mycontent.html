@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "primary-fixed-dim": "#adc6ff",
+                "outline-variant": "#424754",
+                "on-secondary-fixed": "#002113",
+                "surface-bright": "#323949",
+                "tertiary": "#ffb95f",
+                "background": "#0c1322",
+                "on-secondary-container": "#00311f",
+                "surface-dim": "#0c1322",
+                "tertiary-fixed": "#ffddb8",
+                "on-primary-fixed": "#001a42",
+                "secondary-container": "#00a572",
+                "on-error-container": "#ffdad6",
+                "on-primary": "#002e6a",
+                "on-tertiary-container": "#3e2400",
+                "on-secondary": "#003824",
+                "tertiary-fixed-dim": "#ffb95f",
+                "secondary-fixed-dim": "#4edea3",
+                "secondary-fixed": "#6ffbbe",
+                "primary-fixed": "#d8e2ff",
+                "on-tertiary-fixed-variant": "#653e00",
+                "on-primary-fixed-variant": "#004395",
+                "surface": "#0c1322",
+                "error": "#ffb4ab",
+                "tertiary-container": "#ca8100",
+                "on-error": "#690005",
+                "on-primary-container": "#00285d",
+                "on-tertiary": "#472a00",
+                "on-secondary-fixed-variant": "#005236",
+                "inverse-surface": "#dce2f7",
+                "on-background": "#dce2f7",
+                "primary": "#adc6ff",
+                "surface-container-lowest": "#070e1d",
+                "error-container": "#93000a",
+                "surface-container-low": "#141b2b",
+                "surface-variant": "#2e3545",
+                "primary-container": "#4d8eff",
+                "inverse-on-surface": "#293040",
+                "outline": "#8c909f",
+                "surface-container-high": "#232a3a",
+                "surface-container": "#191f2f",
+                "secondary": "#4edea3",
+                "surface-container-highest": "#2e3545",
+                "on-surface": "#dce2f7",
+                "on-tertiary-fixed": "#2a1700",
+                "inverse-primary": "#005ac2",
+                "on-surface-variant": "#c2c6d6",
+                "surface-tint": "#adc6ff"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "base": "4px",
+                "xs": "4px",
+                "gutter": "20px",
+                "lg": "24px",
+                "sm": "8px",
+                "xl": "32px",
+                "margin": "24px",
+                "md": "16px"
+            },
+            "fontFamily": {
+                "stat-value": ["Inter"],
+                "body-sm": ["Inter"],
+                "label-caps": ["Inter"],
+                "body-base": ["Inter"],
+                "display-lg": ["Inter"],
+                "headline-md": ["Inter"],
+                "title-sm": ["Inter"]
+            },
+            "fontSize": {
+                "stat-value": ["28px", {"lineHeight": "1.1", "fontWeight": "700"}],
+                "body-sm": ["13px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                "body-base": ["15px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                "display-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "title-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #0c1322;
+            color: #dce2f7;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+    </style>
+</head>
+<body class="font-body-base">
+<!-- SideNavBar -->
+<aside class="flex flex-col h-screen fixed z-50 bg-slate-950 font-sans text-[14px] font-medium w-[260px] border-r border-slate-800">
+<div class="text-2xl font-black text-blue-500 px-6 py-8">Studa</div>
+<div class="px-4 space-y-1 flex-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition-all ease-in-out duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-600/10 text-blue-500 border-r-2 border-blue-500 transition-all ease-in-out duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+                My Content
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition-all ease-in-out duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+                Students
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition-all ease-in-out duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="video_call">video_call</span>
+                Live Courses
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition-all ease-in-out duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+                Analytics
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition-all ease-in-out duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+</div>
+<div class="p-6">
+<button class="w-full bg-primary-container text-on-primary-container py-3 rounded-xl font-bold flex items-center justify-center gap-2 scale-95 active:duration-75 hover:opacity-90 transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                Create Quiz
+            </button>
+</div>
+<div class="px-4 py-6 border-t border-slate-800 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-100 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+                Help Center
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-slate-100 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                Logout
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen">
+<!-- TopNavBar -->
+<header class="flex items-center justify-between px-6 h-16 w-full sticky top-0 z-40 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" data-icon="search">search</span>
+<input class="bg-slate-950 border-slate-800 text-on-surface-variant rounded-full pl-10 pr-4 py-1.5 w-full text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="Search your educational materials..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-slate-100 transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<button class="text-slate-400 hover:text-slate-100 transition-colors">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="text-slate-400 hover:text-slate-100 transition-colors">
+<span class="material-symbols-outlined" data-icon="mail">mail</span>
+</button>
+</div>
+<div class="flex items-center gap-3 pl-6 border-l border-slate-800">
+<div class="text-right">
+<p class="text-xs font-bold text-slate-100">Dr. Sarah Jenkins</p>
+<p class="text-[10px] text-primary">Senior Instructor</p>
+</div>
+<img alt="Instructor avatar" class="w-10 h-10 rounded-full border-2 border-primary-container object-cover" data-alt="A professional headshot of a female educator with a warm smile, set against a blurred academic background with soft bokeh lighting. She wears a professional navy blazer. The image has a clean, high-end corporate aesthetic with a cool blue color palette to match the Studa dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAt47bnb0-KYoPUlGfsXItZTw3ipDSfBTMvL6cDmS3-98aLphOJmU1Kg_nxtUjWc7lW68PiEeZT6BnU-QdGkxaTvH2F0vPpc2ByobRGGMlb3Bx1UdIJ2e5X_ENsuwfJFB7Y2VxPolRbhhaAAqcOjAFD3E8aN3nG6ixMY-Tj1LvBozDUFLYkzVWK3IiAVWNTnyXoJKH3Q96JwB3kmRIdTTb6D6L4ctpfGWtBz1aApwTnGKu38xSeUpSz4sRP3r66q-NRdDOpr-cT2Co"/>
+</div>
+</div>
+</header>
+<div class="p-8 max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="flex items-end justify-between mb-8">
+<div>
+<h1 class="font-display-lg text-display-lg text-on-surface mb-2">My Content</h1>
+<p class="text-on-surface-variant font-body-base">Manage and organize your academic resources and student materials.</p>
+</div>
+<button class="bg-primary hover:bg-primary-container text-on-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined" data-icon="upload">upload</span>
+                    Upload New Content
+                </button>
+</div>
+<!-- Dashboard Stats Summary (Bento Lite) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-8">
+<div class="glass-card p-lg rounded-xl flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg" data-icon="video_library">video_library</span>
+<span class="text-secondary font-bold text-xs">+12%</span>
+</div>
+<div>
+<p class="text-label-caps text-outline-variant uppercase mb-1">Total Videos</p>
+<h3 class="text-stat-value font-stat-value">48</h3>
+</div>
+</div>
+<div class="glass-card p-lg rounded-xl flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-tertiary bg-tertiary/10 p-2 rounded-lg" data-icon="description">description</span>
+<span class="text-slate-500 font-bold text-xs">Stable</span>
+</div>
+<div>
+<p class="text-label-caps text-outline-variant uppercase mb-1">Documents</p>
+<h3 class="text-stat-value font-stat-value">124</h3>
+</div>
+</div>
+<div class="glass-card p-lg rounded-xl flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-secondary bg-secondary/10 p-2 rounded-lg" data-icon="quiz">quiz</span>
+<span class="text-secondary font-bold text-xs">+5</span>
+</div>
+<div>
+<p class="text-label-caps text-outline-variant uppercase mb-1">Active Quizzes</p>
+<h3 class="text-stat-value font-stat-value">32</h3>
+</div>
+</div>
+<div class="glass-card p-lg rounded-xl flex flex-col justify-between">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim bg-primary/10 p-2 rounded-lg" data-icon="visibility">visibility</span>
+<span class="text-secondary font-bold text-xs">+2.4k</span>
+</div>
+<div>
+<p class="text-label-caps text-outline-variant uppercase mb-1">Content Views</p>
+<h3 class="text-stat-value font-stat-value">18.2k</h3>
+</div>
+</div>
+</div>
+<!-- Content Controls -->
+<div class="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
+<div class="flex items-center gap-2 bg-slate-900/50 p-1 rounded-xl border border-slate-800">
+<button class="px-4 py-2 rounded-lg bg-primary-container text-on-primary-container font-bold text-sm transition-all">All Content</button>
+<button class="px-4 py-2 rounded-lg text-slate-400 hover:text-slate-100 font-medium text-sm transition-all">Videos</button>
+<button class="px-4 py-2 rounded-lg text-slate-400 hover:text-slate-100 font-medium text-sm transition-all">Documents</button>
+<button class="px-4 py-2 rounded-lg text-slate-400 hover:text-slate-100 font-medium text-sm transition-all">Quizzes</button>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative">
+<select class="bg-slate-900 border-slate-800 text-on-surface-variant text-sm rounded-lg pl-4 pr-10 py-2.5 appearance-none focus:ring-primary outline-none">
+<option>Sort by: Newest First</option>
+<option>Sort by: Most Viewed</option>
+<option>Sort by: Alphabetical</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+<button class="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-300 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="filter_list">filter_list</span>
+                        More Filters
+                    </button>
+</div>
+</div>
+<!-- Content Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Content Card 1 -->
+<div class="glass-card rounded-xl overflow-hidden group hover:border-primary/50 transition-all">
+<div class="h-40 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A cinematic 3D abstract visualization of mathematical equations and complex geometric nodes floating in a dark, high-tech space. Subtle blue and cyan glows illuminate the structures. The style is modern, educational, and clean, suitable for a premium physics or mathematics course thumbnail." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_mr0dRfwRzuR2QGOwfBo8Do1puRjSTF-S9RkzAK1Ic2inkF-miYbKfG2zRcrF4fIdyaPvkg2L6YdVcS6UVrReTh-T4XOsgh19KLfrmwZCJAj5FdOx3a5uTAe3LN8IXbpRb6MmXKmXSN0MPDkecL3DywgKGXiLzu9gSTIkQAUwd7X4whUoXcbbTqgg_i0bw2Y9l-bm3VaGla7GyHW9EkTT_XH3bzxt2AXgfW9a63sn8wE3JYtn3EDindarFveXjYzlW_xj3jlJXTc"/>
+<div class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur text-secondary px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-secondary rounded-full"></span> LIVE
+                        </div>
+<div class="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur text-white text-xs px-2 py-1 rounded">14:20</div>
+<div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="bg-white text-slate-950 w-12 h-12 rounded-full flex items-center justify-center shadow-xl">
+<span class="material-symbols-outlined" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-title-sm text-on-surface">Grade 12 Physics: Quantum Mechanics</h4>
+<span class="material-symbols-outlined text-outline-variant cursor-pointer" data-icon="more_vert">more_vert</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-outline-variant mb-6">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="video_library">video_library</span> Video</span>
+<span class="w-1 h-1 bg-slate-700 rounded-full"></span>
+<span>Created Oct 12, 2023</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex gap-2">
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-primary-container hover:text-on-primary-container transition-colors text-slate-400" title="Edit">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors text-slate-400" title="Preview">
+<span class="material-symbols-outlined text-sm" data-icon="visibility">visibility</span>
+</button>
+</div>
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-error-container hover:text-on-error-container transition-colors text-slate-400" title="Delete">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Content Card 2 -->
+<div class="glass-card rounded-xl overflow-hidden group hover:border-primary/50 transition-all">
+<div class="h-40 relative overflow-hidden bg-slate-800/50 flex items-center justify-center">
+<div class="text-center">
+<span class="material-symbols-outlined text-primary-container text-5xl mb-2" data-icon="quiz">quiz</span>
+<p class="text-xs text-outline-variant uppercase font-bold">Quiz Assessment</p>
+</div>
+<div class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur text-tertiary px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1">
+                            DRAFT
+                        </div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-title-sm text-on-surface">Calculus II: Final Exam Prep</h4>
+<span class="material-symbols-outlined text-outline-variant cursor-pointer" data-icon="more_vert">more_vert</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-outline-variant mb-6">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="quiz">quiz</span> Quiz</span>
+<span class="w-1 h-1 bg-slate-700 rounded-full"></span>
+<span>Created Oct 15, 2023</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex gap-2">
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-primary-container hover:text-on-primary-container transition-colors text-slate-400" title="Edit">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors text-slate-400" title="Preview">
+<span class="material-symbols-outlined text-sm" data-icon="visibility">visibility</span>
+</button>
+</div>
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-error-container hover:text-on-error-container transition-colors text-slate-400" title="Delete">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Content Card 3 -->
+<div class="glass-card rounded-xl overflow-hidden group hover:border-primary/50 transition-all">
+<div class="h-40 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Close up photography of organic cellular structures viewed through a microscope, featuring vibrant green and deep blue bioluminescent patterns. The image represents advanced biology or life sciences content, with a high-definition, professional scientific research aesthetic. The lighting is soft and focused on the intricate textures." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBcp_x-rRqNtYoaN2T1wDBQMOMEDdaK1r-1BPqNBmG9sifMAbg0-evzRkQXvIj2atjvEJS-FB_lcsvQGC3szj9L8bwIwpVCR5wHkzJ3uqQnRyxUQAHoY4pX47VogQt3FujTWeuLI66E5mLFJIt6RZM3muWcEsnD7XerMKvtbHOkprenpY0fAvUUzhflchQRT41yXmG_1xpINFUHkDQN708dvPkobnsiDv7YJVnmUS4IqyyOayvWVbLQyHfWTwPu365fc2TVYcgwDE"/>
+<div class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur text-secondary px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-secondary rounded-full"></span> LIVE
+                        </div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-title-sm text-on-surface">Grade 11 Biology: Cellular Respiration</h4>
+<span class="material-symbols-outlined text-outline-variant cursor-pointer" data-icon="more_vert">more_vert</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-outline-variant mb-6">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="description">description</span> Document</span>
+<span class="w-1 h-1 bg-slate-700 rounded-full"></span>
+<span>Created Sep 28, 2023</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex gap-2">
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-primary-container hover:text-on-primary-container transition-colors text-slate-400" title="Edit">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors text-slate-400" title="Preview">
+<span class="material-symbols-outlined text-sm" data-icon="visibility">visibility</span>
+</button>
+</div>
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-error-container hover:text-on-error-container transition-colors text-slate-400" title="Delete">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Content Card 4 -->
+<div class="glass-card rounded-xl overflow-hidden group hover:border-primary/50 transition-all">
+<div class="h-40 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A clean, minimalist classroom scene with a chalkboard full of elegant mathematical derivations and a single spotlight highlighting the work. The composition is balanced and scholarly, with soft shadows and a professional, quiet atmosphere. The aesthetic uses deep grays and chalkboard greens with white chalk accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2bGeoWVcd6kZUxo-tPEn9QtDmHVgVSTsgGaW16rUPW_1mFr3z7Yo7pgBRZgu-tFr75j7KS6RlFCQpAktSAZrTea2yZNQfDO6ynm4uZIS2ZiWcBmLWk4sapx-27irERF0Ikez5FyKlLkopgo_wV4MRv7HT17CaU6IX1uGZRqNM1I8fuZFI2Lu9d0lPIb2rfqj6vENyIvFpDL0TxNsi6TAbdAT6jOQppjxvcWtl4UnH_y0ZKieDOplMdKq6WYbEsaNzdUFDioqHrf8"/>
+<div class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur text-secondary px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-secondary rounded-full"></span> LIVE
+                        </div>
+<div class="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur text-white text-xs px-2 py-1 rounded">08:45</div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-title-sm text-on-surface">Statistics: Probability Distributions</h4>
+<span class="material-symbols-outlined text-outline-variant cursor-pointer" data-icon="more_vert">more_vert</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-outline-variant mb-6">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="video_library">video_library</span> Video</span>
+<span class="w-1 h-1 bg-slate-700 rounded-full"></span>
+<span>Created Sep 20, 2023</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex gap-2">
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-primary-container hover:text-on-primary-container transition-colors text-slate-400" title="Edit">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors text-slate-400" title="Preview">
+<span class="material-symbols-outlined text-sm" data-icon="visibility">visibility</span>
+</button>
+</div>
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-error-container hover:text-on-error-container transition-colors text-slate-400" title="Delete">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Content Card 5 -->
+<div class="glass-card rounded-xl overflow-hidden group hover:border-primary/50 transition-all">
+<div class="h-40 relative overflow-hidden bg-slate-800/50 flex items-center justify-center">
+<div class="text-center">
+<span class="material-symbols-outlined text-tertiary text-5xl mb-2" data-icon="description">description</span>
+<p class="text-xs text-outline-variant uppercase font-bold">Assignment Rubric</p>
+</div>
+<div class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur text-secondary px-2 py-1 rounded text-[10px] font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-secondary rounded-full"></span> LIVE
+                        </div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-title-sm text-on-surface">World History: Industrial Revolution</h4>
+<span class="material-symbols-outlined text-outline-variant cursor-pointer" data-icon="more_vert">more_vert</span>
+</div>
+<div class="flex items-center gap-3 text-xs text-outline-variant mb-6">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]" data-icon="description">description</span> PDF</span>
+<span class="w-1 h-1 bg-slate-700 rounded-full"></span>
+<span>Created Aug 14, 2023</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex gap-2">
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-primary-container hover:text-on-primary-container transition-colors text-slate-400" title="Edit">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 transition-colors text-slate-400" title="Preview">
+<span class="material-symbols-outlined text-sm" data-icon="visibility">visibility</span>
+</button>
+</div>
+<button class="p-2 rounded-lg bg-slate-800 hover:bg-error-container hover:text-on-error-container transition-colors text-slate-400" title="Delete">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Add New Placeholder -->
+<div class="border-2 border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center p-8 text-center group hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer">
+<div class="w-16 h-16 rounded-full bg-slate-900 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined text-slate-500 group-hover:text-primary" data-icon="add_circle">add_circle</span>
+</div>
+<p class="font-title-sm text-slate-400 group-hover:text-primary mb-1">Upload New Material</p>
+<p class="text-xs text-outline-variant">Drag and drop or click to browse files</p>
+</div>
+</div>
+<!-- Table View Alternative (Bottom Section) -->
+<div class="mt-12">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-title-sm text-on-surface">Recent Activity Log</h3>
+<button class="text-primary text-sm font-bold hover:underline">View All History</button>
+</div>
+<div class="glass-card rounded-xl overflow-hidden border border-slate-800">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-900/50 border-b border-slate-800">
+<th class="px-6 py-4 text-label-caps text-outline-variant">Content Item</th>
+<th class="px-6 py-4 text-label-caps text-outline-variant">Type</th>
+<th class="px-6 py-4 text-label-caps text-outline-variant">Modified</th>
+<th class="px-6 py-4 text-label-caps text-outline-variant">Status</th>
+<th class="px-6 py-4 text-label-caps text-outline-variant">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-800">
+<tr class="hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 font-medium text-slate-100">Grade 10 Chem: Elements &amp; Compounds</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-2 text-sm text-slate-400">
+<span class="material-symbols-outlined text-sm" data-icon="description">description</span> Document
+                                    </span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-400">2 hours ago</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-secondary/10 text-secondary border border-secondary/20">
+<span class="w-1 h-1 bg-secondary rounded-full"></span> PUBLISHED
+                                    </span>
+</td>
+<td class="px-6 py-4">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="more_horiz">more_horiz</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 font-medium text-slate-100">Economics 101: Supply Curves</td>
+<td class="px-6 py-4">
+<span class="flex items-center gap-2 text-sm text-slate-400">
+<span class="material-symbols-outlined text-sm" data-icon="video_library">video_library</span> Video
+                                    </span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-400">Yesterday</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-tertiary/10 text-tertiary border border-tertiary/20">
+<span class="w-1 h-1 bg-tertiary rounded-full"></span> PROCESSING
+                                    </span>
+</td>
+<td class="px-6 py-4">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-xl" data-icon="more_horiz">more_horiz</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+</body></html>
