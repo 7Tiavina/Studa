@@ -149,10 +149,13 @@
 <span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
                 Help Center
             </a>
-<a class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition-all" href="#">
-<span class="material-symbols-outlined" data-icon="logout">logout</span>
-                Logout
-            </a>
+<form action="{{ route('logout') }}" method="POST">
+    @csrf
+    <button type="submit" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:bg-slate-900 hover:text-slate-100 transition-all">
+        <span class="material-symbols-outlined" data-icon="logout">logout</span>
+        Logout
+    </button>
+</form>
 </div>
 </aside>
 <!-- Main Content Wrapper -->
@@ -180,7 +183,7 @@
 <div class="h-8 w-[1px] bg-slate-800 mx-2"></div>
 <div class="flex items-center gap-3">
 <div class="text-right">
-<p class="font-bold text-on-surface leading-tight">Dr. Aris Thorne</p>
+<p class="font-bold text-on-surface leading-tight">{{ Auth::user()->name }}</p>
 <p class="text-[11px] text-primary-fixed-dim uppercase tracking-wider">Lead Instructor</p>
 </div>
 <img alt="Instructor avatar" class="w-10 h-10 rounded-full border-2 border-primary-fixed-dim object-cover" data-alt="A professional portrait of a middle-aged male instructor with a confident smile, wearing a charcoal grey blazer. The background is a blurred high-end academic office with soft bokeh lighting. The overall color palette is dominated by deep navy and professional grey tones to match the dashboard's sophisticated aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_wncbssanXGL5-y2BIvE2BB17RNh6k0wLCe9-LzuzJaSYR_2wRGLLeOMEGD-KUpajCi16gVobYkFt1mzZntK11jZxaawEg2ZBtaeinoLJ7Yn6nP8LwHNDDchp6I2RlTWpmoYHbMy4MJ8xdpVclbSwPhVvSB61yiAoixdhxqQmA7PP5ulrSteeI323LJNp9pp11Ay_XCB_fwM1yW5JFkO6neTUCib1G6qu4M82vFxD3xtMoZwV8d2mk5Edlk3qDaF2023M5OP9puY"/>
@@ -205,7 +208,7 @@
 </div>
 </div>
 <div>
-<h2 class="font-headline-md text-headline-md text-on-surface">Dr. Aris Thorne</h2>
+<h2 class="font-headline-md text-headline-md text-on-surface">{{ Auth::user()->name }}</h2>
 <p class="text-primary font-medium">Senior Research Fellow &amp; Educator</p>
 </div>
 <p class="text-on-surface-variant font-body-sm text-body-sm max-w-xs">

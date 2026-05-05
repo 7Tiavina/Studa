@@ -153,10 +153,13 @@
 <span class="material-symbols-outlined">contact_support</span>
 <span>Help Center</span>
 </div>
-<div class="flex items-center gap-3 px-4 py-2 text-error hover:text-red-400 cursor-pointer text-sm">
-<span class="material-symbols-outlined">logout</span>
-<span>Logout</span>
-</div>
+<form action="{{ route('logout') }}" method="POST">
+    @csrf
+    <button type="submit" class="flex items-center gap-3 px-4 py-2 text-error hover:text-red-400 cursor-pointer text-sm">
+        <span class="material-symbols-outlined">logout</span>
+        <span>Logout</span>
+    </button>
+</form>
 </div>
 </div>
 </aside>
@@ -178,7 +181,7 @@
 </div>
 <div class="flex items-center gap-3 pl-4 border-l border-slate-800">
 <div class="text-right">
-<p class="font-bold text-sm text-slate-100">Dr. Julian Voss</p>
+<p class="font-bold text-sm text-slate-100">{{ Auth::user()->name }}</p>
 <p class="text-xs text-slate-500">Academic Director</p>
 </div>
 <img alt="Instructor avatar" class="w-10 h-10 rounded-full border border-slate-700" data-alt="A professional studio portrait of a middle-aged male academic with a confident smile, wearing a dark navy blazer and a crisp white shirt. The background is a soft, out-of-focus library setting, conveying expertise and authority. The lighting is sophisticated, with gentle rim lighting that highlights a modern, dark-themed professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsJWUl-DlicWbfz-tGDWy_otwp_9fUDUCUIKDrK5lGljM-XkmdWmTGlAxG7IzyCS6VUZa-lFNBazXNegrG9UX_0GD1TSYYPmX3VHMCJ5BMz1Xs11dfLlp3css_rKAyJv9Lj66tGuqCA48WIw1Tp3QFk20Ti3cSjesvbIDqFvAnoZc92-JEhoT8XZ6Sm6OJyuPr7md2mIRHAR4ZRvSOMxCkjlqes7iEip9JUNPSZXtozrs4pBdvPmLVDGGNpND-2IDSrrlPe39aO6E"/>

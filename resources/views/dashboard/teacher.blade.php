@@ -119,7 +119,7 @@
 <img alt="Instructor profile picture" data-alt="A professional instructor profile portrait in a minimalist dark studio. The lighting is focused and warm, creating a high-contrast cinematic appearance against a deep slate background. The instructor wears a modern navy blazer, conveying academic authority and professional excellence within the Studa ecosystem's premium branding." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIt82J3fy2UmwcX1zUGwvpSMBQq2y3eCb2Zwzyiq3tZpNK7Vcdva6cTq0Q4-NN7k65A6Sqo5j7s8etzs29TUHah11DndAGNAQ8qM3YI0I9u893-_DhnGnfqF_oz9C4K76cFdNeNYZT9OAGiaPFVSgzO_xiduCbg3ysTIgMzjenUn2KI6k9zDG6TXX0hOWdhvQ63vVKPx51mn_jo-dtRZCSKpa30NNPO2WF36FuXXa4iyx2Z9lBqrindrC7690c_5iRa7b3TTPTu54"/>
 </div>
 <div>
-<div class="font-stat-value text-body-sm text-on-surface">Jean-Pierre R.</div>
+<div class="font-stat-value text-body-sm text-on-surface">{{ Auth::user()->name }}</div>
 <div class="font-body-sm text-xs text-slate-400">Academic Excellence</div>
 </div>
 </div>
@@ -161,10 +161,13 @@
 <span class="material-symbols-outlined">contact_support</span>
                 Help Center
             </a>
-<a class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-red-400 font-sans text-[14px]" href="#">
-<span class="material-symbols-outlined">logout</span>
-                Logout
-            </a>
+<form action="{{ route('logout') }}" method="POST">
+    @csrf
+    <button type="submit" class="flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-red-400 font-sans text-[14px]">
+        <span class="material-symbols-outlined">logout</span>
+        Logout
+    </button>
+</form>
 </div>
 </aside>
 <!-- TopNavBar -->
