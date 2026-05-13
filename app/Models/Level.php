@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Level extends Model
 {
-    protected $fillable = ['name', 'position'];
+    protected $fillable = ['name', 'position', 'category'];
 
     public function subjects()
     {

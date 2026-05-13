@@ -52,6 +52,7 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:levels',
             'position' => 'nullable|integer',
+            'category' => 'required|string|max:255',
         ]);
         Level::create($validated);
         return redirect()->route('admin.dashboard', ['tab' => 'levels'])->with('success', 'Niveau ajouté avec succès.');
@@ -62,6 +63,7 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:levels,name,' . $level->id,
             'position' => 'nullable|integer',
+            'category' => 'required|string|max:255',
         ]);
         $level->update($validated);
         return redirect()->route('admin.dashboard', ['tab' => 'levels'])->with('success', 'Niveau mis à jour.');

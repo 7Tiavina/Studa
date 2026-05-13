@@ -46,7 +46,8 @@
         'menu_book', 'calculate', 'psychology', 'auto_stories', 'brush', 'music_note',
         'fitness_center', 'computer', 'account_balance', 'architecture', 'biometry',
         'chemistry', 'draw', 'language', 'microbiology', 'menu_book', 'school'
-    ]
+    ],
+    availableCategories: ['Primaire', 'Collégial', 'Lycée', 'Université', 'Autre']
 }">
     <aside class="flex flex-col h-screen fixed z-50 bg-slate-950 w-[260px] border-r border-slate-800">
         <div class="text-2xl font-black text-blue-500 px-6 py-8">Studa</div>
@@ -274,7 +275,7 @@
                 <div class="mb-10 flex justify-between items-end">
                     <div>
                         <h1 class="text-3xl font-bold text-on-background mb-2">Gestion des Niveaux</h1>
-                        <p class="text-on-surface-variant">Configurez les niveaux d'études (Seconde, Première, Terminale...).</p>
+                        <p class="text-on-surface-variant">Configurez les niveaux d'études par catégorie et leur ordre d'affichage.</p>
                     </div>
                     <button @click="$dispatch('open-modal', 'add-level')" class="px-5 py-2.5 rounded-lg bg-primary text-slate-900 font-bold hover:opacity-90 transition-opacity flex items-center gap-2">
                         <span class="material-symbols-outlined text-lg">add</span>
@@ -282,24 +283,50 @@
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($levels as $level)
-                    <div class="bg-surface-container rounded-xl border border-outline-variant p-6 flex justify-between items-center group hover:border-primary transition-colors">
-                        <div>
-                            <h3 class="text-xl font-bold">{{ $level->name }}</h3>
-                            <p class="text-xs text-outline uppercase tracking-wider">Niveau Scolaire</p>
-                        </div>
-                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button @click="$dispatch('open-modal', { name: 'edit-level', level: {{ json_encode($level) }} })" class="p-2 rounded-full hover:bg-blue-500/10 text-primary">
-                                <span class="material-symbols-outlined">edit</span>
-                            </button>
-                            <form action="{{ route('admin.levels.destroy', $level->id) }}" method="POST" onsubmit="return confirm('Supprimer ce niveau ?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="p-2 rounded-full hover:bg-red-500/10 text-error">
-                                    <span class="material-symbols-outlined">delete</span>
-                                </button>
-                            </form>
+                <div class="space-y-12">
+                    @foreach($levels->groupBy('category') as $category => $categoryLevels)
+                    <div class="space-y-6">
+                        <h2 class="text-xl font-bold text-primary flex items-center gap-2">
+                            <span class="material-symbols-outlined">folder_open</span>
+                            {{ $category ?: 'Non classé' }}
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            @foreach($categoryLevels as $level)
+                            <div class="bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col group hover:border-primary transition-colors">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h3 class="text-xl font-bold">{{ $level->name }}</h3>
+                                        <p class="text-[10px] text-outline uppercase tracking-wider font-bold">Position: {{ $level->position }}</p>
+                                    </div>
+                                    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button @click="$dispatch('open-modal', { name: 'edit-level', level: {{ json_encode($level) }} })" class="p-2 rounded-full hover:bg-blue-500/10 text-primary">
+                                            <span class="material-symbols-outlined text-lg">edit</span>
+                                        </button>
+                                        <form action="{{ route('admin.levels.destroy', $level->id) }}" method="POST" onsubmit="return confirm('Supprimer ce niveau ?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-2 rounded-full hover:bg-red-500/10 text-error">
+                                                <span class="material-symbols-outlined text-lg">delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-auto pt-4 border-t border-outline-variant/30">
+                                    <p class="text-xs font-semibold text-outline mb-2">Matières liées ({{ $level->subjects->count() }}) :</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        @forelse($level->subjects as $s)
+                                            <span class="px-2 py-1 rounded-md bg-background text-[10px] border border-outline-variant text-on-surface-variant flex items-center gap-1">
+                                                <span class="material-symbols-outlined text-[12px]">{{ $s->icon ?: 'book' }}</span>
+                                                {{ $s->name }}
+                                            </span>
+                                        @empty
+                                            <span class="text-[10px] italic text-outline">Aucune matière</span>
+                                        @endforelse
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
                         </div>
                     </div>
                     @endforeach
@@ -359,12 +386,22 @@
             <form action="{{ route('admin.levels.store') }}" method="POST">
                 @csrf
                 <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Catégorie</label>
+                    <select name="category" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-1 focus:ring-primary" required>
+                        <option value="">Sélectionner une catégorie</option>
+                        <template x-for="cat in availableCategories" :key="cat">
+                            <option :value="cat" x-text="cat"></option>
+                        </template>
+                    </select>
+                </div>
+                <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Nom du niveau (ex: Seconde)</label>
                     <input type="text" name="name" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-1 focus:ring-primary" required placeholder="Seconde">
                 </div>
                 <div class="mb-6">
-                    <label class="block text-sm font-medium mb-2">Position (pour l'ordre)</label>
+                    <label class="block text-sm font-medium mb-2">Position</label>
                     <input type="number" name="position" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-1 focus:ring-primary" value="0">
+                    <p class="text-[10px] text-outline mt-1">Sert à ordonner les niveaux (ex: 1 pour Seconde, 2 pour Première...). Plus le chiffre est petit, plus il apparaît haut.</p>
                 </div>
                 <div class="flex gap-4">
                     <button type="submit" class="flex-1 bg-primary text-slate-900 font-bold py-3 rounded-xl hover:opacity-90">Créer</button>
@@ -382,12 +419,21 @@
                 @csrf
                 @method('PUT')
                 <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Catégorie</label>
+                    <select name="category" x-model="level.category" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-1 focus:ring-primary" required>
+                        <template x-for="cat in availableCategories" :key="cat">
+                            <option :value="cat" x-text="cat" :selected="level.category == cat"></option>
+                        </template>
+                    </select>
+                </div>
+                <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Nom du niveau</label>
                     <input type="text" name="name" x-model="level.name" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-1 focus:ring-primary" required>
                 </div>
                 <div class="mb-6">
                     <label class="block text-sm font-medium mb-2">Position</label>
                     <input type="number" name="position" x-model="level.position" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-1 focus:ring-primary">
+                    <p class="text-[10px] text-outline mt-1">Plus le chiffre est petit, plus il apparaît haut.</p>
                 </div>
                 <div class="flex gap-4">
                     <button type="submit" class="flex-1 bg-primary text-slate-900 font-bold py-3 rounded-xl hover:opacity-90">Enregistrer</button>
@@ -412,8 +458,12 @@
                         <label class="block text-sm font-medium mb-2">Niveau</label>
                         <select name="level_id" class="w-full bg-background border-outline-variant rounded-xl text-white" required>
                             <option value="">Choisir un niveau</option>
-                            @foreach($levels as $l)
-                                <option value="{{ $l->id }}">{{ $l->name }}</option>
+                            @foreach($levels->groupBy('category') as $cat => $catLevels)
+                                <optgroup label="{{ $cat ?: 'Non classé' }}" class="bg-slate-900 text-primary">
+                                    @foreach($catLevels as $l)
+                                        <option value="{{ $l->id }}">{{ $l->name }}</option>
+                                    @endforeach
+                                </optgroup>
                             @endforeach
                         </select>
                     </div>
@@ -454,8 +504,12 @@
                     <div>
                         <label class="block text-sm font-medium mb-2">Niveau</label>
                         <select name="level_id" x-model="subject.level_id" class="w-full bg-background border-outline-variant rounded-xl text-white" required>
-                            @foreach($levels as $l)
-                                <option value="{{ $l->id }}">{{ $l->name }}</option>
+                            @foreach($levels->groupBy('category') as $cat => $catLevels)
+                                <optgroup label="{{ $cat ?: 'Non classé' }}" class="bg-slate-900 text-primary">
+                                    @foreach($catLevels as $l)
+                                        <option value="{{ $l->id }}">{{ $l->name }}</option>
+                                    @endforeach
+                                </optgroup>
                             @endforeach
                         </select>
                     </div>
