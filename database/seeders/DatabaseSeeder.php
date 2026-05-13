@@ -41,5 +41,24 @@ class DatabaseSeeder extends Seeder
             'role' => 'student',
             'is_validated' => false,
         ]);
+
+        // Default Levels
+        $levels = ['Seconde', 'Première', 'Terminale'];
+        foreach ($levels as $level) {
+            \App\Models\Level::create(['name' => $level]);
+        }
+
+        // Default Subjects
+        $subjects = [
+            ['name' => 'Mathématiques', 'slug' => 'mathematiques', 'icon' => 'functions'],
+            ['name' => 'Physique-Chimie', 'slug' => 'physique-chimie', 'icon' => 'science'],
+            ['name' => 'SVT', 'slug' => 'svt', 'icon' => 'biotech'],
+            ['name' => 'Français', 'slug' => 'francais', 'icon' => 'history_edu'],
+            ['name' => 'Anglais', 'slug' => 'anglais', 'icon' => 'translate'],
+            ['name' => 'Histoire-Géo', 'slug' => 'histoire-geo', 'icon' => 'public'],
+        ];
+        foreach ($subjects as $subject) {
+            \App\Models\Subject::create($subject);
+        }
     }
 }
