@@ -15,9 +15,15 @@ class StudentController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $subscribedCoursesIds = $user->subscribedCourses()->pluck('courses.id')->toArray();
         $subscribedCourses = $user->subscribedCourses()->with(['teacher', 'subject', 'level'])->get();
         $followedTeachers = $user->followedTeachers()->get();
-        $levels = Level::with('subjects')->orderBy('position')->get();
+        
+        $levels = Level::with(['subjects' => function($query) {
+            $query->with(['courses' => function($q) {
+                $q->where('status', 'published')->with('teacher');
+            }]);
+        }])->orderBy('position')->get();
         
         $stats = [
             'courses_count' => $subscribedCourses->count(),
@@ -25,7 +31,7 @@ class StudentController extends Controller
             'recent_activity' => 0, // Placeholder
         ];
 
-        return view('dashboard.student', compact('user', 'subscribedCourses', 'followedTeachers', 'levels', 'stats'));
+        return view('dashboard.student', compact('user', 'subscribedCourses', 'subscribedCoursesIds', 'followedTeachers', 'levels', 'stats'));
     }
 
     public function subscribeToCourse(Course $course)

@@ -175,14 +175,43 @@
                             @foreach($categoryLevels as $level)
                             <div class="bg-surface-container rounded-xl border border-outline-variant p-6">
                                 <h5 class="font-bold text-lg mb-4">{{ $level->name }}</h5>
-                                <div class="grid grid-cols-1 gap-2">
+                                <div class="grid grid-cols-1 gap-4">
                                     @foreach($level->subjects as $subject)
-                                    <div class="flex items-center justify-between p-3 bg-background rounded-lg border border-outline-variant/20">
-                                        <div class="flex items-center gap-3">
-                                            <span class="material-symbols-outlined text-sm text-secondary">{{ $subject->icon ?: 'book' }}</span>
-                                            <span class="text-sm">{{ $subject->name }}</span>
+                                    <div x-data="{ expanded: false }" class="bg-background rounded-lg border border-outline-variant/20 overflow-hidden">
+                                        <div class="flex items-center justify-between p-3 cursor-pointer hover:bg-slate-800/40 transition-colors" @click="expanded = !expanded">
+                                            <div class="flex items-center gap-3">
+                                                <span class="material-symbols-outlined text-sm text-secondary">{{ $subject->icon ?: 'book' }}</span>
+                                                <span class="text-sm font-semibold">{{ $subject->name }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-outline">{{ $subject->courses->count() }} cours</span>
+                                                <span class="material-symbols-outlined text-xs transition-transform" :class="expanded ? 'rotate-180' : ''">expand_more</span>
+                                            </div>
                                         </div>
-                                        <button class="text-[10px] font-bold text-primary hover:underline">Voir les cours</button>
+                                        
+                                        <div x-show="expanded" x-collapse x-cloak class="border-t border-outline-variant/10 bg-slate-900/20 p-3 space-y-3">
+                                            @forelse($subject->courses as $course)
+                                            <div class="flex items-center justify-between p-2 bg-surface-container-low rounded-lg border border-outline-variant/10">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="material-symbols-outlined text-xs text-red-400">picture_as_pdf</span>
+                                                    <div>
+                                                        <p class="text-[11px] font-bold leading-none">{{ $course->title }}</p>
+                                                        <p class="text-[9px] text-outline">Par {{ $course->teacher->name }}</p>
+                                                    </div>
+                                                </div>
+                                                @if(in_array($course->id, $subscribedCoursesIds))
+                                                    <span class="px-2 py-1 bg-secondary/10 text-secondary text-[8px] font-bold uppercase rounded">Abonné</span>
+                                                @else
+                                                    <form action="{{ route('student.courses.subscribe', $course->id) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit" class="px-2 py-1 bg-primary text-slate-900 text-[8px] font-bold uppercase rounded hover:opacity-90 transition-opacity">S'abonner</button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                            @empty
+                                            <p class="text-center text-[10px] text-outline italic py-2">Aucun cours disponible.</p>
+                                            @endforelse
+                                        </div>
                                     </div>
                                     @endforeach
                                 </div>
