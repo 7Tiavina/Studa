@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
 
 Route::get('/', function () {
     return view('home');
@@ -15,7 +16,21 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard/student', function () { return view('dashboard.student'); });
-    Route::get('/dashboard/teacher', function () { return view('dashboard.teacher'); });
-    Route::get('/dashboard/admin', function () { return view('dashboard.admin'); });
+    Route::get('/waiting-validation', function () {
+        return view('waiting_validation');
+    })->name('waiting.validation');
+
+    Route::middleware('validated')->group(function () {
+        Route::get('/dashboard/student', function () { return view('dashboard.student'); });
+        Route::get('/dashboard/teacher', function () { return view('dashboard.teacher'); });
+    });
+
+    // Admin routes
+    Route::middleware('admin')->group(function () {
+        Route::get('/dashboard/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+        Route::patch('/admin/users/{user}/validate', [AdminController::class, 'validateUser'])->name('admin.users.validate');
+        Route::get('/admin/users/{user}/edit', [AdminController::class, 'edit'])->name('admin.users.edit');
+        Route::put('/admin/users/{user}', [AdminController::class, 'update'])->name('admin.users.update');
+        Route::delete('/admin/users/{user}', [AdminController::class, 'destroy'])->name('admin.users.destroy');
+    });
 });
