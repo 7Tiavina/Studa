@@ -12,4 +12,9 @@ class Level extends Model
     {
         return $this->hasMany(Subject::class)->orderBy('name');
     }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
 }

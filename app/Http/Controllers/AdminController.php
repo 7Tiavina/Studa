@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Level;
 use App\Models\Subject;
+use App\Models\Course;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -14,7 +15,10 @@ class AdminController extends Controller
         $users = User::where('role', '!=', 'admin')->get();
         $levels = Level::orderBy('position')->orderBy('name')->get();
         $subjects = Subject::with('level')->orderBy('name')->get();
-        return view('dashboard.admin', compact('users', 'levels', 'subjects'));
+        $teachers = User::where('role', 'teacher')->with(['levels', 'subjects', 'courses'])->get();
+        $pendingCourses = Course::where('status', 'pending')->with(['level', 'subject', 'teacher'])->get();
+
+        return view('dashboard.admin', compact('users', 'levels', 'subjects', 'teachers', 'pendingCourses'));
     }
 
     public function validateUser(User $user)
@@ -44,6 +48,19 @@ class AdminController extends Controller
     {
         $user->delete();
         return redirect()->route('admin.dashboard', ['tab' => 'users'])->with('success', 'Utilisateur supprimé avec succès.');
+    }
+
+    // Courses Validation
+    public function approveCourse(Course $course)
+    {
+        $course->update(['status' => 'published']);
+        return redirect()->route('admin.dashboard', ['tab' => 'courses'])->with('success', 'Cours publié avec succès.');
+    }
+
+    public function rejectCourse(Course $course)
+    {
+        $course->update(['status' => 'rejected']);
+        return redirect()->route('admin.dashboard', ['tab' => 'courses'])->with('success', 'Cours rejeté.');
     }
 
     // Levels

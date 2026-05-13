@@ -15,6 +15,11 @@ class Subject extends Model
         return $this->belongsTo(Level::class);
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
+
     protected static function boot()
     {
         parent::boot();

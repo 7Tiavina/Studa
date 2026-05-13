@@ -35,6 +35,10 @@ Route::middleware('auth')->group(function () {
         Route::put('/admin/users/{user}', [AdminController::class, 'update'])->name('admin.users.update');
         Route::delete('/admin/users/{user}', [AdminController::class, 'destroy'])->name('admin.users.destroy');
 
+        // Courses
+        Route::patch('/admin/courses/{course}/approve', [AdminController::class, 'approveCourse'])->name('admin.courses.approve');
+        Route::patch('/admin/courses/{course}/reject', [AdminController::class, 'rejectCourse'])->name('admin.courses.reject');
+
         // Levels
         Route::post('/admin/levels', [AdminController::class, 'storeLevel'])->name('admin.levels.store');
         Route::put('/admin/levels/{level}', [AdminController::class, 'updateLevel'])->name('admin.levels.update');

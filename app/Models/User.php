@@ -49,4 +49,19 @@ class User extends Authenticatable
             'is_validated' => 'boolean',
         ];
     }
+
+    public function courses()
+    {
+        return $this->hasMany(Course::class);
+    }
+
+    public function levels()
+    {
+        return $this->belongsToMany(Level::class);
+    }
+
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class);
+    }
 }
