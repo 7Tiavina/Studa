@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\TeacherController;
 
 Route::get('/', function () {
     return view('home');
@@ -22,7 +23,13 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('validated')->group(function () {
         Route::get('/dashboard/student', function () { return view('dashboard.student'); });
-        Route::get('/dashboard/teacher', function () { return view('dashboard.teacher'); });
+        
+        // Teacher routes
+        Route::get('/dashboard/teacher', [TeacherController::class, 'index'])->name('teacher.dashboard');
+        Route::post('/teacher/courses', [TeacherController::class, 'storeCourse'])->name('teacher.courses.store');
+        Route::post('/teacher/subjects', [TeacherController::class, 'addSubject'])->name('teacher.subjects.add');
+        Route::delete('/teacher/subjects/{subject}', [TeacherController::class, 'removeSubject'])->name('teacher.subjects.remove');
+        Route::put('/teacher/settings', [TeacherController::class, 'updateSettings'])->name('teacher.settings.update');
     });
 
     // Admin routes

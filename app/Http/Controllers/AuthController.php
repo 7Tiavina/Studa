@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -11,7 +12,8 @@ class AuthController extends Controller
 {
     public function showRegister()
     {
-        return view('register');
+        $subjects = Subject::all();
+        return view('register', compact('subjects'));
     }
 
     public function register(Request $request)
@@ -21,6 +23,7 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
             'role' => 'required|in:student,teacher,admin',
+            'subject_id' => 'required_if:role,teacher|exists:subjects,id',
         ]);
 
         \Log::info('Registering user with role: ' . $validated['role']);
@@ -31,6 +34,10 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
         ]);
+
+        if ($user->role === 'teacher' && $request->filled('subject_id')) {
+            $user->subjects()->attach($request->subject_id);
+        }
 
         Auth::login($user);
 
