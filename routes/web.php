@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\StudentController;
 
 Route::get('/', function () {
     return view('home');
@@ -22,7 +23,13 @@ Route::middleware('auth')->group(function () {
     })->name('waiting.validation');
 
     Route::middleware('validated')->group(function () {
-        Route::get('/dashboard/student', function () { return view('dashboard.student'); });
+        // Student routes
+        Route::get('/dashboard/student', [StudentController::class, 'index'])->name('student.dashboard');
+        Route::post('/student/courses/{course}/subscribe', [StudentController::class, 'subscribeToCourse'])->name('student.courses.subscribe');
+        Route::delete('/student/courses/{course}/unsubscribe', [StudentController::class, 'unsubscribeFromCourse'])->name('student.courses.unsubscribe');
+        Route::post('/student/teachers/{teacher}/follow', [StudentController::class, 'followTeacher'])->name('student.teachers.follow');
+        Route::delete('/student/teachers/{teacher}/unfollow', [StudentController::class, 'unfollowTeacher'])->name('student.teachers.unfollow');
+        Route::put('/student/settings', [StudentController::class, 'updateSettings'])->name('student.settings.update');
         
         // Teacher routes
         Route::get('/dashboard/teacher', [TeacherController::class, 'index'])->name('teacher.dashboard');
