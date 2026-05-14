@@ -18,34 +18,42 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'role' => 'required|in:student,teacher,admin',
-            'subject_id' => 'required_if:role,teacher|exists:subjects,id',
-        ]);
+        \Log::info('Tentative d\'inscription démarrée.', $request->all());
 
-        \Log::info('Registering user with role: ' . $validated['role']);
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8',
+                'role' => 'required|in:student,teacher,admin',
+                'subject_id' => 'nullable|required_if:role,teacher|exists:subjects,id',
+            ]);
+            \Log::info('Validation réussie.', $validated);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Erreur de validation lors de l\'inscription.', $e->errors());
+            throw $e;
+        }
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
-        ]);
+        try {
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'role' => $validated['role'],
+            ]);
+            \Log::info('Utilisateur créé avec succès.', ['id' => $user->id]);
+        } catch (\Exception $e) {
+            \Log::error('Erreur lors de la création de l\'utilisateur.', ['message' => $e->getMessage()]);
+            return back()->withErrors(['error' => 'Erreur lors de la création du compte.']);
+        }
 
         if ($user->role === 'teacher' && $request->filled('subject_id')) {
             $user->subjects()->attach($request->subject_id);
+            \Log::info('Matière attachée au professeur.');
         }
 
         Auth::login($user);
-
-        if (Auth::check()) {
-            \Log::info('User is authenticated: ' . Auth::user()->email . ' with role: ' . Auth::user()->role);
-        } else {
-            \Log::error('User FAILED to authenticate after login!');
-        }
+        \Log::info('Utilisateur connecté.');
 
         return $this->redirectByRole($user->role);
     }

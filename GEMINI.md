@@ -1,6 +1,8 @@
 📘 GEMINI.md — Plateforme pédagogique (MVP Laravel)
 🧭 Vision
 
+NEFFACE PAS LES DONNEES DEJA INSERES DANS LA DB !!!!
+
 Plateforme web simple permettant :
 
 consultation des cours par niveau et matière

@@ -42,6 +42,12 @@ class TeacherController extends Controller
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
+        $subject = Subject::findOrFail($validated['subject_id']);
+        
+        if (!$subject->level_id) {
+            return back()->withErrors(['subject_id' => 'Cette matière n\'est pas associée à un niveau valide. Veuillez contacter l\'administrateur.']);
+        }
+
         $path = $request->file('file')->store('courses', 'public');
         $thumbnailPath = $request->hasFile('thumbnail') ? $request->file('thumbnail')->store('thumbnails', 'public') : null;
 
@@ -49,7 +55,7 @@ class TeacherController extends Controller
             'title' => $validated['title'],
             'description' => $validated['description'],
             'subject_id' => $validated['subject_id'],
-            'level_id' => Subject::find($validated['subject_id'])->level_id,
+            'level_id' => $subject->level_id,
             'user_id' => Auth::id(),
             'type' => $validated['type'],
             'file_path' => $path,

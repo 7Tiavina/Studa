@@ -37,7 +37,7 @@
     </style>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body class="bg-background text-on-background font-sans antialiased" x-data="{ activeTab: 'dashboard' }">
+<body class="bg-background text-on-background font-sans antialiased" x-data="{ activeTab: 'dashboard', showMessenger: false }">
     <!-- Sidebar -->
     <aside class="flex flex-col h-screen fixed z-50 bg-slate-950 w-[260px] border-r border-slate-800">
         <div class="text-2xl font-black text-blue-500 px-6 py-8">Studa</div>
@@ -103,11 +103,32 @@
         <header class="flex items-center justify-between px-8 h-16 w-full sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
             <h2 class="font-bold text-slate-100" x-text="activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('_', ' ')"></h2>
             <div class="flex items-center gap-4">
+                <button @click="showMessenger = !showMessenger" class="p-2 text-slate-400 hover:text-primary transition-colors relative">
+                    <span class="material-symbols-outlined">chat</span>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-secondary rounded-full"></span>
+                </button>
                 <button class="p-2 text-slate-400 hover:text-slate-100"><span class="material-symbols-outlined">notifications</span></button>
                 <div class="h-8 w-[1px] bg-slate-800"></div>
                 <p class="text-xs font-bold text-slate-300">{{ Auth::user()->name }}</p>
             </div>
         </header>
+
+        <!-- Messenger Panel -->
+        <div x-show="showMessenger" x-cloak class="fixed right-0 top-16 h-[calc(100vh-64px)] w-[320px] bg-surface-container-low border-l border-slate-800 z-40 flex flex-col shadow-2xl" @click.away="showMessenger = false">
+            <div class="p-4 border-b border-slate-800">
+                <h4 class="font-bold text-sm mb-3">Discussions</h4>
+                <input type="text" placeholder="Rechercher..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs">
+            </div>
+            <div class="flex-1 overflow-y-auto">
+                <button class="w-full p-4 hover:bg-slate-800/50 flex items-center gap-3 border-b border-slate-800/50">
+                    <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">T</div>
+                    <div class="text-left flex-1">
+                        <p class="text-sm font-bold">Dr. Fenosoa R.</p>
+                        <p class="text-[10px] text-outline truncate">Merci pour votre retour sur le cours...</p>
+                    </div>
+                </button>
+            </div>
+        </div>
 
         <div class="p-8 max-w-6xl mx-auto w-full">
             @if(session('success'))
@@ -191,7 +212,7 @@
                     @foreach($courses as $course)
                     <div class="bg-surface-container rounded-2xl border border-outline-variant p-5 flex flex-col group hover:border-primary transition-all">
                         <div class="h-40 bg-background rounded-xl mb-4 flex items-center justify-center border border-outline-variant/30 relative">
-                            <span class="absolute top-2 left-2 bg-slate-900 text-[10px] px-2 py-0.5 rounded text-primary border border-primary/20">{{ $course->level->name }}</span>
+                            <span class="absolute top-2 left-2 bg-slate-900 text-[10px] px-2 py-0.5 rounded text-primary border border-primary/20">{{ $course->level ? $course->level->name : 'N/A' }}</span>
                             <span class="material-symbols-outlined text-4xl text-outline group-hover:text-primary">picture_as_pdf</span>
                         </div>
                         <div class="flex-1">
@@ -247,7 +268,7 @@
                                 </div>
                                 <div>
                                     <h4 class="font-bold text-sm">{{ $course->title }}</h4>
-                                    <p class="text-[10px] text-outline uppercase font-black">{{ $course->subject->name }} • {{ $course->level->name }}</p>
+                                    <p class="text-[10px] text-outline uppercase font-black">{{ $course->subject ? $course->subject->name : 'N/A' }} • {{ $course->level ? $course->level->name : 'N/A' }}</p>
                                 </div>
                             </div>
                             <form action="{{ route('student.courses.unsubscribe', $course->id) }}" method="POST">

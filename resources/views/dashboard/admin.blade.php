@@ -432,7 +432,7 @@
                                 </h4>
                                 <div class="flex flex-wrap gap-2">
                                     @forelse($teacher->subjects as $subject)
-                                        <span class="px-2 py-1 bg-background border border-outline-variant rounded text-[10px]">{{ $subject->name }} ({{ $subject->level->name }})</span>
+                                        <span class="px-2 py-1 bg-background border border-outline-variant rounded text-[10px]">{{ $subject->name }} ({{ $subject->level ? $subject->level->name : 'N/A' }})</span>
                                     @empty
                                         <span class="text-xs italic text-outline">Aucune matière liée</span>
                                     @endforelse
