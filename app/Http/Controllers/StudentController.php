@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
 
 class StudentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $subscribedCoursesIds = $user->subscribedCourses()->pluck('courses.id')->toArray();
@@ -20,19 +20,30 @@ class StudentController extends Controller
         $followedTeachers = $user->followedTeachers()->get();
         $allTeachers = User::where('role', 'teacher')->get();
         
-        $levels = Level::with(['subjects' => function($query) {
-            $query->with(['courses' => function($q) {
-                $q->where('status', 'published')->with('teacher');
-            }]);
-        }])->orderBy('position')->get();
+        $query = Course::query()->where('status', 'published')->with(['teacher', 'subject', 'level']);
+        
+        if ($request->has('level_id')) {
+            $query->where('level_id', $request->level_id);
+        }
+        if ($request->has('subject_id')) {
+            $query->where('subject_id', $request->subject_id);
+        }
+        if ($request->has('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+        
+        $courses = $query->paginate(9)->withQueryString();
+        
+        $levels = Level::orderBy('position')->get();
+        $subjects = Subject::all();
         
         $stats = [
             'courses_count' => $subscribedCourses->count(),
             'teachers_count' => $followedTeachers->count(),
-            'recent_activity' => 0, // Placeholder
+            'recent_activity' => 0,
         ];
 
-        return view('dashboard.student', compact('user', 'subscribedCourses', 'subscribedCoursesIds', 'followedTeachers', 'allTeachers', 'levels', 'stats'));
+        return view('dashboard.student', compact('user', 'subscribedCourses', 'subscribedCoursesIds', 'followedTeachers', 'allTeachers', 'levels', 'subjects', 'courses', 'stats'));
     }
 
     public function toggleLevel(Level $level)

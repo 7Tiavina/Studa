@@ -168,41 +168,52 @@
 
             <!-- Section Courses -->
             <div x-show="activeTab === 'courses'" x-cloak class="space-y-8">
-                <h3 class="text-2xl font-bold">Liste des Cours</h3>
-                <div class="space-y-12">
-                    @foreach($levels as $level)
-                    <div class="space-y-6">
-                        <h4 class="text-lg font-bold text-primary">{{ $level->name }}</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            @foreach($level->subjects as $subject)
-                            <div class="bg-surface-container rounded-xl border border-outline-variant p-6">
-                                <h5 class="font-bold text-lg mb-4">{{ $subject->name }}</h5>
-                                <div class="space-y-3">
-                                    @forelse($subject->courses as $course)
-                                    <div class="flex items-center justify-between p-3 bg-background rounded-lg border border-outline-variant/20">
-                                        <div>
-                                            <p class="font-bold text-sm">{{ $course->title }}</p>
-                                            <p class="text-[10px] text-outline">Par {{ $course->teacher->name }}</p>
-                                        </div>
-                                        @if(in_array($course->id, $subscribedCoursesIds))
-                                            <span class="px-2 py-1 bg-secondary/10 text-secondary text-[10px] font-bold uppercase rounded">Abonné</span>
-                                        @else
-                                            <form action="{{ route('student.courses.subscribe', $course->id) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="px-3 py-1 bg-primary text-slate-900 text-[10px] font-bold uppercase rounded hover:opacity-90 transition-opacity">S'abonner</button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                    @empty
-                                    <p class="text-center text-[10px] text-outline italic py-2">Aucun cours.</p>
-                                    @endforelse
-                                </div>
-                            </div>
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <h3 class="text-2xl font-bold">Liste des Cours</h3>
+                    <form method="GET" action="{{ route('student.dashboard') }}" class="flex flex-wrap gap-2">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Rechercher..." class="bg-surface-container border border-outline-variant rounded-xl px-4 py-2 text-sm w-48">
+                        <select name="level_id" class="bg-surface-container border border-outline-variant rounded-xl px-4 py-2 text-sm" onchange="this.form.submit()">
+                            <option value="">Tous les niveaux</option>
+                            @foreach($levels as $level)
+                                <option value="{{ $level->id }}" {{ request('level_id') == $level->id ? 'selected' : '' }}>{{ $level->name }}</option>
                             @endforeach
+                        </select>
+                        <select name="subject_id" class="bg-surface-container border border-outline-variant rounded-xl px-4 py-2 text-sm" onchange="this.form.submit()">
+                            <option value="">Toutes les matières</option>
+                            @foreach($subjects as $subject)
+                                <option value="{{ $subject->id }}" {{ request('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    @foreach($courses as $course)
+                    <div class="bg-surface-container rounded-2xl border border-outline-variant p-5 flex flex-col group hover:border-primary transition-all">
+                        <div class="h-40 bg-background rounded-xl mb-4 flex items-center justify-center border border-outline-variant/30 relative">
+                            <span class="absolute top-2 left-2 bg-slate-900 text-[10px] px-2 py-0.5 rounded text-primary border border-primary/20">{{ $course->level->name }}</span>
+                            <span class="material-symbols-outlined text-4xl text-outline group-hover:text-primary">picture_as_pdf</span>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-sm mb-1">{{ $course->title }}</h4>
+                            <p class="text-xs text-outline mb-4 line-clamp-2">{{ $course->description }}</p>
+                        </div>
+                        <div class="flex items-center justify-between mt-auto">
+                            <span class="text-[10px] bg-slate-800 text-outline px-2 py-1 rounded">{{ $course->subject->name }}</span>
+                            @if(in_array($course->id, $subscribedCoursesIds))
+                                <button disabled class="px-3 py-1 bg-secondary/10 text-secondary text-[10px] font-bold uppercase rounded">Abonné</button>
+                            @else
+                                <form action="{{ route('student.courses.subscribe', $course->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="px-3 py-1 bg-primary text-slate-900 text-[10px] font-bold uppercase rounded hover:opacity-90">S'abonner</button>
+                                </form>
+                            @endif
                         </div>
                     </div>
                     @endforeach
                 </div>
+                
+                {{ $courses->links() }}
             </div>
 
             <!-- Section Levels -->
