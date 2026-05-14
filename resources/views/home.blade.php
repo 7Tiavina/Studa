@@ -136,7 +136,23 @@
 <a class="text-slate-400 hover:text-white transition-colors font-inter" href="#">Mentors</a>
 </div>
 <div class="flex items-center gap-4">
-<a href="/login" class="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-semibold text-sm active:scale-95 duration-150">Login</a>
+    @auth
+        @php
+            $dashboardRoute = 'student.dashboard';
+            if (Auth::user()->role === 'teacher') {
+                $dashboardRoute = 'teacher.dashboard';
+            } elseif (Auth::user()->role === 'admin') {
+                $dashboardRoute = 'admin.dashboard';
+            }
+        @endphp
+        <a href="{{ route($dashboardRoute) }}" class="text-white hover:text-primary transition-colors text-sm font-semibold">Portal</a>
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="bg-slate-800 text-white px-4 py-2 rounded-lg font-semibold text-sm active:scale-95 duration-150">Logout</button>
+        </form>
+    @else
+        <a href="/login" class="bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-semibold text-sm active:scale-95 duration-150">Login</a>
+    @endauth
 </div>
 </nav>
 

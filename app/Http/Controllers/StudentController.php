@@ -18,6 +18,7 @@ class StudentController extends Controller
         $subscribedCoursesIds = $user->subscribedCourses()->pluck('courses.id')->toArray();
         $subscribedCourses = $user->subscribedCourses()->with(['teacher', 'subject', 'level'])->get();
         $followedTeachers = $user->followedTeachers()->get();
+        $allTeachers = User::where('role', 'teacher')->get();
         
         $levels = Level::with(['subjects' => function($query) {
             $query->with(['courses' => function($q) {
@@ -31,7 +32,7 @@ class StudentController extends Controller
             'recent_activity' => 0, // Placeholder
         ];
 
-        return view('dashboard.student', compact('user', 'subscribedCourses', 'subscribedCoursesIds', 'followedTeachers', 'levels', 'stats'));
+        return view('dashboard.student', compact('user', 'subscribedCourses', 'subscribedCoursesIds', 'followedTeachers', 'allTeachers', 'levels', 'stats'));
     }
 
     public function toggleLevel(Level $level)

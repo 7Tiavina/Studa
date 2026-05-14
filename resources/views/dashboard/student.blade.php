@@ -71,7 +71,7 @@
             </button>
             <button @click="activeTab = 'teachers'" :class="activeTab === 'teachers' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">school</span>
-                <span>Profs suivis</span>
+                <span>Profs</span>
             </button>
             <button @click="activeTab = 'live'" :class="activeTab === 'live' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">video_call</span>
@@ -267,35 +267,35 @@
             </div>
 
             <!-- Section Teachers -->
-            <div x-show="activeTab === 'teachers'" x-cloak class="space-y-8">
-                <h3 class="text-2xl font-bold">Professeurs que je suis</h3>
+            <div x-show="activeTab === 'teachers'" x-cloak class="space-y-8" x-data="{ searchQuery: '' }">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-bold">Professeurs</h3>
+                    <input type="text" x-model="searchQuery" placeholder="Rechercher un professeur..." class="bg-surface-container border border-outline-variant rounded-xl px-4 py-2 text-sm w-64">
+                </div>
+                
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    @forelse($followedTeachers as $teacher)
-                    <div class="bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col items-center text-center group">
+                    @foreach($allTeachers as $teacher)
+                    <div class="bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col items-center text-center group" x-show="'{{ strtolower($teacher->name) }}'.includes(searchQuery.toLowerCase())">
                         <div class="w-20 h-20 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center text-2xl font-bold mb-4">
                             {{ substr($teacher->name, 0, 1) }}
                         </div>
                         <h4 class="font-bold">{{ $teacher->name }}</h4>
-                        <p class="text-xs text-outline mb-4">{{ $teacher->email }}</p>
+                        <p class="text-xs text-outline mb-6">{{ $teacher->email }}</p>
                         
-                        <div class="flex flex-wrap justify-center gap-1 mb-6">
-                            @foreach($teacher->subjects->take(2) as $s)
-                                <span class="px-2 py-0.5 bg-background rounded text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{{ $s->name }}</span>
-                            @endforeach
-                        </div>
-
-                        <form action="{{ route('student.teachers.unfollow', $teacher->id) }}" method="POST" class="w-full">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="w-full py-2 border border-error text-error text-xs font-bold rounded-xl hover:bg-error/10 transition-colors">Ne plus suivre</button>
-                        </form>
+                        @if($followedTeachers->contains($teacher->id))
+                            <form action="{{ route('student.teachers.unfollow', $teacher->id) }}" method="POST" class="w-full">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="w-full py-2 border border-error text-error text-xs font-bold rounded-xl hover:bg-error/10 transition-colors">Ne plus suivre</button>
+                            </form>
+                        @else
+                            <form action="{{ route('student.teachers.follow', $teacher->id) }}" method="POST" class="w-full">
+                                @csrf
+                                <button type="submit" class="w-full py-2 bg-primary text-slate-900 text-xs font-bold rounded-xl hover:opacity-90 transition-opacity">Suivre</button>
+                            </form>
+                        @endif
                     </div>
-                    @empty
-                    <div class="col-span-3 bg-surface-container rounded-xl border border-outline-variant p-12 text-center">
-                        <span class="material-symbols-outlined text-6xl text-outline mb-4">school</span>
-                        <p class="text-outline italic">Vous ne suivez aucun professeur pour le moment.</p>
-                    </div>
-                    @endforelse
+                    @endforeach
                 </div>
             </div>
 
