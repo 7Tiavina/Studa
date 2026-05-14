@@ -34,6 +34,12 @@ class StudentController extends Controller
         return view('dashboard.student', compact('user', 'subscribedCourses', 'subscribedCoursesIds', 'followedTeachers', 'levels', 'stats'));
     }
 
+    public function toggleLevel(Level $level)
+    {
+        Auth::user()->levels()->toggle([$level->id]);
+        return back()->with('success', 'Niveau mis à jour.');
+    }
+
     public function subscribeToCourse(Course $course)
     {
         Auth::user()->subscribedCourses()->syncWithoutDetaching([$course->id]);

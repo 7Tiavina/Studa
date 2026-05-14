@@ -61,6 +61,10 @@
                 <span class="material-symbols-outlined">layers</span>
                 <span>Mon Niveau</span>
             </button>
+            <button @click="activeTab = 'courses'" :class="activeTab === 'courses' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
+                <span class="material-symbols-outlined">menu_book</span>
+                <span>Cours</span>
+            </button>
             <button @click="activeTab = 'subscriptions'" :class="activeTab === 'subscriptions' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">subscriptions</span>
                 <span>Mes Abonnements</span>
@@ -162,62 +166,58 @@
                 </div>
             </div>
 
-            <!-- Section Levels -->
-            <div x-show="activeTab === 'levels'" x-cloak class="space-y-8">
-                <h3 class="text-2xl font-bold">Explorer par Niveau</h3>
+            <!-- Section Courses -->
+            <div x-show="activeTab === 'courses'" x-cloak class="space-y-8">
+                <h3 class="text-2xl font-bold">Liste des Cours</h3>
                 <div class="space-y-12">
-                    @foreach($levels->groupBy('category') as $category => $categoryLevels)
+                    @foreach($levels as $level)
                     <div class="space-y-6">
-                        <h4 class="text-lg font-bold text-primary flex items-center gap-2">
-                            <span class="material-symbols-outlined">folder</span> {{ $category ?: 'Autre' }}
-                        </h4>
+                        <h4 class="text-lg font-bold text-primary">{{ $level->name }}</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            @foreach($categoryLevels as $level)
+                            @foreach($level->subjects as $subject)
                             <div class="bg-surface-container rounded-xl border border-outline-variant p-6">
-                                <h5 class="font-bold text-lg mb-4">{{ $level->name }}</h5>
-                                <div class="grid grid-cols-1 gap-4">
-                                    @foreach($level->subjects as $subject)
-                                    <div x-data="{ expanded: false }" class="bg-background rounded-lg border border-outline-variant/20 overflow-hidden">
-                                        <div class="flex items-center justify-between p-3 cursor-pointer hover:bg-slate-800/40 transition-colors" @click="expanded = !expanded">
-                                            <div class="flex items-center gap-3">
-                                                <span class="material-symbols-outlined text-sm text-secondary">{{ $subject->icon ?: 'book' }}</span>
-                                                <span class="text-sm font-semibold">{{ $subject->name }}</span>
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-outline">{{ $subject->courses->count() }} cours</span>
-                                                <span class="material-symbols-outlined text-xs transition-transform" :class="expanded ? 'rotate-180' : ''">expand_more</span>
-                                            </div>
+                                <h5 class="font-bold text-lg mb-4">{{ $subject->name }}</h5>
+                                <div class="space-y-3">
+                                    @forelse($subject->courses as $course)
+                                    <div class="flex items-center justify-between p-3 bg-background rounded-lg border border-outline-variant/20">
+                                        <div>
+                                            <p class="font-bold text-sm">{{ $course->title }}</p>
+                                            <p class="text-[10px] text-outline">Par {{ $course->teacher->name }}</p>
                                         </div>
-                                        
-                                        <div x-show="expanded" x-collapse x-cloak class="border-t border-outline-variant/10 bg-slate-900/20 p-3 space-y-3">
-                                            @forelse($subject->courses as $course)
-                                            <div class="flex items-center justify-between p-2 bg-surface-container-low rounded-lg border border-outline-variant/10">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="material-symbols-outlined text-xs text-red-400">picture_as_pdf</span>
-                                                    <div>
-                                                        <p class="text-[11px] font-bold leading-none">{{ $course->title }}</p>
-                                                        <p class="text-[9px] text-outline">Par {{ $course->teacher->name }}</p>
-                                                    </div>
-                                                </div>
-                                                @if(in_array($course->id, $subscribedCoursesIds))
-                                                    <span class="px-2 py-1 bg-secondary/10 text-secondary text-[8px] font-bold uppercase rounded">Abonné</span>
-                                                @else
-                                                    <form action="{{ route('student.courses.subscribe', $course->id) }}" method="POST">
-                                                        @csrf
-                                                        <button type="submit" class="px-2 py-1 bg-primary text-slate-900 text-[8px] font-bold uppercase rounded hover:opacity-90 transition-opacity">S'abonner</button>
-                                                    </form>
-                                                @endif
-                                            </div>
-                                            @empty
-                                            <p class="text-center text-[10px] text-outline italic py-2">Aucun cours disponible.</p>
-                                            @endforelse
-                                        </div>
+                                        @if(in_array($course->id, $subscribedCoursesIds))
+                                            <span class="px-2 py-1 bg-secondary/10 text-secondary text-[10px] font-bold uppercase rounded">Abonné</span>
+                                        @else
+                                            <form action="{{ route('student.courses.subscribe', $course->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="px-3 py-1 bg-primary text-slate-900 text-[10px] font-bold uppercase rounded hover:opacity-90 transition-opacity">S'abonner</button>
+                                            </form>
+                                        @endif
                                     </div>
-                                    @endforeach
+                                    @empty
+                                    <p class="text-center text-[10px] text-outline italic py-2">Aucun cours.</p>
+                                    @endforelse
                                 </div>
                             </div>
                             @endforeach
                         </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Section Levels -->
+            <div x-show="activeTab === 'levels'" x-cloak class="space-y-8">
+                <h3 class="text-2xl font-bold">Choisir mes Niveaux</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    @foreach($levels as $level)
+                    <div class="bg-surface-container rounded-xl border {{ Auth::user()->levels->contains($level->id) ? 'border-secondary' : 'border-outline-variant' }} p-6">
+                        <h5 class="font-bold text-lg mb-4">{{ $level->name }}</h5>
+                        <form action="{{ route('student.levels.toggle', $level->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="w-full px-4 py-2 {{ Auth::user()->levels->contains($level->id) ? 'bg-secondary text-slate-900' : 'bg-surface-container-high text-on-background' }} rounded-xl font-bold transition-all">
+                                {{ Auth::user()->levels->contains($level->id) ? 'Sélectionné' : 'Sélectionner' }}
+                            </button>
+                        </form>
                     </div>
                     @endforeach
                 </div>

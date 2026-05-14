@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('validated')->group(function () {
         // Student routes
         Route::get('/dashboard/student', [StudentController::class, 'index'])->name('student.dashboard');
+        Route::post('/student/levels/{level}/toggle', [StudentController::class, 'toggleLevel'])->name('student.levels.toggle');
         Route::post('/student/courses/{course}/subscribe', [StudentController::class, 'subscribeToCourse'])->name('student.courses.subscribe');
         Route::delete('/student/courses/{course}/unsubscribe', [StudentController::class, 'unsubscribeFromCourse'])->name('student.courses.unsubscribe');
         Route::post('/student/teachers/{teacher}/follow', [StudentController::class, 'followTeacher'])->name('student.teachers.follow');
