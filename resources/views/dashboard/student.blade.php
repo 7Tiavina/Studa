@@ -116,18 +116,18 @@
         <!-- Chat Windows Area (Fixed at bottom right) -->
         <div class="fixed bottom-0 right-4 flex gap-3 z-50 items-end pointer-events-none">
             <template x-for="chat in openChats" :key="chat.id">
-                <div class="w-80 bg-white rounded-t-xl shadow-2xl flex flex-col overflow-hidden text-slate-800 pointer-events-auto border border-slate-200">
+                <div class="w-80 bg-slate-900 rounded-t-xl shadow-2xl flex flex-col overflow-hidden text-slate-100 pointer-events-auto border border-slate-800">
                     <!-- Header -->
-                    <div class="bg-white p-3 flex justify-between items-center border-b border-gray-100 cursor-pointer shadow-sm" @click="chat.minimized = !chat.minimized">
+                    <div class="bg-slate-950 p-3 flex justify-between items-center border-b border-slate-800 cursor-pointer shadow-sm" @click="chat.minimized = !chat.minimized">
                         <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-600 flex items-center justify-center font-bold text-[10px]" x-text="chat.name.charAt(0)"></div>
-                            <span class="font-bold text-sm text-slate-800" x-text="chat.name"></span>
+                            <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-[10px]" x-text="chat.name.charAt(0)"></div>
+                            <span class="font-bold text-sm text-slate-200" x-text="chat.name"></span>
                         </div>
                         <div class="flex items-center gap-1">
-                            <button @click.stop="chat.minimized = !chat.minimized" class="p-1 hover:bg-gray-100 rounded-full">
-                                <span class="material-symbols-outlined text-[16px] text-gray-500">remove</span>
+                            <button @click.stop="chat.minimized = !chat.minimized" class="p-1 hover:bg-slate-800 rounded-full">
+                                <span class="material-symbols-outlined text-[16px] text-slate-400">remove</span>
                             </button>
-                            <button @click.stop="openChats = openChats.filter(c => c.id !== chat.id)" class="p-1 hover:bg-gray-100 rounded-full text-gray-500">
+                            <button @click.stop="openChats = openChats.filter(c => c.id !== chat.id)" class="p-1 hover:bg-slate-800 rounded-full text-slate-400">
                                 <span class="material-symbols-outlined text-[16px]">close</span>
                             </button>
                         </div>
@@ -135,12 +135,10 @@
                     
                     <!-- Messages Body -->
                     <div x-show="!chat.minimized" 
-                         class="h-80 overflow-y-auto p-4 bg-white flex flex-col gap-3"
-                         x-init="
-                            fetch(`/messages/${chat.conversation_id}`).then(r => r.json()).then(data => { chat.messages = data; });
-                         ">
+                         class="h-80 overflow-y-auto p-4 bg-slate-900 flex flex-col gap-3"
+                         x-init="fetch(`/messages/${chat.conversation_id}`).then(r => r.json()).then(data => { chat.messages = data; });">
                         <template x-for="msg in chat.messages" :key="msg.id">
-                            <div :class="msg.user_id === {{ Auth::id() }} ? 'bg-blue-600 text-white self-end' : 'bg-gray-100 text-gray-800 self-start'" 
+                            <div :class="msg.user_id === {{ Auth::id() }} ? 'bg-blue-600 text-white self-end' : 'bg-slate-800 text-slate-200 self-start'" 
                                  class="p-3 rounded-2xl max-w-[85%] text-sm shadow-sm"
                                  x-text="msg.body">
                             </div>
@@ -148,7 +146,7 @@
                     </div>
                     
                     <!-- Input Area -->
-                    <div x-show="!chat.minimized" class="p-3 border-t bg-gray-50 flex items-center gap-2">
+                    <div x-show="!chat.minimized" class="p-3 border-t border-slate-800 bg-slate-950 flex items-center gap-2">
                         <form @submit.prevent="
                             fetch(`/messages/${chat.conversation_id}`, {
                                 method: 'POST',
@@ -164,14 +162,12 @@
                                 if(msg.id) {
                                     chat.messages.push(msg);
                                     chat.newMessage = '';
-                                } else {
-                                    console.error('Erreur serveur:', msg);
                                 }
                             })
-                            .catch(e => console.error('Fetch error:', e));
+                            .catch(e => console.error(e));
                         " class="flex w-full gap-2">
-                            <input type="text" x-model="chat.newMessage" placeholder="Écrire un message..." class="flex-1 text-sm px-4 py-2 bg-white rounded-full border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                            <button type="submit" class="text-blue-600 p-1 hover:bg-blue-50 rounded-full">
+                            <input type="text" x-model="chat.newMessage" placeholder="Écrire un message..." class="flex-1 text-sm px-4 py-2 bg-slate-900 text-white rounded-full border border-slate-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                            <button type="submit" class="text-blue-400 p-1 hover:bg-slate-800 rounded-full">
                                 <span class="material-symbols-outlined">send</span>
                             </button>
                         </form>
@@ -188,6 +184,7 @@
             <div class="flex-1 overflow-y-auto">
                 @foreach($followedTeachers as $teacher)
                 <button @click="
+                    showMessenger = false; 
                     fetch('/messages/start/{{ $teacher->id }}')
                     .then(r => r.json())
                     .then(conv => {
