@@ -37,7 +37,7 @@
     </style>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body class="bg-background text-on-background font-sans antialiased" x-data="{ activeTab: 'dashboard', showMessenger: false }">
+<body class="bg-background text-on-background font-sans antialiased" x-data="{ activeTab: 'dashboard', showMessenger: false, openChats: [] }">
     <!-- Sidebar -->
     <aside class="flex flex-col h-screen fixed z-50 bg-slate-950 w-[260px] border-r border-slate-800">
         <div class="text-2xl font-black text-blue-500 px-6 py-8">Studa</div>
@@ -113,20 +113,99 @@
             </div>
         </header>
 
-        <!-- Messenger Panel -->
-        <div x-show="showMessenger" x-cloak class="fixed right-0 top-16 h-[calc(100vh-64px)] w-[320px] bg-surface-container-low border-l border-slate-800 z-40 flex flex-col shadow-2xl" @click.away="showMessenger = false">
+        <!-- Chat Windows Area (Fixed at bottom right) -->
+        <div class="fixed bottom-0 right-4 flex gap-3 z-50 items-end pointer-events-none">
+            <template x-for="chat in openChats" :key="chat.id">
+                <div class="w-80 bg-white rounded-t-xl shadow-2xl flex flex-col overflow-hidden text-slate-800 pointer-events-auto border border-slate-200">
+                    <!-- Header -->
+                    <div class="bg-white p-3 flex justify-between items-center border-b border-gray-100 cursor-pointer shadow-sm" @click="chat.minimized = !chat.minimized">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-600 flex items-center justify-center font-bold text-[10px]" x-text="chat.name.charAt(0)"></div>
+                            <span class="font-bold text-sm text-slate-800" x-text="chat.name"></span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button @click.stop="chat.minimized = !chat.minimized" class="p-1 hover:bg-gray-100 rounded-full">
+                                <span class="material-symbols-outlined text-[16px] text-gray-500">remove</span>
+                            </button>
+                            <button @click.stop="openChats = openChats.filter(c => c.id !== chat.id)" class="p-1 hover:bg-gray-100 rounded-full text-gray-500">
+                                <span class="material-symbols-outlined text-[16px]">close</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Messages Body -->
+                    <div x-show="!chat.minimized" 
+                         class="h-80 overflow-y-auto p-4 bg-white flex flex-col gap-3"
+                         x-init="
+                            fetch(`/messages/${chat.conversation_id}`).then(r => r.json()).then(data => { chat.messages = data; });
+                         ">
+                        <template x-for="msg in chat.messages" :key="msg.id">
+                            <div :class="msg.user_id === {{ Auth::id() }} ? 'bg-blue-600 text-white self-end' : 'bg-gray-100 text-gray-800 self-start'" 
+                                 class="p-3 rounded-2xl max-w-[85%] text-sm shadow-sm"
+                                 x-text="msg.body">
+                            </div>
+                        </template>
+                    </div>
+                    
+                    <!-- Input Area -->
+                    <div x-show="!chat.minimized" class="p-3 border-t bg-gray-50 flex items-center gap-2">
+                        <form @submit.prevent="
+                            fetch(`/messages/${chat.conversation_id}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({ body: chat.newMessage })
+                            })
+                            .then(r => r.json())
+                            .then(msg => {
+                                if(msg.id) {
+                                    chat.messages.push(msg);
+                                    chat.newMessage = '';
+                                } else {
+                                    console.error('Erreur serveur:', msg);
+                                }
+                            })
+                            .catch(e => console.error('Fetch error:', e));
+                        " class="flex w-full gap-2">
+                            <input type="text" x-model="chat.newMessage" placeholder="Écrire un message..." class="flex-1 text-sm px-4 py-2 bg-white rounded-full border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                            <button type="submit" class="text-blue-600 p-1 hover:bg-blue-50 rounded-full">
+                                <span class="material-symbols-outlined">send</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Messenger Panel (Contacts only) -->
+        <div x-show="showMessenger" x-cloak class="fixed right-0 top-16 h-[calc(100vh-64px)] w-[260px] bg-slate-950 border-l border-slate-800 z-40 flex flex-col shadow-2xl">
             <div class="p-4 border-b border-slate-800">
-                <h4 class="font-bold text-sm mb-3">Discussions</h4>
-                <input type="text" placeholder="Rechercher..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs">
+                <h4 class="font-bold text-sm">Contacts</h4>
             </div>
             <div class="flex-1 overflow-y-auto">
-                <button class="w-full p-4 hover:bg-slate-800/50 flex items-center gap-3 border-b border-slate-800/50">
-                    <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">T</div>
-                    <div class="text-left flex-1">
-                        <p class="text-sm font-bold">Dr. Fenosoa R.</p>
-                        <p class="text-[10px] text-outline truncate">Merci pour votre retour sur le cours...</p>
-                    </div>
+                @foreach($followedTeachers as $teacher)
+                <button @click="
+                    fetch('/messages/start/{{ $teacher->id }}')
+                    .then(r => r.json())
+                    .then(conv => {
+                        if(!openChats.find(c => c.id === {{ $teacher->id }})) {
+                            openChats.push({
+                                id: {{ $teacher->id }}, 
+                                name: '{{ $teacher->name }}', 
+                                minimized: false, 
+                                conversation_id: conv.id, 
+                                messages: []
+                            })
+                        }
+                    })" 
+                        class="w-full p-3 hover:bg-slate-900 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center font-bold text-xs">{{ substr($teacher->name, 0, 1) }}</div>
+                    <span class="text-sm font-semibold">{{ $teacher->name }}</span>
                 </button>
+                @endforeach
             </div>
         </div>
 
@@ -211,9 +290,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     @foreach($courses as $course)
                     <div class="bg-surface-container rounded-2xl border border-outline-variant p-5 flex flex-col group hover:border-primary transition-all">
-                        <div class="h-40 bg-background rounded-xl mb-4 flex items-center justify-center border border-outline-variant/30 relative">
+                        <div class="h-40 bg-background rounded-xl mb-4 flex items-center justify-center border border-outline-variant/30 relative overflow-hidden">
                             <span class="absolute top-2 left-2 bg-slate-900 text-[10px] px-2 py-0.5 rounded text-primary border border-primary/20">{{ $course->level ? $course->level->name : 'N/A' }}</span>
-                            <span class="material-symbols-outlined text-4xl text-outline group-hover:text-primary">picture_as_pdf</span>
+                            @if($course->thumbnail_path)
+                                <img src="{{ asset('storage/' . $course->thumbnail_path) }}" alt="{{ $course->title }}" class="w-full h-full object-cover">
+                            @else
+                                <span class="material-symbols-outlined text-4xl text-outline group-hover:text-primary">picture_as_pdf</span>
+                            @endif
                         </div>
                         <div class="flex-1">
                             <h4 class="font-bold text-sm mb-1">{{ $course->title }}</h4>

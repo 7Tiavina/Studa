@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\MessageController;
 
 Route::get('/', function () {
     return view('home');
@@ -28,6 +29,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/student/levels/{level}/toggle', [StudentController::class, 'toggleLevel'])->name('student.levels.toggle');
         Route::post('/student/courses/{course}/subscribe', [StudentController::class, 'subscribeToCourse'])->name('student.courses.subscribe');
         Route::delete('/student/courses/{course}/unsubscribe', [StudentController::class, 'unsubscribeFromCourse'])->name('student.courses.unsubscribe');
+        Route::post('/messages/{conversationId}', [MessageController::class, 'store'])->name('messages.store');
+        Route::get('/messages/{conversationId}', [MessageController::class, 'index'])->name('messages.index');
+        Route::get('/messages/start/{teacherId}', [MessageController::class, 'findOrCreate'])->name('messages.start');
         Route::post('/student/teachers/{teacher}/follow', [StudentController::class, 'followTeacher'])->name('student.teachers.follow');
         Route::delete('/student/teachers/{teacher}/unfollow', [StudentController::class, 'unfollowTeacher'])->name('student.teachers.unfollow');
         Route::put('/student/settings', [StudentController::class, 'updateSettings'])->name('student.settings.update');
