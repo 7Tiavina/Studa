@@ -291,7 +291,12 @@
                             {{ substr($teacher->name, 0, 1) }}
                         </div>
                         <h4 class="font-bold">{{ $teacher->name }}</h4>
-                        <p class="text-xs text-outline mb-6">{{ $teacher->email }}</p>
+                        <p class="text-xs text-outline mb-2">{{ $teacher->email }}</p>
+                        <div class="flex flex-wrap justify-center gap-1 mb-6">
+                            @foreach($teacher->subjects as $subject)
+                                <span class="px-2 py-0.5 bg-background rounded text-[8px] font-bold text-slate-400 uppercase tracking-tighter border border-outline-variant/30">{{ $subject->name }}</span>
+                            @endforeach
+                        </div>
                         
                         @if($followedTeachers->contains($teacher->id))
                             <form action="{{ route('student.teachers.unfollow', $teacher->id) }}" method="POST" class="w-full">
