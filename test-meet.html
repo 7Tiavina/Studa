@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dyte Video Call</title>
+
+    <!-- Dyte UI Kit -->
+    <script type="module">
+        import { defineCustomElements } from 'https://cdn.jsdelivr.net/npm/@dytesdk/ui-kit@latest/loader/index.es2017.js';
+        defineCustomElements();
+    </script>
+
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            padding: 10px;
+            background: #1e1e1e;
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        #meeting {
+            flex: 1;
+        }
+
+        dyte-meeting {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="topbar">
+        <input
+            type="text"
+            id="authToken"
+            placeholder="Colle ici ton Dyte Auth Token"
+        >
+
+        <button onclick="joinMeeting()">
+            Rejoindre
+        </button>
+    </div>
+
+    <div id="meeting"></div>
+
+</div>
+
+<script type="module">
+
+    import { DyteClient } from 'https://cdn.jsdelivr.net/npm/@dytesdk/web-core@latest/dist/dyte-web-core.js';
+
+    async function joinMeeting() {
+
+        const authToken = document.getElementById('authToken').value;
+
+        if (!authToken) {
+            alert('Ajoute un auth token');
+            return;
+        }
+
+        const meeting = await DyteClient.init({
+            authToken: authToken,
+            defaults: {
+                audio: true,
+                video: true,
+                name: "Tiavina"
+            }
+        });
+
+        const meetingContainer = document.getElementById('meeting');
+
+        meetingContainer.innerHTML = `
+            <dyte-meeting mode="fill"></dyte-meeting>
+        `;
+
+        const dyteMeeting = meetingContainer.querySelector('dyte-meeting');
+
+        dyteMeeting.meeting = meeting;
+
+        await meeting.join();
+    }
+
+    window.joinMeeting = joinMeeting;
+
+</script>
+
+</body>
+</html>

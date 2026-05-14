@@ -245,12 +245,29 @@
                 </div>
             </div>
 
-            <!-- Section Students (Placeholder) -->
+            <!-- Section Students -->
             <div x-show="activeTab === 'students'" x-cloak class="space-y-8">
-                <h3 class="text-2xl font-bold">Étudiants Intéressés</h3>
-                <div class="bg-surface-container rounded-xl border border-outline-variant p-12 text-center">
-                    <span class="material-symbols-outlined text-6xl text-outline mb-4">group</span>
-                    <p class="text-outline italic">Cette fonctionnalité arrive bientôt. Vous pourrez voir ici la liste des étudiants qui suivent vos cours.</p>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-bold">Mes Étudiants</h3>
+                    <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold">{{ $students->count() }} étudiants</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    @forelse($students as $student)
+                    <div class="bg-surface-container rounded-xl border border-outline-variant p-6 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center font-bold">
+                            {{ substr($student->name, 0, 1) }}
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm">{{ $student->name }}</p>
+                            <p class="text-xs text-outline">{{ $student->email }}</p>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="col-span-3 bg-surface-container rounded-xl border border-outline-variant p-12 text-center text-outline italic">
+                        Aucun étudiant ne vous suit pour le moment.
+                    </div>
+                    @endforelse
                 </div>
             </div>
 
@@ -360,10 +377,15 @@
                         <label class="block text-sm font-medium mb-2">Type</label>
                         <select name="type" class="w-full bg-background border-outline-variant rounded-xl text-white" required>
                             <option value="course">Cours (PDF/Texte)</option>
-                            <option value="exercise">Exercice</option>
+                            <option value="sujet_type">Sujets Types</option>
                             <option value="correction">Corrigé</option>
                         </select>
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Miniature (Thumbnail)</label>
+                    <input type="file" name="thumbnail" class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-slate-900 hover:file:bg-primary/90" accept="image/*">
                 </div>
 
                 <div>

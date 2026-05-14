@@ -26,8 +26,9 @@ class TeacherController extends Controller
         $recentCourses = $user->courses()->latest()->take(5)->get();
         $mySubjects = $user->subjects()->with('level')->get();
         $allSubjects = Subject::with('level')->get();
+        $students = $user->followers()->get();
 
-        return view('dashboard.teacher', compact('user', 'stats', 'recentCourses', 'mySubjects', 'allSubjects'));
+        return view('dashboard.teacher', compact('user', 'stats', 'recentCourses', 'mySubjects', 'allSubjects', 'students'));
     }
 
     public function storeCourse(Request $request)
@@ -36,11 +37,13 @@ class TeacherController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'subject_id' => 'required|exists:subjects,id',
-            'type' => 'required|in:course,exercise,correction',
-            'file' => 'required|file|mimes:pdf,doc,docx,txt|max:10240', // 10MB
+            'type' => 'required|in:course,sujet_type,correction',
+            'file' => 'required|file|mimes:pdf,doc,docx,txt|max:10240',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $path = $request->file('file')->store('courses', 'public');
+        $thumbnailPath = $request->hasFile('thumbnail') ? $request->file('thumbnail')->store('thumbnails', 'public') : null;
 
         Course::create([
             'title' => $validated['title'],
@@ -50,6 +53,7 @@ class TeacherController extends Controller
             'user_id' => Auth::id(),
             'type' => $validated['type'],
             'file_path' => $path,
+            'thumbnail_path' => $thumbnailPath,
             'status' => 'pending',
         ]);
 
