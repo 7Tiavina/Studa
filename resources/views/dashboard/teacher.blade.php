@@ -542,12 +542,37 @@
     <!-- =========================================================== -->
 
     <!-- Modal Upload Course -->
-    <div x-data="{ show: false }"
+    <div x-data="{ 
+            show: false, 
+            fileName: '', 
+            isUploading: false, 
+            progress: 0,
+            reset() {
+                this.fileName = '';
+                this.isUploading = false;
+                this.progress = 0;
+            },
+            handleFileChange(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    this.fileName = file.name;
+                    this.isUploading = true;
+                    this.progress = 0;
+                    let interval = setInterval(() => {
+                        this.progress += Math.floor(Math.random() * 15) + 5;
+                        if (this.progress >= 100) {
+                            this.progress = 100;
+                            clearInterval(interval);
+                        }
+                    }, 150);
+                }
+            }
+         }"
          x-show="show"
-         @open-modal.window="if($event.detail === 'upload-course') show = true"
+         @open-modal.window="if($event.detail === 'upload-course') { show = true; reset(); }"
          class="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
          x-cloak>
-        <div @click.away="show = false"
+        <div @click.away="show = false; reset();"
              class="bg-surface-container rounded-2xl border border-outline-variant p-8 max-w-lg w-full shadow-2xl">
             <h2 class="text-2xl font-bold mb-6">Envoyer un nouveau contenu</h2>
             <form action="{{ route('teacher.courses.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
@@ -589,18 +614,45 @@
                     <textarea name="description" rows="3" class="w-full bg-background border-outline-variant rounded-xl text-white"></textarea>
                 </div>
 
-                <div class="p-8 border-2 border-dashed border-outline-variant rounded-xl text-center hover:border-primary transition-colors bg-background/50">
-                    <input type="file" name="file" id="file" class="hidden" required accept=".pdf,.doc,.docx,.txt">
-                    <label for="file" class="cursor-pointer">
-                        <span class="material-symbols-outlined text-4xl text-outline mb-2">upload_file</span>
-                        <p class="text-sm font-bold">Cliquez pour choisir un fichier</p>
-                        <p class="text-xs text-outline mt-1">PDF, Word ou Texte (Max 10MB)</p>
-                    </label>
+                <div class="p-8 border-2 border-dashed border-outline-variant rounded-xl text-center hover:border-primary transition-colors bg-background/50 relative overflow-hidden">
+                    <input type="file" name="file" id="file" class="hidden" required accept=".pdf,.doc,.docx,.txt" @change="handleFileChange">
+                    
+                    <template x-if="!fileName">
+                        <label for="file" class="cursor-pointer block">
+                            <span class="material-symbols-outlined text-4xl text-outline mb-2">upload_file</span>
+                            <p class="text-sm font-bold">Cliquez pour choisir un fichier</p>
+                            <p class="text-xs text-outline mt-1">PDF, Word ou Texte (Max 10MB)</p>
+                        </label>
+                    </template>
+
+                    <template x-if="fileName">
+                        <div class="flex flex-col items-center">
+                            <div class="flex items-center gap-3 mb-4 w-full">
+                                <span class="material-symbols-outlined text-3xl text-primary">description</span>
+                                <div class="text-left flex-1 min-w-0">
+                                    <p class="text-sm font-bold text-white truncate" x-text="fileName"></p>
+                                    <p class="text-[10px] text-outline uppercase tracking-widest" x-text="progress < 100 ? 'Importation en cours...' : 'Fichier prêt'"></p>
+                                </div>
+                                <button type="button" @click="reset(); document.getElementById('file').value = ''" class="text-error hover:bg-error/10 p-1 rounded-full">
+                                    <span class="material-symbols-outlined text-sm">close</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Barre de progression -->
+                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div class="h-full bg-primary transition-all duration-300" :style="`width: ${progress}%`"></div>
+                            </div>
+                        </div>
+                    </template>
                 </div>
 
                 <div class="flex gap-4 pt-4">
-                    <button type="submit" class="flex-1 bg-primary text-slate-900 font-bold py-3 rounded-xl hover:opacity-90">Envoyer pour validation</button>
-                    <button type="button" @click="show = false" class="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-700">Annuler</button>
+                    <button type="submit" 
+                            class="flex-1 bg-primary text-slate-900 font-bold py-3 rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                            :disabled="isUploading && progress < 100">
+                        Envoyer pour validation
+                    </button>
+                    <button type="button" @click="show = false; reset();" class="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-700">Annuler</button>
                 </div>
             </form>
         </div>
