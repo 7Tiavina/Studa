@@ -307,9 +307,15 @@
                                     <p class="text-[10px] text-outline">{{ $course->subject->name }} • {{ $course->created_at->diffForHumans() }}</p>
                                 </div>
                             </div>
-                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase {{ $course->status === 'published' ? 'bg-secondary/10 text-secondary' : ($course->status === 'rejected' ? 'bg-error/10 text-error' : 'bg-tertiary/10 text-tertiary') }}">
-                                {{ $course->status }}
-                            </span>
+                            <div class="flex items-center gap-3">
+                                <button @click="$dispatch('open-preview', { url: '{{ asset('storage/' . $course->file_path) }}', title: '{{ addslashes($course->title) }}' })"
+                                        class="p-2 text-outline hover:text-secondary transition-colors" title="Aperçu">
+                                    <span class="material-symbols-outlined text-sm">visibility</span>
+                                </button>
+                                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase {{ $course->status === 'published' ? 'bg-secondary/10 text-secondary' : ($course->status === 'rejected' ? 'bg-error/10 text-error' : 'bg-tertiary/10 text-tertiary') }}">
+                                    {{ $course->status }}
+                                </span>
+                            </div>
                         </div>
                         @empty
                         <p class="text-center text-outline italic py-8">Aucune activité pour le moment.</p>
@@ -367,10 +373,16 @@
                                 </td>
                                 <td class="px-6 py-4 text-xs text-outline">{{ $course->created_at->format('d/m/Y') }}</td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{{ asset('storage/' . $course->file_path) }}" target="_blank"
-                                       class="text-primary hover:underline flex items-center justify-end gap-1 text-xs">
-                                        <span class="material-symbols-outlined text-sm">download</span> Télécharger
-                                    </a>
+                                    <div class="flex items-center justify-end gap-4">
+                                        <button @click="$dispatch('open-preview', { url: '{{ asset('storage/' . $course->file_path) }}', title: '{{ addslashes($course->title) }}' })"
+                                                class="text-secondary hover:text-secondary/80 flex items-center gap-1 text-xs font-bold transition-colors">
+                                            <span class="material-symbols-outlined text-sm">visibility</span> Aperçu
+                                        </button>
+                                        <a href="{{ asset('storage/' . $course->file_path) }}" target="_blank"
+                                           class="text-primary hover:text-primary/80 flex items-center gap-1 text-xs font-bold transition-colors">
+                                            <span class="material-symbols-outlined text-sm">download</span> Télécharger
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach
@@ -706,6 +718,35 @@
                     <button type="button" @click="show = false" class="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-700">Annuler</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Preview -->
+    <div x-data="{ show: false, url: '', title: '' }"
+         x-show="show"
+         @open-preview.window="show = true; url = $event.detail.url; title = $event.detail.title"
+         class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+         x-cloak>
+        <div @click.away="show = false" class="bg-surface-container rounded-2xl border border-outline-variant w-full max-w-5xl h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-4 border-b border-outline-variant flex justify-between items-center bg-slate-900">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span class="material-symbols-outlined text-secondary">visibility</span>
+                    <h3 class="font-bold text-lg text-white truncate pr-4" x-text="title"></h3>
+                </div>
+                <button @click="show = false" class="p-2 hover:bg-slate-800 rounded-full text-outline hover:text-white transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="flex-1 bg-white overflow-hidden">
+                <template x-if="url.toLowerCase().endsWith('.pdf')">
+                    <iframe :src="url" class="w-full h-full border-none"></iframe>
+                </template>
+                <template x-if="!url.toLowerCase().endsWith('.pdf')">
+                    <div class="w-full h-full flex items-center justify-center bg-slate-950 p-8">
+                         <img :src="url" class="max-w-full max-h-full object-contain shadow-2xl">
+                    </div>
+                </template>
+            </div>
         </div>
     </div>
 
