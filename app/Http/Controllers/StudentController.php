@@ -17,7 +17,17 @@ class StudentController extends Controller
         $user = Auth::user();
         $subscribedCoursesIds = $user->subscribedCourses()->pluck('courses.id')->toArray();
         $subscribedCourses = $user->subscribedCourses()->with(['teacher', 'subject', 'level'])->get();
-        $followedTeachers = $user->followedTeachers()->get();
+        $followedTeachers = $user->followedTeachers()->get()->map(function($teacher) use ($user) {
+            $conversation = \App\Models\Conversation::where(function($q) use ($user, $teacher) {
+                $q->where('user_one_id', $user->id)->where('user_two_id', $teacher->id);
+            })->orWhere(function($q) use ($user, $teacher) {
+                $q->where('user_one_id', $teacher->id)->where('user_two_id', $user->id);
+            })->with('lastMessage')->first();
+
+            $teacher->last_message = $conversation ? $conversation->lastMessage : null;
+            $teacher->is_online = $teacher->last_seen_at && $teacher->last_seen_at->gt(now()->subMinutes(2));
+            return $teacher;
+        });
         $allTeachers = User::where('role', 'teacher')->get();
         
         $query = Course::query()->where('status', 'published')->with(['teacher', 'subject', 'level']);

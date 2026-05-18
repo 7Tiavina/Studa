@@ -330,12 +330,24 @@
                             })
                     "
                     class="w-full p-3 hover:bg-slate-900 flex items-center gap-3 border-b border-slate-800/40 transition-colors">
-                    <div class="w-8 h-8 rounded-full bg-secondary/20 text-secondary flex items-center justify-center font-bold text-xs">
-                        {{ substr($student->name, 0, 1) }}
+                    <div class="relative flex-shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-secondary/20 text-secondary flex items-center justify-center font-bold text-xs">
+                            {{ substr($student->name, 0, 1) }}
+                        </div>
+                        <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-950 {{ $student->is_online ? 'bg-secondary' : 'bg-error' }}"></div>
                     </div>
-                    <div class="text-left">
-                        <span class="text-sm font-semibold text-slate-200 block">{{ $student->name }}</span>
-                        <span class="text-[10px] text-outline">{{ $student->email }}</span>
+                    <div class="text-left flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline gap-2">
+                            <span class="text-sm font-semibold text-slate-200 block truncate">{{ $student->name }}</span>
+                        </div>
+                        <p class="text-[10px] text-outline truncate">
+                            @if($student->last_message)
+                                <span class="text-blue-400 font-bold">{{ $student->last_message->user_id === Auth::id() ? 'Vous : ' : '' }}</span>
+                                {{ $student->last_message->body }}
+                            @else
+                                {{ $student->email }}
+                            @endif
+                        </p>
                     </div>
                 </button>
                 @empty

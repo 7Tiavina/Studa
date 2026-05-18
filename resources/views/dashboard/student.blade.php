@@ -274,7 +274,7 @@
             <div class="p-4 border-b border-slate-800">
                 <h4 class="font-bold text-sm">Contacts</h4>
             </div>
-            <div class="flex-1 overflow-y-auto">
+            <div class="flex-1 overflow-y-auto custom-scrollbar">
                 @foreach($followedTeachers as $teacher)
                 <button @click="
                     showMessenger = false; 
@@ -284,16 +284,29 @@
                         if(!openChats.find(c => c.id === {{ $teacher->id }})) {
                             openChats.push({
                                 id: {{ $teacher->id }}, 
-                                name: '{{ $teacher->name }}', 
+                                name: '{{ addslashes($teacher->name) }}', 
                                 minimized: false, 
                                 conversation_id: conv.id, 
                                 is_online: conv.partner_is_online,
                                 messages: []
                             })
                         }                    })" 
-                        class="w-full p-3 hover:bg-slate-900 flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center font-bold text-xs">{{ substr($teacher->name, 0, 1) }}</div>
-                    <span class="text-sm font-semibold">{{ $teacher->name }}</span>
+                        class="w-full p-3 hover:bg-slate-900 flex items-center gap-3 border-b border-slate-800/40 transition-colors">
+                    <div class="relative flex-shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center font-bold text-xs">{{ substr($teacher->name, 0, 1) }}</div>
+                        <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-950 {{ $teacher->is_online ? 'bg-secondary' : 'bg-error' }}"></div>
+                    </div>
+                    <div class="text-left flex-1 min-w-0">
+                        <span class="text-sm font-semibold text-slate-200 block truncate">{{ $teacher->name }}</span>
+                        <p class="text-[10px] text-outline truncate">
+                            @if($teacher->last_message)
+                                <span class="text-blue-400 font-bold">{{ $teacher->last_message->user_id === Auth::id() ? 'Vous : ' : '' }}</span>
+                                {{ $teacher->last_message->body }}
+                            @else
+                                {{ $teacher->email }}
+                            @endif
+                        </p>
+                    </div>
                 </button>
                 @endforeach
             </div>

@@ -26,7 +26,17 @@ class TeacherController extends Controller
         $recentCourses = $user->courses()->latest()->take(5)->get();
         $mySubjects = $user->subjects()->with('level')->get();
         $allSubjects = Subject::with('level')->get();
-        $students = $user->followers()->get();
+        $students = $user->followers()->get()->map(function($student) use ($user) {
+            $conversation = \App\Models\Conversation::where(function($q) use ($user, $student) {
+                $q->where('user_one_id', $user->id)->where('user_two_id', $student->id);
+            })->orWhere(function($q) use ($user, $student) {
+                $q->where('user_one_id', $student->id)->where('user_two_id', $user->id);
+            })->with('lastMessage')->first();
+
+            $student->last_message = $conversation ? $conversation->lastMessage : null;
+            $student->is_online = $student->last_seen_at && $student->last_seen_at->gt(now()->subMinutes(2));
+            return $student;
+        });
 
         return view('dashboard.teacher', compact('user', 'stats', 'recentCourses', 'mySubjects', 'allSubjects', 'students'));
     }
