@@ -108,7 +108,6 @@
                      ">
                     <template x-for="msg in chat.messages" :key="msg.id">
                         <div x-data="{ showPicker: false }" 
-                             @mouseleave="showPicker = false"
                              :class="msg.user_id === {{ Auth::id() }} ? 'self-end' : 'self-start'" 
                              class="max-w-[85%] group relative">
                             
@@ -121,25 +120,35 @@
                             <div x-show="msg.reactions && Object.keys(msg.reactions).length > 0" class="flex flex-wrap gap-1 mt-1" :class="msg.user_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start'">
                                 <template x-for="(userIds, emoji) in msg.reactions" :key="emoji">
                                     <button @click="
-                                        fetch(`/messages/${msg.id}/react`, {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                                            body: JSON.stringify({ emoji: emoji })
-                                        })
-                                        .then(r => r.json())
-                                        .then(updatedMsg => { msg.reactions = updatedMsg.reactions; })
+                                        if (msg.user_id !== {{ Auth::id() }}) {
+                                            fetch(`/messages/${msg.id}/react`, {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                                body: JSON.stringify({ emoji: emoji })
+                                            })
+                                            .then(r => r.json())
+                                            .then(updatedMsg => { msg.reactions = updatedMsg.reactions; })
+                                        }
                                     "
-                                    :class="userIds.includes({{ Auth::id() }}) ? 'bg-blue-500/30 border-blue-500/50' : 'bg-slate-800 border-slate-700'"
-                                    class="flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[10px] hover:scale-110 transition-transform">
+                                    :disabled="msg.user_id === {{ Auth::id() }}"
+                                    :class="[
+                                        userIds.includes({{ Auth::id() }}) ? 'bg-blue-500/30 border-blue-500/50' : 'bg-slate-800 border-slate-700',
+                                        msg.user_id === {{ Auth::id() }} ? 'cursor-default' : 'hover:scale-110 transition-transform'
+                                    ]"
+                                    class="flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[10px]">
                                         <span x-text="emoji"></span>
                                         <span class="font-bold" x-text="userIds.length"></span>
                                     </button>
                                 </template>
                             </div>
 
-                            <!-- Icône de réaction au survol -->
-                            <div class="absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                                 :class="msg.user_id === {{ Auth::id() }} ? 'right-full mr-2' : 'left-full ml-2'">
+                            <!-- Icône de réaction au survol (masquée pour ses propres messages) -->
+                            <div x-show="msg.user_id !== {{ Auth::id() }}" 
+                                 class="absolute top-0 transition-opacity z-10"
+                                 :class="[
+                                    msg.user_id === {{ Auth::id() }} ? 'right-full mr-2' : 'left-full ml-2',
+                                    showPicker ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                                 ]">
                                 
                                 <button @click="showPicker = !showPicker" 
                                         class="p-1 bg-slate-800 border border-slate-700 rounded-full text-slate-400 hover:text-primary hover:scale-110 transition-all shadow-lg flex items-center justify-center">
@@ -148,6 +157,7 @@
 
                                 <!-- Menu d'emojis (s'affiche au clic) -->
                                 <div x-show="showPicker" 
+                                     @click.away="showPicker = false"
                                      x-transition:enter="transition ease-out duration-200"
                                      x-transition:enter-start="opacity-0 scale-90"
                                      x-transition:enter-end="opacity-100 scale-100"
