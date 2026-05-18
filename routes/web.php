@@ -39,6 +39,14 @@ Route::middleware('auth')->group(function () {
             }
             return response()->json(['status' => 'ok']);
         })->name('users.heartbeat');
+
+        Route::post('/users/offline', function() {
+            if(auth()->check()) {
+                auth()->user()->update(['last_seen_at' => now()->subMinutes(10)]);
+            }
+            return response()->json(['status' => 'offline']);
+        })->name('users.offline');
+
         Route::post('/messages/{message}/react', [MessageController::class, 'react'])->name('messages.react');
         Route::post('/student/teachers/{teacher}/follow', [StudentController::class, 'followTeacher'])->name('student.teachers.follow');
         Route::delete('/student/teachers/{teacher}/unfollow', [StudentController::class, 'unfollowTeacher'])->name('student.teachers.unfollow');

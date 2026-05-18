@@ -47,6 +47,13 @@
                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
             });
         }, 30000); // Toutes les 30 secondes
+
+        // Signaler la déconnexion lors de la fermeture de l'onglet
+        window.addEventListener('beforeunload', function() {
+            const formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+            navigator.sendBeacon('/users/offline', formData);
+        });
     </script>
 </head>
 <body class="bg-background text-on-background font-sans antialiased" x-data="{ activeTab: 'dashboard', showMessenger: false, openChats: [] }">
@@ -165,7 +172,7 @@
                                         .then(r => r.json())
                                         .then(data => { chat.is_online = data.is_online; });
                                 }
-                            }, 15000); // Toutes les 15 secondes
+                            }, 10000); // Toutes les 10 secondes
                          ">
                     <template x-for="msg in chat.messages" :key="msg.id">
                         <div x-data="{ showPicker: false }" 
