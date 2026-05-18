@@ -220,6 +220,28 @@
     @endforeach
 </div>
 </section>
+<!-- Type Filters -->
+<section class="space-y-md">
+<div class="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar">
+    <a href="?level_id={{ request('level_id') }}&search={{ request('search') }}" 
+       class="flex items-center gap-2 {{ !request('type') ? 'bg-primary text-on-primary' : 'bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-colors">
+        Tous les types
+    </a>
+    <a href="?type=course&level_id={{ request('level_id') }}&subject_id={{ request('subject_id') }}&search={{ request('search') }}" 
+       class="flex items-center gap-2 {{ request('type') == 'course' ? 'bg-primary text-on-primary' : 'bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-colors">
+        Cours
+    </a>
+    <a href="?type=sujet_type&level_id={{ request('level_id') }}&subject_id={{ request('subject_id') }}&search={{ request('search') }}" 
+       class="flex items-center gap-2 {{ request('type') == 'sujet_type' ? 'bg-primary text-on-primary' : 'bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-colors">
+        Sujets Types
+    </a>
+    <a href="?type=correction&level_id={{ request('level_id') }}&subject_id={{ request('subject_id') }}&search={{ request('search') }}" 
+       class="flex items-center gap-2 {{ request('type') == 'correction' ? 'bg-primary text-on-primary' : 'bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-colors">
+        Corrigés
+    </a>
+</div>
+</section>
+
 <!-- Course Grid -->
 <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter pb-xl">
     @forelse($courses as $course)
@@ -228,6 +250,7 @@
                 <img alt="{{ $course->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="{{ $course->thumbnail_path ? asset('storage/' . $course->thumbnail_path) : 'https://picsum.photos/400/300' }}"/>
                 <div class="absolute top-4 left-4 flex gap-2">
                     <span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">{{ $course->subject->name }}</span>
+                    <span class="bg-purple-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">{{ $course->type }}</span>
                     <span class="bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">{{ $course->level->name }}</span>
                 </div>
             </div>
