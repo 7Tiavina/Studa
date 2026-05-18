@@ -32,6 +32,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/messages/{conversationId}', [MessageController::class, 'store'])->name('messages.store');
         Route::get('/messages/{conversationId}', [MessageController::class, 'index'])->name('messages.index');
         Route::get('/messages/start/{teacherId}', [MessageController::class, 'findOrCreate'])->name('messages.start');
+        Route::post('/messages/{message}/react', [MessageController::class, 'react'])->name('messages.react');
         Route::post('/student/teachers/{teacher}/follow', [StudentController::class, 'followTeacher'])->name('student.teachers.follow');
         Route::delete('/student/teachers/{teacher}/unfollow', [StudentController::class, 'unfollowTeacher'])->name('student.teachers.unfollow');
         Route::put('/student/settings', [StudentController::class, 'updateSettings'])->name('student.settings.update');

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Message;
 use App\Models\Conversation;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,6 +13,7 @@ class MessageController extends Controller
     public function findOrCreate($partnerId)
     {
         $currentId = Auth::id();
+        $partner = User::findOrFail($partnerId);
         
         $conversation = Conversation::where(function($query) use ($currentId, $partnerId) {
             $query->where('user_one_id', $currentId)->where('user_two_id', $partnerId);
@@ -26,7 +28,10 @@ class MessageController extends Controller
             ]);
         }
 
-        return response()->json($conversation);
+        $data = $conversation->toArray();
+        $data['partner_is_online'] = $partner->last_seen_at && $partner->last_seen_at->gt(now()->subMinutes(5));
+
+        return response()->json($data);
     }
 
     public function index($conversationId)
@@ -59,5 +64,35 @@ class MessageController extends Controller
         ]);
 
         return response()->json($message->load('user'));
+    }
+
+    public function react(Request $request, Message $message)
+    {
+        $request->validate([
+            'emoji' => 'required|string',
+        ]);
+
+        $emoji = $request->emoji;
+        $userId = Auth::id();
+        $reactions = $message->reactions ?: [];
+
+        if (!isset($reactions[$emoji])) {
+            $reactions[$emoji] = [];
+        }
+
+        if (in_array($userId, $reactions[$emoji])) {
+            // Remove reaction
+            $reactions[$emoji] = array_values(array_filter($reactions[$emoji], fn($id) => $id !== $userId));
+            if (empty($reactions[$emoji])) {
+                unset($reactions[$emoji]);
+            }
+        } else {
+            // Add reaction
+            $reactions[$emoji][] = $userId;
+        }
+
+        $message->update(['reactions' => $reactions]);
+
+        return response()->json($message);
     }
 }

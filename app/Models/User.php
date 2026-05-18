@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'role',
         'is_validated',
+        'last_seen_at',
     ];
 
     /**
@@ -47,6 +48,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_validated' => 'boolean',
+            'last_seen_at' => 'datetime',
         ];
     }
 

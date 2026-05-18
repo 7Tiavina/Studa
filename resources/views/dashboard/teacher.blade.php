@@ -47,14 +47,22 @@
     <!-- =========================================================== -->
     <div class="fixed bottom-0 right-4 flex gap-3 z-50 items-end pointer-events-none">
         <template x-for="chat in openChats" :key="chat.id">
-            <div class="w-80 bg-slate-900 rounded-t-xl shadow-2xl flex flex-col overflow-hidden text-slate-100 pointer-events-auto border border-slate-800">
+            <div class="w-96 bg-slate-900 rounded-t-xl shadow-2xl flex flex-col overflow-hidden text-slate-100 pointer-events-auto border border-slate-800">
                 <!-- Header de la fenêtre chat -->
                 <div class="bg-slate-950 p-3 flex justify-between items-center border-b border-slate-800 cursor-pointer shadow-sm"
                      @click="chat.minimized = !chat.minimized">
                     <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-[10px]"
-                             x-text="chat.name.charAt(0)"></div>
-                        <span class="font-bold text-sm text-slate-200" x-text="chat.name"></span>
+                        <div class="relative">
+                            <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-[10px]"
+                                 x-text="chat.name.charAt(0)"></div>
+                            <!-- Point de statut -->
+                            <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-slate-950"
+                                 :class="chat.is_online ? 'bg-secondary' : 'bg-error'"></div>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-sm text-slate-200" x-text="chat.name"></span>
+                            <span class="text-[9px] uppercase tracking-tighter" :class="chat.is_online ? 'text-secondary' : 'text-error'" x-text="chat.is_online ? 'En ligne' : 'Hors ligne'"></span>
+                        </div>
                     </div>
                     <div class="flex items-center gap-1">
                         <button @click.stop="chat.minimized = !chat.minimized"
@@ -70,14 +78,69 @@
 
                 <!-- Messages -->
                 <div x-show="!chat.minimized"
-                     class="h-80 overflow-y-auto p-4 bg-slate-900 flex flex-col gap-3"
+                     class="h-96 overflow-y-auto p-4 bg-slate-900 flex flex-col gap-3 custom-scrollbar"
                      x-init="fetch(`/messages/${chat.conversation_id}`).then(r => r.json()).then(data => { chat.messages = data; });">
                     <template x-for="msg in chat.messages" :key="msg.id">
-                        <div :class="msg.user_id === {{ Auth::id() }}
-                                ? 'bg-blue-600 text-white self-end'
-                                : 'bg-slate-800 text-slate-200 self-start'"
-                             class="p-3 rounded-2xl max-w-[85%] text-sm shadow-sm"
-                             x-text="msg.body"></div>
+                        <div x-data="{ showPicker: false }" 
+                             @mouseleave="showPicker = false"
+                             :class="msg.user_id === {{ Auth::id() }} ? 'self-end' : 'self-start'" 
+                             class="max-w-[85%] group relative">
+                            
+                            <div :class="msg.user_id === {{ Auth::id() }} ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-200'"
+                                 class="p-3 rounded-2xl text-sm shadow-sm">
+                                <span x-text="msg.body"></span>
+                            </div>
+                            
+                            <!-- Affichage des réactions -->
+                            <div x-show="msg.reactions && Object.keys(msg.reactions).length > 0" class="flex flex-wrap gap-1 mt-1" :class="msg.user_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start'">
+                                <template x-for="(userIds, emoji) in msg.reactions" :key="emoji">
+                                    <button @click="
+                                        fetch(`/messages/${msg.id}/react`, {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                            body: JSON.stringify({ emoji: emoji })
+                                        })
+                                        .then(r => r.json())
+                                        .then(updatedMsg => { msg.reactions = updatedMsg.reactions; })
+                                    "
+                                    :class="userIds.includes({{ Auth::id() }}) ? 'bg-blue-500/30 border-blue-500/50' : 'bg-slate-800 border-slate-700'"
+                                    class="flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[10px] hover:scale-110 transition-transform">
+                                        <span x-text="emoji"></span>
+                                        <span class="font-bold" x-text="userIds.length"></span>
+                                    </button>
+                                </template>
+                            </div>
+
+                            <!-- Icône de réaction au survol -->
+                            <div class="absolute top-0 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                 :class="msg.user_id === {{ Auth::id() }} ? 'right-full mr-2' : 'left-full ml-2'">
+                                
+                                <button @click="showPicker = !showPicker" 
+                                        class="p-1 bg-slate-800 border border-slate-700 rounded-full text-slate-400 hover:text-primary hover:scale-110 transition-all shadow-lg flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[14px]">add_reaction</span>
+                                </button>
+
+                                <!-- Menu d'emojis (s'affiche au clic) -->
+                                <div x-show="showPicker" 
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="opacity-0 scale-90"
+                                     x-transition:enter-end="opacity-100 scale-100"
+                                     class="absolute top-full mt-2 flex bg-slate-800 border border-slate-700 rounded-full shadow-2xl p-1 z-20"
+                                     :class="msg.user_id === {{ Auth::id() }} ? 'right-0' : 'left-0'">
+                                    <template x-for="emoji in ['👍', '❤️', '😂', '😮', '😢', '🔥']" :key="emoji">
+                                        <button @click="
+                                            fetch(`/messages/${msg.id}/react`, {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                                body: JSON.stringify({ emoji: emoji })
+                                            })
+                                            .then(r => r.json())
+                                            .then(updatedMsg => { msg.reactions = updatedMsg.reactions; showPicker = false; })
+                                        " class="hover:scale-125 transition-transform px-1.5 py-1 text-lg" x-text="emoji"></button>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
                     </template>
                 </div>
 
@@ -233,6 +296,7 @@
                                         name: '{{ addslashes($student->name) }}',
                                         minimized: false,
                                         conversation_id: conv.id,
+                                        is_online: conv.partner_is_online,
                                         messages: [],
                                         newMessage: ''
                                     })
