@@ -32,6 +32,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/messages/{conversationId}', [MessageController::class, 'store'])->name('messages.store');
         Route::get('/messages/{conversationId}', [MessageController::class, 'index'])->name('messages.index');
         Route::get('/messages/start/{teacherId}', [MessageController::class, 'findOrCreate'])->name('messages.start');
+        Route::get('/users/statuses', [MessageController::class, 'checkStatuses'])->name('users.statuses');
         Route::get('/users/{user}/status', [MessageController::class, 'checkStatus'])->name('users.status');
         Route::post('/users/heartbeat', function() {
             if(auth()->check()) {

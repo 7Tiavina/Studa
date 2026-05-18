@@ -56,7 +56,32 @@
         });
     </script>
 </head>
-<body class="bg-background text-on-background font-sans antialiased" x-data="{ activeTab: 'dashboard', showMessenger: false, openChats: [] }">
+<body class="bg-background text-on-background font-sans antialiased" 
+      x-data="{ 
+        activeTab: 'dashboard', 
+        showMessenger: false, 
+        openChats: [],
+        userStatuses: {
+            @foreach($students as $s) {{ $s->id }}: {{ $s->is_online ? 'true' : 'false' }}, @endforeach
+        },
+        updateAllStatuses() {
+            let ids = [...new Set([
+                ...Object.keys(this.userStatuses),
+                ...this.openChats.map(c => c.id)
+            ])];
+            if (ids.length === 0) return;
+            
+            let url = new URL('/users/statuses', window.location.origin);
+            ids.forEach(id => url.searchParams.append('ids[]', id));
+            
+            fetch(url)
+                .then(r => r.json())
+                .then(statuses => { this.userStatuses = statuses; });
+        }
+      }"
+      x-init="
+        setInterval(() => { updateAllStatuses(); }, 8000);
+      ">
 
     <!-- =========================================================== -->
     <!-- CHAT WINDOWS (flottantes en bas à droite) — du code 2       -->
@@ -73,11 +98,11 @@
                                  x-text="chat.name.charAt(0)"></div>
                             <!-- Point de statut -->
                             <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-slate-950"
-                                 :class="chat.is_online ? 'bg-secondary' : 'bg-error'"></div>
+                                 :class="userStatuses[chat.id] ? 'bg-secondary' : 'bg-error'"></div>
                         </div>
                         <div class="flex flex-col">
                             <span class="font-bold text-sm text-slate-200" x-text="chat.name"></span>
-                            <span class="text-[9px] uppercase tracking-tighter" :class="chat.is_online ? 'text-secondary' : 'text-error'" x-text="chat.is_online ? 'En ligne' : 'Hors ligne'"></span>
+                            <span class="text-[9px] uppercase tracking-tighter" :class="userStatuses[chat.id] ? 'text-secondary' : 'text-error'" x-text="userStatuses[chat.id] ? 'En ligne' : 'Hors ligne'"></span>
                         </div>
                     </div>
                     <div class="flex items-center gap-1">
@@ -95,17 +120,7 @@
                 <!-- Messages -->
                 <div x-show="!chat.minimized"
                      class="h-96 overflow-y-auto p-4 bg-slate-900 flex flex-col gap-3 custom-scrollbar"
-                     x-init="
-                        fetch(`/messages/${chat.conversation_id}`).then(r => r.json()).then(data => { chat.messages = data; });
-                        // Polling du statut en ligne de l'interlocuteur
-                        setInterval(() => {
-                            if(!chat.minimized) {
-                                fetch(`/users/${chat.id}/status`)
-                                    .then(r => r.json())
-                                    .then(data => { chat.is_online = data.is_online; });
-                            }
-                        }, 10000); // Toutes les 10 secondes
-                     ">
+                     x-init="fetch(`/messages/${chat.conversation_id}`).then(r => r.json()).then(data => { chat.messages = data; });">
                     <template x-for="msg in chat.messages" :key="msg.id">
                         <div x-data="{ showPicker: false }" 
                              :class="msg.user_id === {{ Auth::id() }} ? 'self-end' : 'self-start'" 
@@ -344,7 +359,8 @@
                         <div class="w-10 h-10 rounded-full bg-secondary/20 text-secondary flex items-center justify-center font-bold text-xs">
                             {{ substr($student->name, 0, 1) }}
                         </div>
-                        <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-950 {{ $student->is_online ? 'bg-secondary' : 'bg-error' }}"></div>
+                        <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-950"
+                             :class="userStatuses[{{ $student->id }}] ? 'bg-secondary' : 'bg-error'"></div>
                     </div>
                     <div class="text-left flex-1 min-w-0">
                         <div class="flex justify-between items-baseline gap-2">

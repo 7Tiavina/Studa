@@ -41,6 +41,17 @@ class MessageController extends Controller
         return response()->json(['is_online' => $isOnline]);
     }
 
+    public function checkStatuses(Request $request)
+    {
+        $request->validate(['ids' => 'required|array']);
+        $users = User::whereIn('id', $request->ids)->get();
+        $statuses = [];
+        foreach ($users as $user) {
+            $statuses[$user->id] = $user->last_seen_at && $user->last_seen_at->gt(now()->subMinutes(2));
+        }
+        return response()->json($statuses);
+    }
+
     public function index($conversationId)
     {
         $conversation = Conversation::where('id', $conversationId)
