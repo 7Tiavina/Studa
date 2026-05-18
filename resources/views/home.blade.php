@@ -119,15 +119,19 @@
         }
     </script>
 </head>
-<body class="bg-background font-body-base text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<body class="bg-background font-body-base text-on-background selection:bg-primary-container selection:text-on-primary-container" x-data="{ 
+    search: '{{ request('search') }}',
+    level: '{{ request('level_id') }}',
+    subject: '{{ request('subject_id') }}'
+}">
 <!-- TopNavBar -->
 <nav class="fixed top-0 w-full z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 shadow-lg flex justify-between items-center px-6 h-16">
 <div class="flex items-center gap-8">
-<span class="text-2xl font-black tracking-tight text-white">Studa</span>
-<div class="hidden md:flex items-center bg-slate-800/50 rounded-lg px-3 py-1.5 border border-slate-700">
-<span class="material-symbols-outlined text-slate-400 text-sm mr-2">search</span>
-<input class="bg-transparent border-none text-sm text-white focus:ring-0 w-64 placeholder:text-slate-500" placeholder="Rechercher un cours..." type="text"/>
-</div>
+<a href="/" class="text-2xl font-black tracking-tight text-white">Studa</a>
+<form action="/" class="hidden md:flex items-center bg-slate-800/50 rounded-lg px-3 py-1.5 border border-slate-700">
+    <span class="material-symbols-outlined text-slate-400 text-sm mr-2">search</span>
+    <input name="search" value="{{ request('search') }}" class="bg-transparent border-none text-sm text-white focus:ring-0 w-64 placeholder:text-slate-500" placeholder="Rechercher un cours..." type="text"/>
+</form>
 </div>
 <div class="hidden md:flex items-center gap-6">
 <a class="text-blue-400 font-semibold border-b-2 border-blue-500 pb-1 font-inter" href="#">Courses</a>
@@ -172,13 +176,13 @@
 <p class="text-on-surface-variant font-body-base max-w-md">
                     Accédez aux meilleures ressources pédagogiques pour exceller dans vos examens nationaux.
                 </p>
-<div class="flex items-center bg-surface-container-high rounded-xl p-1 border border-outline-variant max-w-lg">
-<input class="bg-transparent border-none text-white focus:ring-0 flex-1 px-4 py-2 placeholder:text-slate-500 font-body-sm" placeholder="Quel sujet souhaites-tu réviser ?" type="text"/>
-<button class="bg-primary text-on-primary px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:bg-primary-container transition-all">
-<span class="material-symbols-outlined" data-icon="search">search</span>
-                        Rechercher
-                    </button>
-</div>
+<form action="/" class="flex items-center bg-surface-container-high rounded-xl p-1 border border-outline-variant max-w-lg">
+    <input name="search" value="{{ request('search') }}" class="bg-transparent border-none text-white focus:ring-0 flex-1 px-4 py-2 placeholder:text-slate-500 font-body-sm" placeholder="Quel sujet souhaites-tu réviser ?" type="text"/>
+    <button type="submit" class="bg-primary text-on-primary px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:bg-primary-container transition-all">
+        <span class="material-symbols-outlined">search</span>
+        Rechercher
+    </button>
+</form>
 </div>
 </section>
 <!-- Academic Level Filters -->
@@ -190,176 +194,71 @@
                 </h2>
 </div>
 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-gutter">
-<button class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center hover:border-primary hover:bg-slate-800 transition-all group">
-<p class="text-slate-500 font-label-caps group-hover:text-primary">Lycée</p>
-<p class="text-white font-title-sm mt-1">Seconde</p>
-</button>
-<button class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center hover:border-primary hover:bg-slate-800 transition-all group">
-<p class="text-slate-500 font-label-caps group-hover:text-primary">Lycée</p>
-<p class="text-white font-title-sm mt-1">Première</p>
-</button>
-<button class="bg-blue-600/20 border border-blue-500 p-4 rounded-xl text-center shadow-lg shadow-blue-500/10">
-<p class="text-blue-400 font-label-caps">Baccalauréat</p>
-<p class="text-white font-title-sm mt-1">Terminale S</p>
-</button>
-<button class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center hover:border-primary hover:bg-slate-800 transition-all group">
-<p class="text-slate-500 font-label-caps group-hover:text-primary">Baccalauréat</p>
-<p class="text-white font-title-sm mt-1">Terminale D</p>
-</button>
-<button class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center hover:border-primary hover:bg-slate-800 transition-all group">
-<p class="text-slate-500 font-label-caps group-hover:text-primary">Baccalauréat</p>
-<p class="text-white font-title-sm mt-1">Terminale C</p>
-</button>
-<button class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center hover:border-primary hover:bg-slate-800 transition-all group">
-<p class="text-slate-500 font-label-caps group-hover:text-primary">Baccalauréat</p>
-<p class="text-white font-title-sm mt-1">Terminale A</p>
-</button>
+    @foreach($levels as $l)
+        <a href="?level_id={{ $l->id }}&subject_id={{ request('subject_id') }}&search={{ request('search') }}" 
+           class="{{ request('level_id') == $l->id ? 'bg-blue-600/20 border-blue-500 shadow-lg shadow-blue-500/10' : 'bg-slate-900 border-slate-800 hover:border-primary hover:bg-slate-800' }} p-4 rounded-xl text-center transition-all group">
+            <p class="text-slate-500 font-label-caps group-hover:text-primary">{{ $l->category }}</p>
+            <p class="text-white font-title-sm mt-1">{{ $l->name }}</p>
+        </a>
+    @endforeach
 </div>
 </section>
 <!-- Subject Filters -->
 <section class="space-y-md">
 <div class="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar">
-<button class="flex items-center gap-2 bg-primary text-on-primary px-5 py-2.5 rounded-full whitespace-nowrap font-medium text-sm">
-<span class="material-symbols-outlined text-lg" data-icon="all_inclusive">all_inclusive</span>
-                    Tous les sujets
-                </button>
-<button class="flex items-center gap-2 bg-surface-container hover:bg-surface-container-high px-5 py-2.5 rounded-full border border-outline-variant whitespace-nowrap text-sm text-on-surface-variant transition-colors">
-<span class="material-symbols-outlined text-lg" data-icon="functions">functions</span>
-                    Mathématiques
-                </button>
-<button class="flex items-center gap-2 bg-surface-container hover:bg-surface-container-high px-5 py-2.5 rounded-full border border-outline-variant whitespace-nowrap text-sm text-on-surface-variant transition-colors">
-<span class="material-symbols-outlined text-lg" data-icon="biotech">biotech</span>
-                    Physique-Chimie
-                </button>
-<button class="flex items-center gap-2 bg-surface-container hover:bg-surface-container-high px-5 py-2.5 rounded-full border border-outline-variant whitespace-nowrap text-sm text-on-surface-variant transition-colors">
-<span class="material-symbols-outlined text-lg" data-icon="eco">eco</span>
-                    SVT
-                </button>
-<button class="flex items-center gap-2 bg-surface-container hover:bg-surface-container-high px-5 py-2.5 rounded-full border border-outline-variant whitespace-nowrap text-sm text-on-surface-variant transition-colors">
-<span class="material-symbols-outlined text-lg" data-icon="psychology">psychology</span>
-                    Philosophie
-                </button>
-<button class="flex items-center gap-2 bg-surface-container hover:bg-surface-container-high px-5 py-2.5 rounded-full border border-outline-variant whitespace-nowrap text-sm text-on-surface-variant transition-colors">
-<span class="material-symbols-outlined text-lg" data-icon="language">language</span>
-                    Anglais
-                </button>
-<button class="flex items-center gap-2 bg-surface-container hover:bg-surface-container-high px-5 py-2.5 rounded-full border border-outline-variant whitespace-nowrap text-sm text-on-surface-variant transition-colors">
-<span class="material-symbols-outlined text-lg" data-icon="translate">translate</span>
-                    Malagasy
-                </button>
+    <a href="?level_id={{ request('level_id') }}&search={{ request('search') }}" 
+       class="flex items-center gap-2 {{ !request('subject_id') ? 'bg-primary text-on-primary' : 'bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap font-medium text-sm transition-colors">
+        <span class="material-symbols-outlined text-lg">all_inclusive</span>
+        Tous les sujets
+    </a>
+    @foreach($subjects as $s)
+        <a href="?subject_id={{ $s->id }}&level_id={{ request('level_id') }}&search={{ request('search') }}" 
+           class="flex items-center gap-2 {{ request('subject_id') == $s->id ? 'bg-primary text-on-primary' : 'bg-surface-container hover:bg-surface-container-high border border-outline-variant text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-colors">
+            <span class="material-symbols-outlined text-lg">{{ $s->icon ?: 'book' }}</span>
+            {{ $s->name }}
+        </a>
+    @endforeach
 </div>
 </section>
 <!-- Course Grid -->
 <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter pb-xl">
-<!-- Course Card 1 -->
-<div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden flex flex-col group hover:border-primary transition-all duration-300 shadow-xl">
-<div class="h-48 relative overflow-hidden">
-<img alt="Analyse de fonctions" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCE1-dwBkAsqOKOxIhZ5xy8yg4guKqLUN2-F283csUKwuihuTGUMCKHlspSyr-0YLHmwfXnU5Kl1ifnA_xottglgXLAvfU5rB-VBoJku2vVO_K_2ijy3SbSOqrGfCaa5oTZtI_yiujAI3nB6wKPhYWXopDEQbxqxKEuQWl_u2f0svJVJ7Vz9VchvTeKAB-fMEp5ihb1u3FPcD21tc-v8fTG1RBlwt_Gu76QZUF9h4ncR6rvbpRZH2ICRi8Y2KESmyxRMSbrYDYPp-4"/>
-<div class="absolute top-4 left-4 flex gap-2">
-<span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Maths</span>
-<span class="bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Terminale S</span>
-</div>
-<div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent"></div>
-</div>
-<div class="p-6 flex-1 flex flex-col space-y-4">
-<div>
-<h3 class="font-title-sm text-white group-hover:text-primary transition-colors">Analyse de fonctions exponentielles</h3>
-<p class="text-on-surface-variant text-body-sm mt-1">Maîtrisez les limites, dérivées et intégrales des fonctions exponentielles complexes.</p>
-</div>
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-2">
-<img alt="Instructor" class="w-8 h-8 rounded-full object-cover border border-slate-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJIe-xDI4kMM225rwLppUU6kdAEK9iuSLMB05RMrsD7jPbh2CmUnraTtxvbyTNuQvXss9txKQidAOF8rXsS7yDr91XT8X6p9uTgFQxQ9UjNckyJ7eyE8Xejs56_eCudHmxMUv-VCofbDLSpru2rkSKKIOuJe_XI_tOnynfHnPACyZbvPmhpOELGVc1jn3h_t8uW4tARYpWy3Fhyf-6ukyPPUA3jcAAkvsjDJX-Eif9FZdvmf4poSZiYuinuEcDxo0x3TDos7jw-bE"/>
-<span class="text-xs font-medium text-slate-300">Dr. Fenosoa R.</span>
-</div>
-<div class="flex items-center gap-1 text-tertiary">
-<span class="material-symbols-outlined text-sm" data-icon="star" data-weight="fill">star</span>
-<span class="text-xs font-bold">4.9</span>
-</div>
-</div>
-<div class="flex flex-col gap-2 pt-2">
-<button class="w-full bg-primary text-on-primary py-2.5 rounded-lg font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2">
-                            Commencer le cours
-                        </button>
-<button class="w-full bg-slate-800 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
-<span class="material-symbols-outlined text-sm" data-icon="download">download</span>
-                            Télécharger PDF
-                        </button>
-</div>
-</div>
-</div>
-<!-- Course Card 2 -->
-<div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden flex flex-col group hover:border-primary transition-all duration-300 shadow-xl">
-<div class="h-48 relative overflow-hidden">
-<img alt="Optique Géométrique" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKYCX0khYRUvlyLUntTZ2iRIe5hUNmqDqaZN7HOMuLr0Lrsptl2D03jmaU0B4yfNaPJW-DcyrZniZ9jqLX2zKi-sBRF0b7CdF-klFfUT30Qk_JTtRN_BR4So1a_2YGJcuNr4K0bAIxMtAeQrzeZuxbN6KWHIkJXKTLpoHEPusQJYDnGpkAtgCB0PpIVuVoN-uUJgpqcAvceTDKBsGEVsJXmd1lgpxLqTKFHKiBd7VP6ko0H8-FyWoHw221p0zxjF2zIhn8WfWEcBU"/>
-<div class="absolute top-4 left-4 flex gap-2">
-<span class="bg-secondary-container text-on-secondary-container text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Physique</span>
-<span class="bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Terminale S</span>
-</div>
-<div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent"></div>
-</div>
-<div class="p-6 flex-1 flex flex-col space-y-4">
-<div>
-<h3 class="font-title-sm text-white group-hover:text-primary transition-colors">Optique Géométrique : Miroirs &amp; Lentilles</h3>
-<p class="text-on-surface-variant text-body-sm mt-1">Tout sur la formation des images et les instruments d'optique pour le bac.</p>
-</div>
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-2">
-<img alt="Instructor" class="w-8 h-8 rounded-full object-cover border border-slate-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbCGZfgqRplzW0DJAO7DW8YdFJ8suGSRV5lap3EVbNAyEL0zyjJhClh_2DqmMrxSk2Mq4hUBgPYyHPDkZSgFKagBFiwFcUFqg0Bb9EI_WirWp2V0tJqVVf0EJ1g1KDNNkV6_szevWSmFl6QiiXfIGfwsiHXoKHcn1DIQYZhHKYB3Sff0wJzLb3QlA6Yj8BSSi3sy_9aXpPRq3ZLGxGCyJimhFCRp3i4Vnkr662KmFm18OuVnlvSZ9rZUDgDrIANFCKhSGKh_qHlp0"/>
-<span class="text-xs font-medium text-slate-300">Mme. Tahina A.</span>
-</div>
-<div class="flex items-center gap-1 text-tertiary">
-<span class="material-symbols-outlined text-sm" data-icon="star" data-weight="fill">star</span>
-<span class="text-xs font-bold">4.7</span>
-</div>
-</div>
-<div class="flex flex-col gap-2 pt-2">
-<button class="w-full bg-primary text-on-primary py-2.5 rounded-lg font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2">
-                            Commencer le cours
-                        </button>
-<button class="w-full bg-slate-800 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
-<span class="material-symbols-outlined text-sm" data-icon="download">download</span>
-                            Télécharger PDF
-                        </button>
-</div>
-</div>
-</div>
-<!-- Course Card 3 -->
-<div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden flex flex-col group hover:border-primary transition-all duration-300 shadow-xl">
-<div class="h-48 relative overflow-hidden">
-<img alt="Génétique Humaine" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4hlVa87DvsND7KKhaXYyLejxXk_IOONK7y4PAYlf9loIGGlOXOpjj4Of9yeRUD2RX3ONP2ScVUy0ttBTNnqPxULW4T38Bq__DHEvRqgZg5OnRwnSAlhr_w5Mgu1-3KmQ00VvCUTwLMSDcohTsH4aV0UmKbzIS13Qc7lblkKhaNyU63LjGI-H7vygTWhqtah3ugRyoxlf5fiUjs3My3ciffxoK_2j24o-Spyj2TSUh7Ir7ZYPiIlWIn9HPWv3U-UnGrJs4b8U7r-U"/>
-<div class="absolute top-4 left-4 flex gap-2">
-<span class="bg-tertiary-container text-on-tertiary-container text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">SVT</span>
-<span class="bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Terminale D</span>
-</div>
-<div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent"></div>
-</div>
-<div class="p-6 flex-1 flex flex-col space-y-4">
-<div>
-<h3 class="font-title-sm text-white group-hover:text-primary transition-colors">Génétique Humaine et Hérédité</h3>
-<p class="text-on-surface-variant text-body-sm mt-1">Étude approfondie de la transmission des caractères et des cycles cellulaires.</p>
-</div>
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-2">
-<img alt="Instructor" class="w-8 h-8 rounded-full object-cover border border-slate-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqUXlXkLA3jKq4Ofln-zHux2EntBErWYmvITVoFj2aZa7cYrwuZZEdUnOMxXW6JpxEEdPn2dTx6Hf1-v4oOBMDezWDzGBvsMV6XjvQ0S7wxpeZXH-oOrQwrcIae99or9mdOYkH7LQbZY9IOc7aQ46CdAeq4_kNZsX5BX9W8Ok2WP3CSPnGPHTqZX_LHKkpCxMcjTKnX8Cb22Tz48wcltPFWgCqSBJj5R1JKr2PvXgQR9I71gvij5nLhfOSbnhhZuf7G64xgdehfgg"/>
-<span class="text-xs font-medium text-slate-300">Mr. Toky J.</span>
-</div>
-<div class="flex items-center gap-1 text-tertiary">
-<span class="material-symbols-outlined text-sm" data-icon="star" data-weight="fill">star</span>
-<span class="text-xs font-bold">4.8</span>
-</div>
-</div>
-<div class="flex flex-col gap-2 pt-2">
-<button class="w-full bg-primary text-on-primary py-2.5 rounded-lg font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2">
-                            Commencer le cours
-                        </button>
-<button class="w-full bg-slate-800 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
-<span class="material-symbols-outlined text-sm" data-icon="download">download</span>
-                            Télécharger PDF
-                        </button>
-</div>
-</div>
-</div>
+    @forelse($courses as $course)
+        <div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden flex flex-col group hover:border-primary transition-all duration-300 shadow-xl">
+            <div class="h-48 relative overflow-hidden">
+                <img alt="{{ $course->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="{{ $course->thumbnail_path ? asset('storage/' . $course->thumbnail_path) : 'https://picsum.photos/400/300' }}"/>
+                <div class="absolute top-4 left-4 flex gap-2">
+                    <span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">{{ $course->subject->name }}</span>
+                    <span class="bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">{{ $course->level->name }}</span>
+                </div>
+            </div>
+            <div class="p-6 flex-1 flex flex-col space-y-4">
+                <div>
+                    <h3 class="font-title-sm text-white group-hover:text-primary transition-colors">{{ $course->title }}</h3>
+                    <p class="text-on-surface-variant text-body-sm mt-1">{{ Str::limit($course->description, 100) }}</p>
+                </div>
+                <div class="flex items-center justify-between mt-auto">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-[10px]">
+                            {{ substr($course->teacher->name, 0, 1) }}
+                        </div>
+                        <span class="text-xs font-medium text-slate-300">{{ $course->teacher->name }}</span>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2 pt-2">
+                    <a href="{{ asset('storage/' . $course->file_path) }}" target="_blank" class="w-full bg-primary text-on-primary py-2.5 rounded-lg font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-sm">visibility</span> Prévisualiser
+                    </a>
+                    <a href="{{ asset('storage/' . $course->file_path) }}" download class="w-full bg-slate-800 text-white py-2.5 rounded-lg font-medium text-sm hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-sm">download</span> Télécharger
+                    </a>
+                </div>
+            </div>
+        </div>
+    @empty
+        <p class="text-center text-outline italic py-12 col-span-3">Aucun cours trouvé.</p>
+    @endforelse
 </section>
+{{ $courses->links('pagination::tailwind') }}
 </main>
 <!-- Footer -->
 <footer class="bg-slate-950 border-t border-slate-800 w-full py-12 px-8 flex flex-col md:flex-row justify-between items-center gap-4">

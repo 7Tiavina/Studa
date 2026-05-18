@@ -228,7 +228,7 @@
     <!-- SIDEBAR — du code 1 (design complet)                        -->
     <!-- =========================================================== -->
     <aside class="flex flex-col h-screen fixed z-50 bg-slate-950 w-[260px] border-r border-slate-800">
-        <div class="text-2xl font-black text-blue-500 px-6 py-8">Studa</div>
+        <a href="/" class="text-2xl font-black text-blue-500 px-6 py-8 block">Studa</a>
 
         <div class="px-6 mb-8 flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500 font-bold">

@@ -50,7 +50,7 @@
     availableCategories: ['Primaire', 'Collégial', 'Lycée', 'Université', 'Autre']
 }">
     <aside class="flex flex-col h-screen fixed z-50 bg-slate-950 w-[260px] border-r border-slate-800">
-        <div class="text-2xl font-black text-blue-500 px-6 py-8">Studa</div>
+        <a href="/" class="text-2xl font-black text-blue-500 px-6 py-8 block">Studa</a>
         <div class="flex-1 px-4 space-y-2">
             <button @click="activeTab = 'dashboard'" :class="activeTab === 'dashboard' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">dashboard</span>
