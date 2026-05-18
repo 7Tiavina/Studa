@@ -29,9 +29,16 @@ class MessageController extends Controller
         }
 
         $data = $conversation->toArray();
-        $data['partner_is_online'] = $partner->last_seen_at && $partner->last_seen_at->gt(now()->subMinutes(5));
+        $data['partner_is_online'] = $partner->last_seen_at && $partner->last_seen_at->gt(now()->subMinutes(2));
 
         return response()->json($data);
+    }
+
+    public function checkStatus($userId)
+    {
+        $user = User::findOrFail($userId);
+        $isOnline = $user->last_seen_at && $user->last_seen_at->gt(now()->subMinutes(2));
+        return response()->json(['is_online' => $isOnline]);
     }
 
     public function index($conversationId)

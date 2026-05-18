@@ -39,6 +39,15 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #424754; border-radius: 10px; }
     </style>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script>
+        // Heartbeat global pour mettre à jour la présence de l'utilisateur
+        setInterval(() => {
+            fetch('/users/heartbeat', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
+            });
+        }, 30000); // Toutes les 30 secondes
+    </script>
 </head>
 <body class="bg-background text-on-background font-sans antialiased" x-data="{ activeTab: 'dashboard', showMessenger: false, openChats: [] }">
 
@@ -79,7 +88,17 @@
                 <!-- Messages -->
                 <div x-show="!chat.minimized"
                      class="h-96 overflow-y-auto p-4 bg-slate-900 flex flex-col gap-3 custom-scrollbar"
-                     x-init="fetch(`/messages/${chat.conversation_id}`).then(r => r.json()).then(data => { chat.messages = data; });">
+                     x-init="
+                        fetch(`/messages/${chat.conversation_id}`).then(r => r.json()).then(data => { chat.messages = data; });
+                        // Polling du statut en ligne de l'interlocuteur
+                        setInterval(() => {
+                            if(!chat.minimized) {
+                                fetch(`/users/${chat.id}/status`)
+                                    .then(r => r.json())
+                                    .then(data => { chat.is_online = data.is_online; });
+                            }
+                        }, 15000); // Toutes les 15 secondes
+                     ">
                     <template x-for="msg in chat.messages" :key="msg.id">
                         <div x-data="{ showPicker: false }" 
                              @mouseleave="showPicker = false"
