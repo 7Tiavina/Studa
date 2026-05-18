@@ -293,7 +293,15 @@
                         @forelse($recentCourses as $course)
                         <div class="flex items-center justify-between p-4 bg-background rounded-xl border border-outline-variant/30">
                             <div class="flex items-center gap-4">
-                                <span class="material-symbols-outlined text-blue-500">article</span>
+                                @if($course->thumbnail_path)
+                                    <div class="w-10 h-10 rounded-lg overflow-hidden border border-outline-variant/30">
+                                        <img src="{{ asset('storage/' . $course->thumbnail_path) }}" alt="" class="w-full h-full object-cover">
+                                    </div>
+                                @else
+                                    <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center border border-outline-variant/30">
+                                        <span class="material-symbols-outlined text-blue-500">article</span>
+                                    </div>
+                                @endif
                                 <div>
                                     <p class="font-bold text-sm">{{ $course->title }}</p>
                                     <p class="text-[10px] text-outline">{{ $course->subject->name }} • {{ $course->created_at->diffForHumans() }}</p>
@@ -324,6 +332,7 @@
                     <table class="w-full text-left">
                         <thead class="bg-surface-container-low text-[10px] uppercase text-outline font-black">
                             <tr>
+                                <th class="px-6 py-4">Aperçu</th>
                                 <th class="px-6 py-4">Titre</th>
                                 <th class="px-6 py-4">Matière</th>
                                 <th class="px-6 py-4">Type</th>
@@ -335,6 +344,17 @@
                         <tbody class="divide-y divide-outline-variant/20">
                             @foreach($user->courses as $course)
                             <tr class="hover:bg-slate-800/40 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="w-10 h-10 rounded-lg bg-slate-800 overflow-hidden border border-outline-variant/30">
+                                        @if($course->thumbnail_path)
+                                            <img src="{{ asset('storage/' . $course->thumbnail_path) }}" alt="" class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full flex items-center justify-center text-outline">
+                                                <span class="material-symbols-outlined text-lg">image</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </td>
                                 <td class="px-6 py-4 font-bold text-sm">{{ $course->title }}</td>
                                 <td class="px-6 py-4 text-sm">{{ $course->subject->name }}</td>
                                 <td class="px-6 py-4">
