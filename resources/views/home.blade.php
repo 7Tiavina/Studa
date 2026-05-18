@@ -190,8 +190,8 @@
             </div>
             
             <div class="lg:col-span-5 relative flex justify-center lg:justify-end">
-                <div class="relative w-full max-w-[420px] aspect-square rounded-2xl overflow-hidden shadow-xl border-4 border-white dark:border-slate-800 bg-amber-50">
-                    <img alt="Hero Graphic" class="w-full h-full object-cover" src="/hero1.jpg"/>
+                <div class="relative w-full max-w-[420px]">
+                    <img alt="Hero Graphic" class="w-full h-full object-contain" src="/hero1.png"/>
                 </div>
             </div>
         </div>
