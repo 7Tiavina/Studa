@@ -65,7 +65,7 @@
         }
 
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        [v-cloak] { display: none; }
+        [x-cloak], [v-cloak] { display: none !important; }
         
         /* Scrollbar styles */
         ::-webkit-scrollbar {
@@ -469,9 +469,14 @@
                                 <h3 class="text-xl font-bold">{{ $teacher->name }}</h3>
                                 <p class="text-xs text-outline">{{ $teacher->email }}</p>
                             </div>
-                            <span class="px-3 py-1 rounded-full text-[10px] font-bold {{ $teacher->is_validated ? 'bg-secondary/10 text-secondary' : 'bg-tertiary/10 text-tertiary' }}">
+                             <span class="px-3 py-1 rounded-full text-[10px] font-bold {{ $teacher->is_validated ? 'bg-secondary/10 text-secondary' : 'bg-tertiary/10 text-tertiary' }}">
                                 {{ $teacher->is_validated ? 'Compte Validé' : 'En attente' }}
                             </span>
+                            <button @click="$dispatch('open-modal', { name: 'open-audit', teacher: { id: {{ $teacher->id }}, name: '{{ e(addslashes($teacher->name)) }}' } })"
+                                    class="mt-2 flex items-center justify-center gap-2 w-full px-4 py-2 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 rounded-xl text-xs font-semibold transition-all">
+                                <span class="material-symbols-outlined text-sm">chat</span>
+                                Voir les messages
+                            </button>
                         </div>
 
                         <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -765,6 +770,173 @@
                     <button type="submit" class="flex-1 bg-secondary text-slate-900 font-bold py-3 rounded-xl hover:opacity-90">Enregistrer</button>
                     <button type="button" @click="show = false" class="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-700">Annuler</button>
                 </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Audit Messages -->
+    <div x-data="{
+        show: false,
+        teacher: { id: null, name: '' },
+        conversations: [],
+        selectedConversation: null,
+        messages: [],
+        loadingConversations: false,
+        loadingMessages: false,
+
+        initAudit(detail) {
+            this.teacher = detail;
+            this.show = true;
+            this.conversations = [];
+            this.selectedConversation = null;
+            this.messages = [];
+            this.loadConversations();
+        },
+
+        loadConversations() {
+            this.loadingConversations = true;
+            fetch(`/admin/teachers/${this.teacher.id}/conversations`)
+                .then(r => r.json())
+                .then(data => {
+                    this.conversations = data;
+                    this.loadingConversations = false;
+                })
+                .catch(e => {
+                    console.error(e);
+                    this.loadingConversations = false;
+                });
+        },
+
+        selectConversation(conv) {
+            this.selectedConversation = conv;
+            this.loadingMessages = true;
+            fetch(`/admin/conversations/${conv.id}/messages`)
+                .then(r => r.json())
+                .then(data => {
+                    this.messages = data;
+                    this.loadingMessages = false;
+                })
+                .catch(e => {
+                    console.error(e);
+                    this.loadingMessages = false;
+                });
+        }
+    }"
+    @open-modal.window="if($event.detail.name === 'open-audit') { initAudit($event.detail.teacher); }"
+    x-show="show"
+    class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+    x-cloak>
+        <div @click.away="show = false" class="bg-surface-container rounded-2xl border border-outline-variant w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl overflow-hidden transition-colors duration-200">
+            <!-- Header -->
+            <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-high/50">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary text-2xl">supervisor_account</span>
+                    <div>
+                        <h3 class="font-bold text-lg text-on-background">Audit des messages</h3>
+                        <p class="text-xs text-on-surface-variant">Conversations de <span class="font-semibold text-primary" x-text="teacher.name"></span></p>
+                    </div>
+                </div>
+                <button @click="show = false" class="p-2 hover:bg-surface-container-high rounded-full text-outline hover:text-on-background transition-colors flex items-center justify-center">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <!-- Body split-pane -->
+            <div class="flex-grow flex overflow-hidden">
+                <!-- Volet Gauche : Liste des conversations (étudiants) -->
+                <div class="w-80 border-r border-outline-variant flex flex-col bg-surface-container-low/50">
+                    <div class="p-4 border-b border-outline-variant bg-surface-container/20">
+                        <span class="text-xs font-bold text-outline uppercase tracking-wider">Discussions (étudiants)</span>
+                    </div>
+                    <div class="flex-grow overflow-y-auto custom-scrollbar p-2 space-y-1">
+                        <template x-if="loadingConversations">
+                            <div class="flex justify-center items-center h-32">
+                                <span class="animate-spin material-symbols-outlined text-primary">progress_activity</span>
+                            </div>
+                        </template>
+                        <template x-if="!loadingConversations && conversations.length === 0">
+                            <div class="p-6 text-center text-xs text-outline italic">
+                                Aucune conversation trouvée pour cet enseignant.
+                            </div>
+                        </template>
+                        <template x-for="conv in conversations" :key="conv.id">
+                            <button @click="selectConversation(conv)"
+                                    :class="selectedConversation && selectedConversation.id === conv.id ? 'bg-primary/10 text-primary border-primary' : 'hover:bg-surface-container-high/60 border-transparent text-on-background'"
+                                    class="w-full text-left p-3 rounded-xl border flex items-center gap-3 transition-all">
+                                <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
+                                    <span x-text="conv.student.name.charAt(0)"></span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs font-bold truncate" x-text="conv.student.name"></p>
+                                    <p class="text-[10px] text-outline truncate" x-text="conv.last_message"></p>
+                                </div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Volet Droit : Zone de discussion -->
+                <div class="flex-1 flex flex-col bg-background/50">
+                    <template x-if="!selectedConversation">
+                        <div class="flex-1 flex flex-col items-center justify-center p-8 text-center text-outline">
+                            <span class="material-symbols-outlined text-5xl mb-3 text-outline/40">forum</span>
+                            <p class="text-sm">Sélectionnez une discussion pour consulter l'historique des échanges.</p>
+                        </div>
+                    </template>
+                    <template x-if="selectedConversation">
+                        <div class="flex-grow flex flex-col overflow-hidden h-full">
+                            <!-- En-tête de la discussion -->
+                            <div class="px-6 py-3 border-b border-outline-variant bg-surface-container/30 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
+                                    <span x-text="selectedConversation.student.name.charAt(0)"></span>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-bold text-on-background" x-text="selectedConversation.student.name"></p>
+                                    <p class="text-[9px] text-outline">Rôle : Étudiant</p>
+                                </div>
+                            </div>
+
+                            <!-- Liste des messages -->
+                            <div class="flex-grow overflow-y-auto p-6 space-y-4 custom-scrollbar bg-background/10">
+                                <template x-if="loadingMessages">
+                                    <div class="flex justify-center items-center h-64">
+                                        <span class="animate-spin material-symbols-outlined text-primary text-3xl">progress_activity</span>
+                                    </div>
+                                </template>
+                                <template x-if="!loadingMessages">
+                                    <div class="space-y-4">
+                                        <template x-for="msg in messages" :key="msg.id">
+                                            <div :class="msg.user_id === teacher.id ? 'justify-end' : 'justify-start'" class="flex">
+                                                <div :class="msg.user_id === teacher.id ? 'bg-blue-600 text-white rounded-br-none' : 'bg-surface-container text-on-surface rounded-bl-none'"
+                                                     class="max-w-[70%] p-3.5 rounded-2xl shadow-sm text-xs border border-outline-variant/30 transition-colors duration-200">
+                                                    <!-- Expéditeur -->
+                                                    <div class="flex items-center justify-between gap-4 mb-1">
+                                                        <span class="font-black text-[9px] uppercase tracking-wider" :class="msg.user_id === teacher.id ? 'text-white/80' : 'text-primary'" x-text="msg.user.name"></span>
+                                                        <span class="text-[8px] opacity-60" x-text="new Date(msg.created_at).toLocaleDateString('fr-FR', {hour: '2-digit', minute:'2-digit'})"></span>
+                                                    </div>
+                                                    <p class="leading-relaxed whitespace-pre-wrap" x-text="msg.body"></p>
+
+                                                    <!-- Réactions en lecture seule -->
+                                                    <div x-show="msg.reactions && Object.keys(msg.reactions).length > 0" class="flex flex-wrap gap-1 mt-2">
+                                                        <template x-for="(userIds, emoji) in msg.reactions" :key="emoji">
+                                                            <div class="flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[9px] font-semibold"
+                                                                 :class="msg.user_id === teacher.id ? 'bg-white/10 border-white/20 text-white' : 'bg-background border-outline-variant text-on-background'">
+                                                                <span x-text="emoji"></span>
+                                                                <span x-text="userIds.length"></span>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
     </div>
 
 <script>

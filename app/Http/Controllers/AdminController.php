@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Level;
 use App\Models\Subject;
 use App\Models\Course;
+use App\Models\Conversation;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -129,5 +130,38 @@ class AdminController extends Controller
     {
         $subject->delete();
         return redirect()->route('admin.dashboard', ['tab' => 'subjects'])->with('success', 'Matière supprimée.');
+    }
+
+    public function getTeacherConversations(User $teacher)
+    {
+        $conversations = Conversation::where('user_one_id', $teacher->id)
+            ->orWhere('user_two_id', $teacher->id)
+            ->with(['messages' => function($query) {
+                $query->latest();
+            }])
+            ->get();
+
+        $formatted = $conversations->map(function($conversation) use ($teacher) {
+            $partnerId = $conversation->user_one_id === $teacher->id ? $conversation->user_two_id : $conversation->user_one_id;
+            $partner = User::find($partnerId);
+            
+            if ($partner && $partner->role === 'student') {
+                return [
+                    'id' => $conversation->id,
+                    'student' => $partner,
+                    'last_message' => $conversation->messages->first() ? $conversation->messages->first()->body : 'Aucun message',
+                    'updated_at' => $conversation->updated_at->toIso8601String()
+                ];
+            }
+            return null;
+        })->filter()->values();
+
+        return response()->json($formatted);
+    }
+
+    public function getConversationMessages(Conversation $conversation)
+    {
+        $messages = $conversation->messages()->with('user')->orderBy('created_at', 'asc')->get();
+        return response()->json($messages);
     }
 }

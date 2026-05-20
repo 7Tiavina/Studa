@@ -82,5 +82,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/subjects', [AdminController::class, 'storeSubject'])->name('admin.subjects.store');
         Route::put('/admin/subjects/{subject}', [AdminController::class, 'updateSubject'])->name('admin.subjects.update');
         Route::delete('/admin/subjects/{subject}', [AdminController::class, 'destroySubject'])->name('admin.subjects.destroy');
+
+        // Teacher Message Auditing
+        Route::get('/admin/teachers/{teacher}/conversations', [AdminController::class, 'getTeacherConversations'])->name('admin.teachers.conversations');
+        Route::get('/admin/conversations/{conversation}/messages', [AdminController::class, 'getConversationMessages'])->name('admin.conversations.messages');
     });
 });
