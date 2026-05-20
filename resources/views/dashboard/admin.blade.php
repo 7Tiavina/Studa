@@ -452,13 +452,34 @@
             </div>
 
             <!-- Section Professeurs -->
-            <div x-show="activeTab === 'teachers'" x-cloak>
-                <div class="mb-10">
-                    <h1 class="text-3xl font-bold text-on-background mb-2">Gestion des Professeurs</h1>
-                    <p class="text-on-surface-variant">Consultez les informations et l'activité des enseignants.</p>
+            <div x-show="activeTab === 'teachers'" x-data="{ 
+                teacherSubTab: 'list',
+                courseSearchQuery: '',
+                allCourses: {{ json_encode($allCourses) }}
+            }" x-cloak>
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-on-background mb-2">Gestion des Professeurs & Cours</h1>
+                    <p class="text-on-surface-variant text-sm">Consultez les informations des enseignants et gérez l'ensemble des cours du site.</p>
                 </div>
 
-                <div class="grid grid-cols-1 gap-6">
+                <!-- Sous-navigation (Tabs) -->
+                <div class="flex gap-6 border-b border-outline-variant mb-8">
+                    <button @click="teacherSubTab = 'list'" 
+                            :class="teacherSubTab === 'list' ? 'border-b-2 border-primary text-primary font-bold' : 'text-outline hover:text-on-background'" 
+                            class="pb-3 text-sm px-1 transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">school</span>
+                        Liste des Professeurs
+                    </button>
+                    <button @click="teacherSubTab = 'courses'" 
+                            :class="teacherSubTab === 'courses' ? 'border-b-2 border-primary text-primary font-bold' : 'text-outline hover:text-on-background'" 
+                            class="pb-3 text-sm px-1 transition-all flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">menu_book</span>
+                        Tous les Cours
+                    </button>
+                </div>
+
+                <!-- Sous-onglet 1 : Liste des Enseignants -->
+                <div x-show="teacherSubTab === 'list'" class="grid grid-cols-1 gap-6">
                     @foreach($teachers as $teacher)
                     <div class="bg-surface-container rounded-xl border border-outline-variant p-8 flex flex-col md:flex-row gap-8">
                         <div class="flex flex-col items-center gap-4 min-w-[200px]">
@@ -466,7 +487,7 @@
                                 {{ substr($teacher->name, 0, 1) }}
                             </div>
                             <div class="text-center">
-                                <h3 class="text-xl font-bold">{{ $teacher->name }}</h3>
+                                <h3 class="text-xl font-bold text-on-background">{{ $teacher->name }}</h3>
                                 <p class="text-xs text-outline">{{ $teacher->email }}</p>
                             </div>
                              <span class="px-3 py-1 rounded-full text-[10px] font-bold {{ $teacher->is_validated ? 'bg-secondary/10 text-secondary' : 'bg-tertiary/10 text-tertiary' }}">
@@ -515,7 +536,7 @@
                                         <div class="p-3 bg-background border border-outline-variant rounded-lg flex items-center gap-3">
                                             <span class="material-symbols-outlined text-blue-500">picture_as_pdf</span>
                                             <div class="truncate">
-                                                <p class="text-xs font-bold truncate">{{ $course->title }}</p>
+                                                <p class="text-xs font-bold truncate text-on-background">{{ $course->title }}</p>
                                                 <p class="text-[10px] text-outline">{{ $course->subject->name }} - {{ $course->level->name }}</p>
                                             </div>
                                         </div>
@@ -527,6 +548,137 @@
                         </div>
                     </div>
                     @endforeach
+                </div>
+
+                <!-- Sous-onglet 2 : Tous les Cours -->
+                <div x-show="teacherSubTab === 'courses'">
+                    <!-- Barre de recherche -->
+                    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-container p-4 rounded-xl border border-outline-variant">
+                        <div class="relative w-full md:w-80">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-outline">
+                                <span class="material-symbols-outlined text-sm">search</span>
+                            </span>
+                            <input type="text" x-model="courseSearchQuery" placeholder="Rechercher par titre, enseignant, matière..." 
+                                   class="w-full pl-9 pr-4 py-2 bg-background border border-outline-variant rounded-xl text-xs text-on-background focus:outline-none focus:border-primary placeholder-outline transition-all">
+                        </div>
+                        <div class="text-xs text-outline">
+                            Total : <span class="font-bold text-primary" x-text="allCourses.length"></span> cours
+                        </div>
+                    </div>
+
+                    <!-- Liste des cours -->
+                    <div class="bg-surface-container border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-surface-container-low text-outline font-semibold border-b border-outline-variant">
+                                        <th class="p-4">Cours</th>
+                                        <th class="p-4">Enseignant</th>
+                                        <th class="p-4">Niveau / Matière</th>
+                                        <th class="p-4">Type / Statut</th>
+                                        <th class="p-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="course in allCourses.filter(c => {
+                                        if (!courseSearchQuery) return true;
+                                        const query = courseSearchQuery.toLowerCase();
+                                        return c.title.toLowerCase().includes(query) ||
+                                               c.teacher.name.toLowerCase().includes(query) ||
+                                               c.subject.name.toLowerCase().includes(query) ||
+                                               c.level.name.toLowerCase().includes(query);
+                                    })" :key="course.id">
+                                        <tr class="border-b border-outline-variant/50 hover:bg-surface-container-high/40 transition-colors">
+                                            <td class="p-4">
+                                                <div class="flex items-center gap-3">
+                                                    <span class="material-symbols-outlined text-red-500 text-lg">picture_as_pdf</span>
+                                                    <div>
+                                                        <p class="font-bold text-on-background" x-text="course.title"></p>
+                                                        <p class="text-[10px] text-outline truncate max-w-[250px]" x-text="course.description || 'Aucune description'"></p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="p-4">
+                                                <div class="flex items-center gap-2">
+                                                    <div class="w-6 h-6 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center font-bold text-[10px]" x-text="course.teacher.name.charAt(0)"></div>
+                                                    <span class="text-on-background font-medium" x-text="course.teacher.name"></span>
+                                                </div>
+                                            </td>
+                                            <td class="p-4 text-outline">
+                                                <span class="bg-background px-2 py-0.5 rounded border border-outline-variant text-[10px]" x-text="course.level.name"></span>
+                                                <span class="ml-1" x-text="course.subject.name"></span>
+                                            </td>
+                                            <td class="p-4">
+                                                <div class="flex flex-col gap-1 items-start">
+                                                    <span class="text-[9px] uppercase font-bold text-outline" x-text="course.type"></span>
+                                                    <!-- Badges statut -->
+                                                    <template x-if="course.status === 'published'">
+                                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-secondary/10 text-secondary border border-secondary/20">Publié</span>
+                                                    </template>
+                                                    <template x-if="course.status === 'pending'">
+                                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-tertiary/10 text-tertiary border border-tertiary/20">En attente</span>
+                                                    </template>
+                                                    <template x-if="course.status === 'rejected'">
+                                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-error/10 text-error border border-error/20">Rejeté</span>
+                                                    </template>
+                                                    <template x-if="course.status === 'suspended'">
+                                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-500/15 text-slate-400 border border-slate-500/25">Suspendu</span>
+                                                    </template>
+                                                </div>
+                                            </td>
+                                            <td class="p-4 text-right">
+                                                <div class="flex items-center justify-end gap-2">
+                                                    <!-- Bouton Aperçu -->
+                                                    <button @click="$dispatch('open-modal', { name: 'preview-pdf', url: '/storage/' + course.file_path, title: course.title })"
+                                                            class="px-2.5 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg font-bold text-[10px] flex items-center gap-1 transition-all">
+                                                        <span class="material-symbols-outlined text-[12px]">visibility</span>
+                                                        Aperçu
+                                                    </button>
+                                                    
+                                                    <!-- Bouton de suspension -->
+                                                    <template x-if="course.status === 'published'">
+                                                        <form :action="'/admin/courses/' + course.id + '/suspend'" method="POST" class="inline">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <button type="submit" class="px-2.5 py-1.5 bg-error/10 text-error hover:bg-error/20 rounded-lg font-bold text-[10px] flex items-center gap-1 transition-all">
+                                                                <span class="material-symbols-outlined text-[12px]">pause_circle</span>
+                                                                Suspendre
+                                                            </button>
+                                                        </form>
+                                                    </template>
+                                                    
+                                                    <!-- Bouton de publication -->
+                                                    <template x-if="course.status === 'suspended' || course.status === 'rejected'">
+                                                        <form :action="'/admin/courses/' + course.id + '/approve'" method="POST" class="inline">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <button type="submit" class="px-2.5 py-1.5 bg-secondary/10 text-secondary hover:bg-secondary/20 rounded-lg font-bold text-[10px] flex items-center gap-1 transition-all">
+                                                                <span class="material-symbols-outlined text-[12px]">play_circle</span>
+                                                                Publier
+                                                            </button>
+                                                        </form>
+                                                    </template>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <!-- Aucun résultat -->
+                                    <tr x-show="allCourses.filter(c => {
+                                        if (!courseSearchQuery) return true;
+                                        const query = courseSearchQuery.toLowerCase();
+                                        return c.title.toLowerCase().includes(query) ||
+                                               c.teacher.name.toLowerCase().includes(query) ||
+                                               c.subject.name.toLowerCase().includes(query) ||
+                                               c.level.name.toLowerCase().includes(query);
+                                    }).length === 0">
+                                        <td colspan="5" class="p-8 text-center text-outline italic">
+                                            Aucun cours ne correspond à votre recherche.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -771,6 +923,38 @@
                     <button type="button" @click="show = false" class="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-700">Annuler</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Preview PDF -->
+    <div x-data="{ 
+        show: false, 
+        pdfUrl: '', 
+        pdfTitle: '' 
+    }" 
+    x-show="show" 
+    @open-modal.window="if($event.detail.name === 'preview-pdf') { show = true; pdfUrl = $event.detail.url; pdfTitle = $event.detail.title; }" 
+    class="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm" 
+    x-cloak>
+        <div @click.away="show = false" class="bg-surface-container rounded-2xl border border-outline-variant w-full max-w-4xl h-[85vh] flex flex-col shadow-2xl overflow-hidden transition-colors duration-200">
+            <!-- Header -->
+            <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-high/50">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary text-2xl">picture_as_pdf</span>
+                    <div>
+                        <h3 class="font-bold text-lg text-on-background">Aperçu du cours</h3>
+                        <p class="text-xs text-outline" x-text="pdfTitle"></p>
+                    </div>
+                </div>
+                <button @click="show = false" class="p-2 hover:bg-surface-container-high rounded-full text-outline hover:text-on-background transition-colors flex items-center justify-center">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <!-- PDF Viewer Iframe -->
+            <div class="flex-grow bg-slate-900 flex items-center justify-center relative">
+                <iframe :src="pdfUrl" class="w-full h-full border-0"></iframe>
+            </div>
         </div>
     </div>
 

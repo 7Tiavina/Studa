@@ -72,6 +72,7 @@ Route::middleware('auth')->group(function () {
         // Courses
         Route::patch('/admin/courses/{course}/approve', [AdminController::class, 'approveCourse'])->name('admin.courses.approve');
         Route::patch('/admin/courses/{course}/reject', [AdminController::class, 'rejectCourse'])->name('admin.courses.reject');
+        Route::patch('/admin/courses/{course}/suspend', [AdminController::class, 'suspendCourse'])->name('admin.courses.suspend');
 
         // Levels
         Route::post('/admin/levels', [AdminController::class, 'storeLevel'])->name('admin.levels.store');

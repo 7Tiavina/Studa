@@ -18,8 +18,9 @@ class AdminController extends Controller
         $subjects = Subject::with('level')->orderBy('name')->get();
         $teachers = User::where('role', 'teacher')->with(['levels', 'subjects', 'courses'])->get();
         $pendingCourses = Course::where('status', 'pending')->with(['level', 'subject', 'teacher'])->get();
+        $allCourses = Course::with(['teacher', 'subject', 'level'])->get();
 
-        return view('dashboard.admin', compact('users', 'levels', 'subjects', 'teachers', 'pendingCourses'));
+        return view('dashboard.admin', compact('users', 'levels', 'subjects', 'teachers', 'pendingCourses', 'allCourses'));
     }
 
     public function validateUser(User $user)
@@ -163,5 +164,11 @@ class AdminController extends Controller
     {
         $messages = $conversation->messages()->with('user')->orderBy('created_at', 'asc')->get();
         return response()->json($messages);
+    }
+
+    public function suspendCourse(Course $course)
+    {
+        $course->update(['status' => 'suspended']);
+        return redirect()->route('admin.dashboard', ['tab' => 'teachers'])->with('success', 'Le cours a été suspendu.');
     }
 }
