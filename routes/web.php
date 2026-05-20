@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\MeetingController;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
@@ -57,6 +58,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/teacher/subjects', [TeacherController::class, 'addSubject'])->name('teacher.subjects.add');
         Route::delete('/teacher/subjects/{subject}', [TeacherController::class, 'removeSubject'])->name('teacher.subjects.remove');
         Route::put('/teacher/settings', [TeacherController::class, 'updateSettings'])->name('teacher.settings.update');
+        
+        // Meeting routes
+        Route::post('/teacher/meetings', [MeetingController::class, 'store'])->name('teacher.meetings.store');
+        Route::delete('/teacher/meetings/{meeting}', [MeetingController::class, 'destroy'])->name('teacher.meetings.destroy');
+        Route::post('/student/meetings/{meeting}/book', [MeetingController::class, 'book'])->name('student.meetings.book');
+        Route::post('/student/meetings/{meeting}/cancel', [MeetingController::class, 'cancel'])->name('student.meetings.cancel');
+        Route::get('/meetings/{meeting}/join', [MeetingController::class, 'join'])->name('meetings.join');
     });
 
     // Admin routes

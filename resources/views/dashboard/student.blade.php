@@ -116,7 +116,7 @@
 </head>
 <body class="bg-background text-on-background font-sans antialiased transition-colors duration-200" 
       x-data="{ 
-        activeTab: 'dashboard', 
+        activeTab: '{{ request('tab', 'dashboard') }}', 
         showMessenger: false, 
         openChats: [],
         userStatuses: {
@@ -371,7 +371,7 @@
                         if(!openChats.find(c => c.id === {{ $teacher->id }})) {
                             openChats.push({
                                 id: {{ $teacher->id }}, 
-                                name: '{{ addslashes($teacher->name) }}', 
+                                name: {{ json_encode($teacher->name) }}, 
                                 minimized: false, 
                                 conversation_id: conv.id, 
                                 is_online: conv.partner_is_online,
@@ -553,6 +553,40 @@
                                 </button>
                             </form>
                         </div>
+                        @php
+                            // Obtenir les créneaux libres futurs pour ce cours
+                            $freeMeetings = \App\Models\Meeting::where('course_id', $course->id)
+                                ->whereNull('student_id')
+                                ->where('start_at', '>', now())
+                                ->orderBy('start_at')
+                                ->get();
+                        @endphp
+                        
+                        <div class="my-4 pt-4 border-t border-outline-variant/10">
+                            @if($freeMeetings->isNotEmpty())
+                                <p class="text-xs font-bold text-tertiary mb-2 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">schedule</span> Visios libres :
+                                </p>
+                                <div class="space-y-2 max-h-32 overflow-y-auto pr-1">
+                                    @foreach($freeMeetings as $meeting)
+                                        <div class="flex items-center justify-between bg-slate-900/50 p-2 rounded-lg border border-outline-variant/20 text-[10px]">
+                                            <span class="text-slate-300">
+                                                {{ \Carbon\Carbon::parse($meeting->start_at)->translatedFormat('d M à H:i') }} - {{ \Carbon\Carbon::parse($meeting->end_at)->format('H:i') }}
+                                            </span>
+                                            <form action="{{ route('student.meetings.book', $meeting->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="px-2 py-1 bg-secondary text-slate-900 font-bold rounded hover:opacity-90 transition-opacity">
+                                                    Réserver
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="text-[10px] text-outline italic">Aucun créneau de live disponible.</p>
+                            @endif
+                        </div>
+
                         <div class="mt-auto flex items-center justify-between pt-4 border-t border-outline-variant/20">
                             <div class="flex items-center gap-2">
                                 <div class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center text-[10px] font-bold">
@@ -610,13 +644,56 @@
                 </div>
             </div>
 
-            <!-- Section Live (Placeholder) -->
+            <!-- Section Live -->
             <div x-show="activeTab === 'live'" x-cloak class="space-y-8">
                 <h3 class="text-2xl font-bold">Live Courses</h3>
-                <div class="bg-surface-container rounded-xl border border-outline-variant p-12 text-center">
-                    <span class="material-symbols-outlined text-6xl text-outline mb-4">video_call</span>
-                    <p class="text-outline italic font-bold">Aucun live prévu actuellement.</p>
-                    <p class="text-outline text-sm">Les sessions en direct avec vos professeurs s'afficheront ici.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    @forelse($myMeetings as $meeting)
+                    <div class="bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col group">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+                                    <span class="material-symbols-outlined">video_camera_front</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-sm">{{ $meeting->course->title }}</h4>
+                                    <p class="text-[10px] text-outline uppercase font-black">{{ $meeting->course->subject->name }} • {{ $meeting->course->level->name }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-2 mb-6">
+                            <p class="text-xs text-slate-300 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm text-outline">calendar_month</span>
+                                <span>{{ \Carbon\Carbon::parse($meeting->start_at)->translatedFormat('l d F Y') }}</span>
+                            </p>
+                            <p class="text-xs text-slate-300 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm text-outline">schedule</span>
+                                <span>{{ \Carbon\Carbon::parse($meeting->start_at)->format('H:i') }} - {{ \Carbon\Carbon::parse($meeting->end_at)->format('H:i') }}</span>
+                            </p>
+                            <p class="text-xs text-slate-300 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm text-outline">school</span>
+                                <span>Professeur : <strong class="text-primary">{{ $meeting->teacher->name }}</strong></span>
+                            </p>
+                        </div>
+                        <div class="mt-auto pt-4 border-t border-outline-variant/20 flex gap-4">
+                            <a href="{{ route('meetings.join', $meeting->id) }}" target="_blank" class="flex-1 text-center py-2.5 bg-primary text-slate-900 text-xs font-bold rounded-xl hover:opacity-90 transition-opacity">
+                                Rejoindre le Live
+                            </a>
+                            <form action="{{ route('student.meetings.cancel', $meeting->id) }}" method="POST" onsubmit="return confirm('Voulez-vous vraiment annuler votre réservation ?')">
+                                @csrf
+                                <button type="submit" class="p-2.5 text-error hover:bg-error/10 rounded-xl transition-colors border border-outline-variant/30" title="Annuler la réservation">
+                                    <span class="material-symbols-outlined text-sm">cancel</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="col-span-2 bg-surface-container rounded-xl border border-outline-variant p-12 text-center">
+                        <span class="material-symbols-outlined text-6xl text-outline mb-4">video_call</span>
+                        <p class="text-outline italic font-bold">Aucun live prévu actuellement.</p>
+                        <p class="text-outline text-sm mt-1">Vous pouvez réserver des créneaux de visioconférence libres depuis l'onglet "Mes Abonnements".</p>
+                    </div>
+                    @endforelse
                 </div>
             </div>
 

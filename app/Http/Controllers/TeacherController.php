@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Storage;
 
 class TeacherController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $stats = [
@@ -38,7 +38,26 @@ class TeacherController extends Controller
             return $student;
         });
 
-        return view('dashboard.teacher', compact('user', 'stats', 'recentCourses', 'mySubjects', 'allSubjects', 'students'));
+        // Filtrer les cours de l'enseignant
+        $coursesQuery = $user->courses()->with(['subject', 'level']);
+        if ($request->has('subject_id') && $request->subject_id != '') {
+            $coursesQuery->where('subject_id', $request->subject_id);
+        }
+        if ($request->has('level_id') && $request->level_id != '') {
+            $coursesQuery->where('level_id', $request->level_id);
+        }
+        $myCourses = $coursesQuery->get();
+
+        // Récupérer les niveaux associés aux matières de l'enseignant pour les filtres
+        $myLevels = Level::whereIn('id', $mySubjects->pluck('level_id')->unique())->orderBy('position')->get();
+
+        // Récupérer les réunions du professeur
+        $meetings = \App\Models\Meeting::where('teacher_id', $user->id)
+            ->with(['course', 'student'])
+            ->orderBy('start_at', 'asc')
+            ->get();
+
+        return view('dashboard.teacher', compact('user', 'stats', 'recentCourses', 'mySubjects', 'allSubjects', 'students', 'myCourses', 'myLevels', 'meetings'));
     }
 
     public function storeCourse(Request $request)

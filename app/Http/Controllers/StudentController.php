@@ -53,7 +53,12 @@ class StudentController extends Controller
             'recent_activity' => 0,
         ];
 
-        return view('dashboard.student', compact('user', 'subscribedCourses', 'subscribedCoursesIds', 'followedTeachers', 'allTeachers', 'levels', 'subjects', 'courses', 'stats'));
+        $myMeetings = \App\Models\Meeting::where('student_id', $user->id)
+            ->with(['course', 'teacher'])
+            ->orderBy('start_at')
+            ->get();
+
+        return view('dashboard.student', compact('user', 'subscribedCourses', 'subscribedCoursesIds', 'followedTeachers', 'allTeachers', 'levels', 'subjects', 'courses', 'stats', 'myMeetings'));
     }
 
     public function toggleLevel(Level $level)

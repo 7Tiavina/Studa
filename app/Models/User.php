@@ -82,4 +82,14 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(User::class, 'teacher_student', 'teacher_id', 'student_id');
     }
+
+    public function meetings()
+    {
+        return $this->hasMany(Meeting::class, 'teacher_id');
+    }
+
+    public function bookedMeetings()
+    {
+        return $this->hasMany(Meeting::class, 'student_id');
+    }
 }

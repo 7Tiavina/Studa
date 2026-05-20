@@ -112,7 +112,7 @@
 </head>
 <body class="bg-background text-on-background font-sans antialiased transition-colors duration-200" 
       x-data="{ 
-        activeTab: 'dashboard', 
+        activeTab: '{{ request('tab', 'dashboard') }}', 
         showMessenger: false, 
         openChats: [],
         userStatuses: {
@@ -381,7 +381,7 @@
                                 if(!openChats.find(c => c.id === {{ $student->id }})) {
                                     openChats.push({
                                         id: {{ $student->id }},
-                                        name: '{{ addslashes($student->name) }}',
+                                        name: {{ json_encode($student->name) }},
                                         minimized: false,
                                         conversation_id: conv.id,
                                         is_online: conv.partner_is_online,
@@ -473,7 +473,9 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-3">
-                                <button @click="$dispatch('open-preview', { url: '{{ asset('storage/' . $course->file_path) }}', title: '{{ addslashes($course->title) }}' })"
+                                <button data-url="{{ asset('storage/' . $course->file_path) }}"
+                                        data-title="{{ $course->title }}"
+                                        @click="$dispatch('open-preview', { url: $el.dataset.url, title: $el.dataset.title })"
                                         class="p-2 text-outline hover:text-secondary transition-colors" title="Aperçu">
                                     <span class="material-symbols-outlined text-sm">visibility</span>
                                 </button>
@@ -499,6 +501,39 @@
                     </button>
                 </div>
 
+                <!-- FILTRES DE COURS -->
+                <form action="{{ route('teacher.dashboard') }}" method="GET" class="bg-surface-container-low p-4 rounded-xl border border-outline-variant/30 flex flex-wrap gap-4 items-end">
+                    <input type="hidden" name="tab" value="content">
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-xs font-semibold text-outline mb-1.5 uppercase">Matière</label>
+                        <select name="subject_id" class="w-full bg-background border-outline-variant rounded-xl text-white text-xs">
+                            <option value="">Toutes mes matières</option>
+                            @foreach($mySubjects as $s)
+                                <option value="{{ $s->id }}" {{ request('subject_id') == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-xs font-semibold text-outline mb-1.5 uppercase">Niveau</label>
+                        <select name="level_id" class="w-full bg-background border-outline-variant rounded-xl text-white text-xs">
+                            <option value="">Tous les niveaux</option>
+                            @foreach($myLevels as $l)
+                                <option value="{{ $l->id }}" {{ request('level_id') == $l->id ? 'selected' : '' }}>{{ $l->name }} ({{ $l->category }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" class="bg-primary text-slate-900 px-4 py-2 rounded-xl text-xs font-bold hover:opacity-90 transition-opacity">
+                            Filtrer
+                        </button>
+                        @if(request('subject_id') || request('level_id'))
+                            <a href="{{ route('teacher.dashboard', ['tab' => 'content']) }}" class="bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-700 transition-colors">
+                                Réinitialiser
+                            </a>
+                        @endif
+                    </div>
+                </form>
+
                 <div class="bg-surface-container rounded-xl border border-outline-variant overflow-hidden">
                     <table class="w-full text-left">
                         <thead class="bg-surface-container-low text-[10px] uppercase text-outline font-black">
@@ -509,11 +544,11 @@
                                 <th class="px-6 py-4">Type</th>
                                 <th class="px-6 py-4">Statut</th>
                                 <th class="px-6 py-4">Date</th>
-                                <th class="px-6 py-4 text-right">Fichier</th>
+                                <th class="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-outline-variant/20">
-                            @foreach($user->courses as $course)
+                            @forelse($myCourses as $course)
                             <tr class="hover:bg-slate-800/40 transition-colors">
                                 <td class="px-6 py-4">
                                     <div class="w-10 h-10 rounded-lg bg-slate-800 overflow-hidden border border-outline-variant/30">
@@ -539,7 +574,9 @@
                                 <td class="px-6 py-4 text-xs text-outline">{{ $course->created_at->format('d/m/Y') }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-4">
-                                        <button @click="$dispatch('open-preview', { url: '{{ asset('storage/' . $course->file_path) }}', title: '{{ addslashes($course->title) }}' })"
+                                        <button data-url="{{ asset('storage/' . $course->file_path) }}"
+                                                data-title="{{ $course->title }}"
+                                                @click="$dispatch('open-preview', { url: $el.dataset.url, title: $el.dataset.title })"
                                                 class="text-secondary hover:text-secondary/80 flex items-center gap-1 text-xs font-bold transition-colors">
                                             <span class="material-symbols-outlined text-sm">visibility</span> Aperçu
                                         </button>
@@ -547,10 +584,22 @@
                                            class="text-primary hover:text-primary/80 flex items-center gap-1 text-xs font-bold transition-colors">
                                             <span class="material-symbols-outlined text-sm">download</span> Télécharger
                                         </a>
+                                        @if($course->status === 'published')
+                                            <button data-course-id="{{ $course->id }}"
+                                                    data-course-title="{{ $course->title }}"
+                                                    @click="$dispatch('open-create-meeting', { courseId: $el.dataset.courseId, courseTitle: $el.dataset.courseTitle })"
+                                                    class="text-tertiary hover:text-tertiary/80 flex items-center gap-1 text-xs font-bold transition-colors">
+                                                <span class="material-symbols-outlined text-sm">video_call</span> Créer réunion
+                                            </button>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
-                            @endforeach
+                            @empty
+                            <tr>
+                                <td colspan="7" class="px-6 py-12 text-center text-outline italic">Aucun cours trouvé.</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -625,7 +674,7 @@
                                         if(!openChats.find(c => c.id === {{ $student->id }})) {
                                             openChats.push({
                                                 id: {{ $student->id }},
-                                                name: '{{ addslashes($student->name) }}',
+                                                name: {{ json_encode($student->name) }},
                                                 minimized: false,
                                                 conversation_id: conv.id,
                                                 messages: [],
@@ -651,13 +700,59 @@
             <div x-show="activeTab === 'live'" x-cloak class="space-y-8">
                 <div class="flex justify-between items-center">
                     <h3 class="text-2xl font-bold">Live Courses</h3>
-                    <button class="bg-secondary text-slate-900 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 opacity-50 cursor-not-allowed">
-                        <span class="material-symbols-outlined">add</span> Créer une visio
-                    </button>
                 </div>
-                <div class="bg-surface-container rounded-xl border border-outline-variant p-12 text-center">
-                    <span class="material-symbols-outlined text-6xl text-outline mb-4">video_call</span>
-                    <p class="text-outline italic">Le module de visioconférence est en cours de développement.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    @forelse($meetings as $meeting)
+                    <div class="bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col group">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+                                    <span class="material-symbols-outlined">video_camera_front</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-sm">{{ $meeting->course->title }}</h4>
+                                    <p class="text-[10px] text-outline uppercase font-black">{{ $meeting->course->subject->name }} • {{ $meeting->course->level->name }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-2 mb-6">
+                            <p class="text-xs text-slate-300 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm text-outline">calendar_month</span>
+                                <span>{{ \Carbon\Carbon::parse($meeting->start_at)->translatedFormat('l d F Y') }}</span>
+                            </p>
+                            <p class="text-xs text-slate-300 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm text-outline">schedule</span>
+                                <span>{{ \Carbon\Carbon::parse($meeting->start_at)->format('H:i') }} - {{ \Carbon\Carbon::parse($meeting->end_at)->format('H:i') }}</span>
+                            </p>
+                            <p class="text-xs flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm text-outline">person</span>
+                                @if($meeting->student)
+                                    <span class="text-secondary font-semibold">Réservé par {{ $meeting->student->name }}</span>
+                                @else
+                                    <span class="text-tertiary">Créneau libre / Non réservé</span>
+                                @endif
+                            </p>
+                        </div>
+                        <div class="mt-auto pt-4 border-t border-outline-variant/20 flex gap-4">
+                            <a href="{{ route('meetings.join', $meeting->id) }}" target="_blank" class="flex-1 text-center py-2.5 bg-primary text-slate-900 text-xs font-bold rounded-xl hover:opacity-90 transition-opacity">
+                                Rejoindre le Live
+                            </a>
+                            <form action="{{ route('teacher.meetings.destroy', $meeting->id) }}" method="POST" onsubmit="return confirm('Voulez-vous vraiment supprimer cette réunion ?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="p-2.5 text-error hover:bg-error/10 rounded-xl transition-colors border border-outline-variant/30">
+                                    <span class="material-symbols-outlined text-sm">delete</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="col-span-2 bg-surface-container rounded-xl border border-outline-variant p-12 text-center">
+                        <span class="material-symbols-outlined text-6xl text-outline mb-4">video_call</span>
+                        <p class="text-outline italic">Vous n'avez créé aucune visioconférence pour le moment.</p>
+                        <p class="text-outline text-sm mt-1">Vous pouvez en créer une à partir de la liste de vos cours dans l'onglet "Mes Contenus".</p>
+                    </div>
+                    @endforelse
                 </div>
             </div>
 
@@ -912,6 +1007,36 @@
                     </div>
                 </template>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal Create Meeting -->
+    <div x-data="{ show: false, courseId: null, courseTitle: '' }"
+         x-show="show"
+         @open-create-meeting.window="show = true; courseId = $event.detail.courseId; courseTitle = $event.detail.courseTitle"
+         class="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
+         x-cloak>
+        <div @click.away="show = false"
+             class="bg-surface-container rounded-2xl border border-outline-variant p-8 max-w-md w-full shadow-2xl">
+            <h2 class="text-2xl font-bold mb-2">Créer une réunion live</h2>
+            <p class="text-outline text-xs mb-6 truncate" x-text="'Pour : ' + courseTitle"></p>
+            <form action="{{ route('teacher.meetings.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="course_id" :value="courseId">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Date et Heure de début</label>
+                    <input type="datetime-local" name="start_at" class="w-full bg-background border-outline-variant rounded-xl text-white" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2">Date et Heure de fin</label>
+                    <input type="datetime-local" name="end_at" class="w-full bg-background border-outline-variant rounded-xl text-white" required>
+                </div>
+                <div class="flex gap-4">
+                    <button type="submit" class="flex-1 bg-secondary text-slate-900 font-bold py-3 rounded-xl hover:opacity-90">Créer le créneau</button>
+                    <button type="button" @click="show = false" class="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-700">Annuler</button>
+                </div>
+            </form>
+        </div>
     </div>
 
 <script>
