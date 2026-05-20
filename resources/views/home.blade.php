@@ -201,32 +201,32 @@
                 <div class="space-y-3">
                     <h3 class="text-xl font-bold text-slate-900 dark:text-white">Étudiants</h3>
                     <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-                        Faites un grand pas vers votre nouvelle carrière en suivant l'une de nos formations diplômantes.
+                        Boostez votre réussite académique en accédant à une bibliothèque complète de ressources, cours et sujets types. Trouvez le soutien dont vous avez besoin en rejoignant des cours particuliers ou en groupe avec des professeurs rigoureusement vérifiés.
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-4 mt-6">
-                    <button class="bg-[#6366f1] hover:bg-[#4f46e5] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm">
+                    <a href="{{ route('register') }}" class="inline-block bg-[#6366f1] hover:bg-[#4f46e5] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm">
                         Démarrer mon inscription
-                    </button>
-                    <a href="#" class="text-[#6366f1] dark:text-blue-400 font-semibold text-sm hover:underline">
-                        Découvrir les formations diplômantes
+                    </a>
+                    <a href="#levels" class="text-[#6366f1] dark:text-blue-400 font-semibold text-sm hover:underline">
+                        Explorer les ressources et professeurs
                     </a>
                 </div>
             </div>
 
             <div class="bg-blue-50/40 dark:bg-slate-800/40 border-t-4 border-blue-400 dark:border-blue-500 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
                 <div class="space-y-3">
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white">Employeurs</h3>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white">Professeurs</h3>
                     <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
-                        Recrutez des alternants qui créent de la valeur rapidement et formez vos équipes aux compétences à fort impact.
+                        Partagez votre expertise en publiant vos cours et ressources directement sur la plateforme. Gérez votre activité en toute liberté en entrant en contact direct avec vos étudiants pour des cours personnalisés et profitez de nos fonctionnalités exclusives pour optimiser votre enseignement.
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-4 mt-6">
-                    <button class="bg-[#6366f1] hover:bg-[#4f46e5] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm">
-                        Explorer l'espace employeur
-                    </button>
+                    <a href="{{ route('register') }}?role=teacher" class="inline-block bg-[#6366f1] hover:bg-[#4f46e5] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm">
+                        Créer mon espace professeur
+                    </a>
                     <a href="#" class="text-[#6366f1] dark:text-blue-400 font-semibold text-sm hover:underline">
-                        Découvrir nos solutions
+                        Découvrir les avantages exclusifs
                     </a>
                 </div>
             </div>
