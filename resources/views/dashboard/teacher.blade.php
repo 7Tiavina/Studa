@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="fr">
+<html lang="fr">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -12,43 +12,97 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#adc6ff",
-                        "background": "#0c1322",
-                        "surface": "#0c1322",
-                        "surface-container": "#191f2f",
-                        "surface-container-high": "#232a3a",
-                        "surface-container-low": "#141b2b",
-                        "on-background": "#dce2f7",
-                        "on-surface": "#dce2f7",
-                        "on-surface-variant": "#c2c6d6",
-                        "outline": "#8c909f",
-                        "outline-variant": "#424754",
-                        "secondary": "#4edea3",
-                        "tertiary": "#ffb95f",
-                        "error": "#ffb4ab",
+                        "primary": "var(--primary)",
+                        "background": "var(--background)",
+                        "surface": "var(--surface)",
+                        "surface-container": "var(--surface-container)",
+                        "surface-container-high": "var(--surface-container-high)",
+                        "surface-container-low": "var(--surface-container-low)",
+                        "on-background": "var(--on-background)",
+                        "on-surface": "var(--on-surface)",
+                        "on-surface-variant": "var(--on-surface-variant)",
+                        "outline": "var(--outline)",
+                        "outline-variant": "var(--outline-variant)",
+                        "secondary": "var(--secondary)",
+                        "tertiary": "var(--tertiary)",
+                        "error": "var(--error)",
                     }
                 }
             }
         }
     </script>
     <style>
+        :root {
+            --primary: #2563eb; 
+            --background: #f8fafc; 
+            --surface: #ffffff;
+            --surface-container: #ffffff; 
+            --surface-container-high: #f1f5f9; 
+            --surface-container-low: #f8fafc;
+            --on-background: #0f172a; 
+            --on-surface: #0f172a;
+            --on-surface-variant: #475569; 
+            --outline: #94a3b8;
+            --outline-variant: #e2e8f0; 
+            --secondary: #10b981; 
+            --tertiary: #f59e0b; 
+            --error: #ef4444; 
+        }
+        .dark {
+            --primary: #adc6ff;
+            --background: #0c1322;
+            --surface: #0c1322;
+            --surface-container: #191f2f;
+            --surface-container-high: #232a3a;
+            --surface-container-low: #141b2b;
+            --on-background: #dce2f7;
+            --on-surface: #dce2f7;
+            --on-surface-variant: #c2c6d6;
+            --outline: #8c909f;
+            --outline-variant: #424754;
+            --secondary: #4edea3;
+            --tertiary: #ffb95f;
+            --error: #ffb4ab;
+        }
+
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         [x-cloak] { display: none !important; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #0c1322; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #424754; border-radius: 10px; }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        html.dark ::-webkit-scrollbar-track {
+            background: #0c1322;
+        }
+        html:not(.dark) ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+        html.dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+        html:not(.dark) ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
     </style>
+    <script>
+        if (localStorage.getItem('theme') === 'light' || (!('theme' in localStorage) && !window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script>
-        // Heartbeat global pour mettre à jour la présence de l'utilisateur
         setInterval(() => {
             fetch('/users/heartbeat', {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
             });
-        }, 30000); // Toutes les 30 secondes
+        }, 30000);
 
-        // Signaler la déconnexion lors de la fermeture de l'onglet
         window.addEventListener('beforeunload', function() {
             const formData = new FormData();
             formData.append('_token', '{{ csrf_token() }}');
@@ -56,7 +110,7 @@
         });
     </script>
 </head>
-<body class="bg-background text-on-background font-sans antialiased" 
+<body class="bg-background text-on-background font-sans antialiased transition-colors duration-200" 
       x-data="{ 
         activeTab: 'dashboard', 
         showMessenger: false, 
@@ -83,55 +137,48 @@
         setInterval(() => { updateAllStatuses(); }, 8000);
       ">
 
-    <!-- =========================================================== -->
-    <!-- CHAT WINDOWS (flottantes en bas à droite) — du code 2       -->
-    <!-- =========================================================== -->
     <div class="fixed bottom-0 right-4 flex gap-3 z-50 items-end pointer-events-none">
         <template x-for="chat in openChats" :key="chat.id">
-            <div class="w-96 bg-slate-900 rounded-t-xl shadow-2xl flex flex-col overflow-hidden text-slate-100 pointer-events-auto border border-slate-800">
-                <!-- Header de la fenêtre chat -->
-                <div class="bg-slate-950 p-3 flex justify-between items-center border-b border-slate-800 cursor-pointer shadow-sm"
+            <div class="w-96 bg-white dark:bg-slate-900 rounded-t-xl shadow-2xl flex flex-col overflow-hidden text-slate-800 dark:text-slate-100 pointer-events-auto border border-slate-200 dark:border-slate-800 transition-colors">
+                <div class="bg-slate-50 dark:bg-slate-950 p-3 flex justify-between items-center border-b border-slate-200 dark:border-slate-800 cursor-pointer shadow-sm transition-colors"
                      @click="chat.minimized = !chat.minimized">
                     <div class="flex items-center gap-2">
                         <div class="relative">
-                            <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-[10px]"
+                            <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-500 dark:text-blue-400 flex items-center justify-center font-bold text-[10px]"
                                  x-text="chat.name.charAt(0)"></div>
-                            <!-- Point de statut -->
-                            <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-slate-950"
+                            <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-slate-50 dark:border-slate-950"
                                  :class="userStatuses[chat.id] ? 'bg-secondary' : 'bg-error'"></div>
                         </div>
                         <div class="flex flex-col">
-                            <span class="font-bold text-sm text-slate-200" x-text="chat.name"></span>
+                            <span class="font-bold text-sm text-slate-800 dark:text-slate-200" x-text="chat.name"></span>
                             <span class="text-[9px] uppercase tracking-tighter" :class="userStatuses[chat.id] ? 'text-secondary' : 'text-error'" x-text="userStatuses[chat.id] ? 'En ligne' : 'Hors ligne'"></span>
                         </div>
                     </div>
                     <div class="flex items-center gap-1">
                         <button @click.stop="chat.minimized = !chat.minimized"
-                                class="p-1 hover:bg-slate-800 rounded-full">
-                            <span class="material-symbols-outlined text-[16px] text-slate-400">remove</span>
+                                class="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400">
+                            <span class="material-symbols-outlined text-[16px]">remove</span>
                         </button>
                         <button @click.stop="openChats = openChats.filter(c => c.id !== chat.id)"
-                                class="p-1 hover:bg-slate-800 rounded-full text-slate-400">
+                                class="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400">
                             <span class="material-symbols-outlined text-[16px]">close</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Messages -->
                 <div x-show="!chat.minimized"
-                     class="h-96 overflow-y-auto p-4 bg-slate-900 flex flex-col gap-3 custom-scrollbar"
+                     class="h-96 overflow-y-auto p-4 bg-white dark:bg-slate-900 flex flex-col gap-3 custom-scrollbar transition-colors"
                      x-init="fetch(`/messages/${chat.conversation_id}`).then(r => r.json()).then(data => { chat.messages = data; });">
                     <template x-for="msg in chat.messages" :key="msg.id">
                         <div x-data="{ showPicker: false }" 
                              :class="msg.user_id === {{ Auth::id() }} ? 'self-end' : 'self-start'" 
                              class="max-w-[85%] group relative">
                             
-                            <div :class="msg.user_id === {{ Auth::id() }} ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-200'"
-                                 class="p-3 rounded-2xl text-sm shadow-sm">
+                            <div :class="msg.user_id === {{ Auth::id() }} ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200'"
+                                 class="p-3 rounded-2xl text-sm shadow-sm transition-colors">
                                 <span x-text="msg.body"></span>
                             </div>
                             
-                            <!-- Affichage des réactions -->
                             <div x-show="msg.reactions && Object.keys(msg.reactions).length > 0" class="flex flex-wrap gap-1 mt-1" :class="msg.user_id === {{ Auth::id() }} ? 'justify-end' : 'justify-start'">
                                 <template x-for="(userIds, emoji) in msg.reactions" :key="emoji">
                                     <button @click="
@@ -147,17 +194,16 @@
                                     "
                                     :disabled="msg.user_id === {{ Auth::id() }}"
                                     :class="[
-                                        userIds.includes({{ Auth::id() }}) ? 'bg-blue-500/30 border-blue-500/50' : 'bg-slate-800 border-slate-700',
+                                        userIds.includes({{ Auth::id() }}) ? 'bg-blue-500/30 border-blue-500/50' : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200',
                                         msg.user_id === {{ Auth::id() }} ? 'cursor-default' : 'hover:scale-110 transition-transform'
                                     ]"
-                                    class="flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[10px]">
+                                    class="flex items-center gap-1 px-1.5 py-0.5 rounded-full border text-[10px] transition-colors">
                                         <span x-text="emoji"></span>
                                         <span class="font-bold" x-text="userIds.length"></span>
                                     </button>
                                 </template>
                             </div>
 
-                            <!-- Icône de réaction au survol (masquée pour ses propres messages) -->
                             <div x-show="msg.user_id !== {{ Auth::id() }}" 
                                  class="absolute top-0 transition-opacity z-10"
                                  :class="[
@@ -166,17 +212,16 @@
                                  ]">
                                 
                                 <button @click="showPicker = !showPicker" 
-                                        class="p-1 bg-slate-800 border border-slate-700 rounded-full text-slate-400 hover:text-primary hover:scale-110 transition-all shadow-lg flex items-center justify-center">
+                                        class="p-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-slate-500 dark:text-slate-400 hover:text-primary hover:scale-110 transition-all shadow-lg flex items-center justify-center">
                                     <span class="material-symbols-outlined text-[14px]">add_reaction</span>
                                 </button>
 
-                                <!-- Menu d'emojis (s'affiche au clic) -->
                                 <div x-show="showPicker" 
                                      @click.away="showPicker = false"
                                      x-transition:enter="transition ease-out duration-200"
                                      x-transition:enter-start="opacity-0 scale-90"
                                      x-transition:enter-end="opacity-100 scale-100"
-                                     class="absolute top-full mt-2 flex bg-slate-800 border border-slate-700 rounded-full shadow-2xl p-1 z-20"
+                                     class="absolute top-full mt-2 flex bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full shadow-2xl p-1 z-20"
                                      :class="msg.user_id === {{ Auth::id() }} ? 'right-0' : 'left-0'">
                                     <template x-for="emoji in ['👍', '❤️', '😂', '😮', '😢', '🔥']" :key="emoji">
                                         <button @click="
@@ -195,8 +240,7 @@
                     </template>
                 </div>
 
-                <!-- Input envoi -->
-                <div x-show="!chat.minimized" class="p-3 border-t border-slate-800 bg-slate-950 flex items-center gap-2">
+                <div x-show="!chat.minimized" class="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex items-center gap-2 transition-colors">
                     <form @submit.prevent="
                         fetch(`/messages/${chat.conversation_id}`, {
                             method: 'POST',
@@ -214,8 +258,8 @@
                         <input type="text"
                                x-model="chat.newMessage"
                                placeholder="Écrire..."
-                               class="flex-1 text-sm px-4 py-2 bg-slate-900 text-white rounded-full border border-slate-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                        <button type="submit" class="text-blue-400 p-1 hover:bg-slate-800 rounded-full">
+                               class="flex-1 text-sm px-4 py-2 bg-white dark:bg-slate-900 text-slate-800 dark:text-white rounded-full border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                        <button type="submit" class="text-blue-500 dark:text-blue-400 p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full flex items-center justify-center">
                             <span class="material-symbols-outlined">send</span>
                         </button>
                     </form>
@@ -224,71 +268,68 @@
         </template>
     </div>
 
-    <!-- =========================================================== -->
-    <!-- SIDEBAR — du code 1 (design complet)                        -->
-    <!-- =========================================================== -->
-    <aside class="flex flex-col h-screen fixed z-50 bg-slate-950 w-[260px] border-r border-slate-800">
-        <a href="/" class="text-2xl font-black text-blue-500 px-6 py-8 block">Studa</a>
+    <aside class="flex flex-col h-screen fixed z-50 bg-white dark:bg-slate-950 w-[260px] border-r border-slate-200 dark:border-slate-800 transition-colors">
+        <a href="/" class="text-2xl font-black text-blue-600 dark:text-blue-500 px-6 py-8 block">Studa</a>
 
         <div class="px-6 mb-8 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500 font-bold">
+            <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-500 font-bold">
                 {{ substr(Auth::user()->name, 0, 1) }}
             </div>
             <div>
-                <p class="font-bold text-sm text-slate-100">{{ Auth::user()->name }}</p>
+                <p class="font-bold text-sm text-slate-800 dark:text-slate-100">{{ Auth::user()->name }}</p>
                 <p class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Professeur</p>
             </div>
         </div>
 
         <nav class="flex-1 px-4 space-y-1">
             <button @click="activeTab = 'dashboard'"
-                    :class="activeTab === 'dashboard' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'"
+                    :class="activeTab === 'dashboard' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">dashboard</span>
                 <span>Tableau de bord</span>
             </button>
             <button @click="activeTab = 'content'"
-                    :class="activeTab === 'content' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'"
+                    :class="activeTab === 'content' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">menu_book</span>
                 <span>Mes Contenus</span>
             </button>
             <button @click="activeTab = 'subjects'"
-                    :class="activeTab === 'subjects' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'"
+                    :class="activeTab === 'subjects' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">school</span>
                 <span>Mes Spécialités</span>
             </button>
             <button @click="activeTab = 'students'"
-                    :class="activeTab === 'students' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'"
+                    :class="activeTab === 'students' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">group</span>
                 <span>Étudiants</span>
             </button>
             <button @click="activeTab = 'live'"
-                    :class="activeTab === 'live' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'"
+                    :class="activeTab === 'live' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">video_call</span>
                 <span>Live Courses</span>
             </button>
             <button @click="activeTab = 'analytics'"
-                    :class="activeTab === 'analytics' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'"
+                    :class="activeTab === 'analytics' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">insights</span>
                 <span>Analytics</span>
             </button>
             <button @click="activeTab = 'settings'"
-                    :class="activeTab === 'settings' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'"
+                    :class="activeTab === 'settings' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">settings</span>
                 <span>Paramètres</span>
             </button>
         </nav>
 
-        <div class="p-6 border-t border-slate-800">
+        <div class="p-6 border-t border-slate-200 dark:border-slate-800">
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="flex items-center gap-3 px-4 py-2 text-error hover:text-red-400 w-full text-left text-sm">
+                <button type="submit" class="flex items-center gap-3 px-4 py-2 text-error hover:text-red-500 w-full text-left text-sm font-medium">
                     <span class="material-symbols-outlined">logout</span>
                     <span>Déconnexion</span>
                 </button>
@@ -296,34 +337,30 @@
         </div>
     </aside>
 
-    <!-- =========================================================== -->
-    <!-- MAIN CONTENT                                                 -->
-    <!-- =========================================================== -->
     <main class="ml-[260px] min-h-screen flex flex-col">
 
-        <!-- Header -->
-        <header class="flex items-center justify-between px-8 h-16 w-full sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
-            <h2 class="font-bold text-slate-100"
+        <header class="flex items-center justify-between px-8 h-16 w-full sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
+            <h2 class="font-bold text-slate-800 dark:text-slate-100"
                 x-text="activeTab.charAt(0).toUpperCase() + activeTab.slice(1)"></h2>
             <div class="flex items-center gap-4">
-                <!-- Bouton Messenger — ouvre le panneau latéral liste étudiants -->
+                <button id="theme-toggle" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors focus:outline-none flex items-center justify-center">
+                    <span id="theme-toggle-icon" class="material-symbols-outlined">dark_mode</span>
+                </button>
                 <button @click="showMessenger = !showMessenger"
-                        class="p-2 text-slate-400 hover:text-primary transition-colors relative">
+                        class="p-2 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors relative">
                     <span class="material-symbols-outlined">chat</span>
                     <span class="absolute top-1 right-1 w-2 h-2 bg-secondary rounded-full"></span>
                 </button>
-                <button class="p-2 text-slate-400 hover:text-slate-100">
+                <button class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100">
                     <span class="material-symbols-outlined">notifications</span>
                 </button>
-                <div class="h-8 w-[1px] bg-slate-800"></div>
+                <div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-800"></div>
                 <div class="flex items-center gap-2">
-                    <p class="text-xs font-bold text-slate-300">{{ Auth::user()->email }}</p>
+                    <p class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ Auth::user()->email }}</p>
                 </div>
             </div>
         </header>
 
-        <!-- =========================================================== -->
-        <!-- PANNEAU MESSENGER LATÉRAL — du code 2 (liste étudiants)     -->
         <!-- =========================================================== -->
         <div x-show="showMessenger"
              x-cloak
@@ -875,8 +912,32 @@
                     </div>
                 </template>
             </div>
-        </div>
     </div>
 
+<script>
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeToggleIcon = document.getElementById('theme-toggle-icon');
+    const htmlElement = document.documentElement;
+
+    // Ajuster l'icône au chargement
+    if (htmlElement.classList.contains('dark')) {
+        themeToggleIcon.textContent = 'dark_mode';
+    } else {
+        themeToggleIcon.textContent = 'light_mode';
+    }
+
+    // Toggle event listener
+    themeToggleBtn.addEventListener('click', () => {
+        if (htmlElement.classList.contains('dark')) {
+            htmlElement.classList.remove('dark');
+            themeToggleIcon.textContent = 'light_mode';
+            localStorage.setItem('theme', 'light');
+        } else {
+            htmlElement.classList.add('dark');
+            themeToggleIcon.textContent = 'dark_mode';
+            localStorage.setItem('theme', 'dark');
+        }
+    });
+</script>
 </body>
 </html>

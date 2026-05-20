@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html lang="fr">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -11,35 +11,93 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#adc6ff",
-                        "background": "#0c1322",
-                        "surface": "#0c1322",
-                        "surface-container": "#191f2f",
-                        "surface-container-high": "#232a3a",
-                        "surface-container-low": "#141b2b",
-                        "on-background": "#dce2f7",
-                        "on-surface": "#dce2f7",
-                        "on-surface-variant": "#c2c6d6",
-                        "outline": "#8c909f",
-                        "outline-variant": "#424754",
-                        "secondary": "#4edea3",
-                        "tertiary": "#ffb95f",
-                        "error": "#ffb4ab",
+                        "primary": "var(--primary)",
+                        "background": "var(--background)",
+                        "surface": "var(--surface)",
+                        "surface-container": "var(--surface-container)",
+                        "surface-container-high": "var(--surface-container-high)",
+                        "surface-container-low": "var(--surface-container-low)",
+                        "on-background": "var(--on-background)",
+                        "on-surface": "var(--on-surface)",
+                        "on-surface-variant": "var(--on-surface-variant)",
+                        "outline": "var(--outline)",
+                        "outline-variant": "var(--outline-variant)",
+                        "secondary": "var(--secondary)",
+                        "tertiary": "var(--tertiary)",
+                        "error": "var(--error)",
                     }
                 }
             }
         }
     </script>
     <style>
+        :root {
+            --primary: #2563eb; /* Blue 600 */
+            --background: #f8fafc; /* Slate 50 */
+            --surface: #ffffff;
+            --surface-container: #ffffff; 
+            --surface-container-high: #f1f5f9; /* Slate 100 */
+            --surface-container-low: #f8fafc;
+            --on-background: #0f172a; /* Slate 900 */
+            --on-surface: #0f172a;
+            --on-surface-variant: #475569; /* Slate 600 */
+            --outline: #94a3b8;
+            --outline-variant: #e2e8f0; /* Slate 200 */
+            --secondary: #10b981; /* Emerald 500 */
+            --tertiary: #f59e0b; /* Amber 500 */
+            --error: #ef4444; /* Red 500 */
+        }
+        .dark {
+            --primary: #adc6ff;
+            --background: #0c1322;
+            --surface: #0c1322;
+            --surface-container: #191f2f;
+            --surface-container-high: #232a3a;
+            --surface-container-low: #141b2b;
+            --on-background: #dce2f7;
+            --on-surface: #dce2f7;
+            --on-surface-variant: #c2c6d6;
+            --outline: #8c909f;
+            --outline-variant: #424754;
+            --secondary: #4edea3;
+            --tertiary: #ffb95f;
+            --error: #ffb4ab;
+        }
+
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         [v-cloak] { display: none; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #0c1322; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #424754; border-radius: 10px; }
+        
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        html.dark ::-webkit-scrollbar-track {
+            background: #0c1322;
+        }
+        html:not(.dark) ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+        html.dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+        html:not(.dark) ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
     </style>
+    <script>
+        // Initialiser le thème le plus tôt possible pour éviter le flash blanc
+        if (localStorage.getItem('theme') === 'light' || (!('theme' in localStorage) && !window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body class="bg-background text-on-background font-sans antialiased" x-data="{ 
+<body class="bg-background text-on-background font-sans antialiased transition-colors duration-200" x-data="{ 
     activeTab: '{{ request()->query('tab', 'dashboard') }}',
     availableIcons: [
         'functions', 'science', 'biotech', 'history_edu', 'translate', 'public', 
@@ -49,30 +107,30 @@
     ],
     availableCategories: ['Primaire', 'Collégial', 'Lycée', 'Université', 'Autre']
 }">
-    <aside class="flex flex-col h-screen fixed z-50 bg-slate-950 w-[260px] border-r border-slate-800">
-        <a href="/" class="text-2xl font-black text-blue-500 px-6 py-8 block">Studa</a>
+    <aside class="flex flex-col h-screen fixed z-50 bg-white dark:bg-slate-950 w-[260px] border-r border-slate-200 dark:border-slate-800 transition-colors">
+        <a href="/" class="text-2xl font-black text-blue-600 dark:text-blue-500 px-6 py-8 block">Studa</a>
         <div class="flex-1 px-4 space-y-2">
-            <button @click="activeTab = 'dashboard'" :class="activeTab === 'dashboard' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
+            <button @click="activeTab = 'dashboard'" :class="activeTab === 'dashboard' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">dashboard</span>
                 <span>Tableau de bord</span>
             </button>
-            <button @click="activeTab = 'users'" :class="activeTab === 'users' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
+            <button @click="activeTab = 'users'" :class="activeTab === 'users' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">group</span>
                 <span>Utilisateurs</span>
             </button>
-            <button @click="activeTab = 'levels'" :class="activeTab === 'levels' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
+            <button @click="activeTab = 'levels'" :class="activeTab === 'levels' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">layers</span>
                 <span>Niveaux</span>
             </button>
-            <button @click="activeTab = 'subjects'" :class="activeTab === 'subjects' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
+            <button @click="activeTab = 'subjects'" :class="activeTab === 'subjects' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">category</span>
                 <span>Matières</span>
             </button>
-            <button @click="activeTab = 'teachers'" :class="activeTab === 'teachers' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
+            <button @click="activeTab = 'teachers'" :class="activeTab === 'teachers' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">school</span>
                 <span>Professeurs</span>
             </button>
-            <button @click="activeTab = 'courses'" :class="activeTab === 'courses' ? 'bg-blue-600/10 text-blue-500 border-r-2 border-blue-500' : 'text-slate-400 hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all relative">
+            <button @click="activeTab = 'courses'" :class="activeTab === 'courses' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all relative">
                 <span class="material-symbols-outlined">check_circle</span>
                 <span>Validation Cours</span>
                 @if($pendingCourses->count() > 0)
@@ -82,10 +140,10 @@
                 @endif
             </button>
         </div>
-        <div class="p-6 border-t border-slate-800">
+        <div class="p-6 border-t border-slate-200 dark:border-slate-800">
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="flex items-center gap-3 px-4 py-2 text-error hover:text-red-400 w-full text-left text-sm">
+                <button type="submit" class="flex items-center gap-3 px-4 py-2 text-error hover:text-red-500 w-full text-left text-sm font-medium">
                     <span class="material-symbols-outlined">logout</span>
                     <span>Déconnexion</span>
                 </button>
@@ -94,10 +152,14 @@
     </aside>
 
     <main class="ml-[260px] min-h-screen flex flex-col">
-        <header class="flex items-center justify-between px-6 h-16 w-full sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+        <header class="flex items-center justify-between px-6 h-16 w-full sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
             <div class="flex items-center gap-3 ml-auto">
+                <!-- Theme Toggle Button -->
+                <button id="theme-toggle" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors focus:outline-none flex items-center justify-center mr-2">
+                    <span id="theme-toggle-icon" class="material-symbols-outlined">dark_mode</span>
+                </button>
                 <div class="text-right">
-                    <p class="font-bold text-sm text-slate-100">{{ Auth::user()->name }}</p>
+                    <p class="font-bold text-sm text-slate-800 dark:text-slate-100">{{ Auth::user()->name }}</p>
                     <p class="text-xs text-slate-500 uppercase">{{ Auth::user()->role }}</p>
                 </div>
             </div>
@@ -703,8 +765,32 @@
                     <button type="submit" class="flex-1 bg-secondary text-slate-900 font-bold py-3 rounded-xl hover:opacity-90">Enregistrer</button>
                     <button type="button" @click="show = false" class="flex-1 bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-700">Annuler</button>
                 </div>
-            </form>
-        </div>
     </div>
+
+<script>
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeToggleIcon = document.getElementById('theme-toggle-icon');
+    const htmlElement = document.documentElement;
+
+    // Ajuster l'icône au chargement
+    if (htmlElement.classList.contains('dark')) {
+        themeToggleIcon.textContent = 'dark_mode';
+    } else {
+        themeToggleIcon.textContent = 'light_mode';
+    }
+
+    // Toggle event listener
+    themeToggleBtn.addEventListener('click', () => {
+        if (htmlElement.classList.contains('dark')) {
+            htmlElement.classList.remove('dark');
+            themeToggleIcon.textContent = 'light_mode';
+            localStorage.setItem('theme', 'light');
+        } else {
+            htmlElement.classList.add('dark');
+            themeToggleIcon.textContent = 'dark_mode';
+            localStorage.setItem('theme', 'dark');
+        }
+    });
+</script>
 </body>
 </html>
