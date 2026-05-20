@@ -6,6 +6,7 @@
     <title>Studa | Dashboard Professeur</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -758,21 +759,174 @@
 
             <!-- ANALYTICS -->
             <div x-show="activeTab === 'analytics'" x-cloak class="space-y-8">
-                <h3 class="text-2xl font-bold">Statistiques & Analytics</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-surface-container rounded-xl border border-outline-variant p-8">
-                        <h4 class="font-bold mb-4">Engagement par cours</h4>
-                        <div class="h-40 bg-background rounded-lg border border-dashed border-outline-variant flex items-center justify-center text-outline text-xs italic">
-                            Graphique d'engagement (bientôt disponible)
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-bold">Statistiques & Analytics</h3>
+                    <span class="text-xs text-outline">Mis à jour en temps réel</span>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-surface-container rounded-2xl border border-outline-variant p-6 flex flex-col justify-between shadow-lg">
+                        <div class="flex items-center justify-between text-outline mb-4">
+                            <span class="text-xs font-bold uppercase tracking-wider">Abonnés</span>
+                            <span class="material-symbols-outlined text-secondary text-2xl">group</span>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-black text-white mb-1">{{ $stats['total_students'] }}</p>
+                            <p class="text-[10px] text-outline">Élèves qui vous suivent</p>
                         </div>
                     </div>
-                    <div class="bg-surface-container rounded-xl border border-outline-variant p-8">
-                        <h4 class="font-bold mb-4">Consultation des PDF</h4>
-                        <div class="h-40 bg-background rounded-lg border border-dashed border-outline-variant flex items-center justify-center text-outline text-xs italic">
-                            Graphique de consultation (bientôt disponible)
+                    <div class="bg-surface-container rounded-2xl border border-outline-variant p-6 flex flex-col justify-between shadow-lg">
+                        <div class="flex items-center justify-between text-outline mb-4">
+                            <span class="text-xs font-bold uppercase tracking-wider">Visioconférences</span>
+                            <span class="material-symbols-outlined text-primary text-2xl">video_call</span>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-black text-white mb-1">{{ $stats['total_meetings'] }}</p>
+                            <p class="text-[10px] text-outline">Créneaux créés au total</p>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container rounded-2xl border border-outline-variant p-6 flex flex-col justify-between shadow-lg">
+                        <div class="flex items-center justify-between text-outline mb-4">
+                            <span class="text-xs font-bold uppercase tracking-wider">Taux d'occupation</span>
+                            <span class="material-symbols-outlined text-tertiary text-2xl">percent</span>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-black text-white mb-1">{{ $stats['occupancy_rate'] }}%</p>
+                            <p class="text-[10px] text-outline">{{ $stats['booked_meetings'] }} sur {{ $stats['total_meetings'] }} réservés</p>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container rounded-2xl border border-outline-variant p-6 flex flex-col justify-between shadow-lg">
+                        <div class="flex items-center justify-between text-outline mb-4">
+                            <span class="text-xs font-bold uppercase tracking-wider">Cours validés</span>
+                            <span class="material-symbols-outlined text-green-500 text-2xl">verified</span>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-black text-white mb-1">{{ $stats['published_courses'] }}</p>
+                            <p class="text-[10px] text-outline">Sur {{ $stats['total_courses'] }} cours envoyés</p>
                         </div>
                     </div>
                 </div>
+
+                <!-- Graphiques -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Graphique répartition matières -->
+                    <div class="bg-surface-container rounded-2xl border border-outline-variant p-6 shadow-lg flex flex-col">
+                        <h4 class="font-bold text-sm mb-6 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">pie_chart</span> Répartition des cours par matière
+                        </h4>
+                        <div class="flex-1 flex items-center justify-center p-4">
+                            @if(count($coursesPerSubject) > 0)
+                                <div class="w-full max-w-[280px]">
+                                    <canvas id="subjectChart"></canvas>
+                                </div>
+                            @else
+                                <p class="text-xs text-outline italic">Aucune donnée disponible</p>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Graphique abonnés par cours -->
+                    <div class="bg-surface-container rounded-2xl border border-outline-variant p-6 shadow-lg flex flex-col">
+                        <h4 class="font-bold text-sm mb-6 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary">bar_chart</span> Top 5 des cours les plus populaires (abonnés)
+                        </h4>
+                        <div class="flex-1 flex items-center justify-center p-4">
+                            @if(count($subscribersPerCourse) > 0)
+                                <canvas id="popularityChart"></canvas>
+                            @else
+                                <p class="text-xs text-outline italic">Aucun cours publié ou aucun abonné</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                @if(count($coursesPerSubject) > 0 || count($subscribersPerCourse) > 0)
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        // Configuration globale de Chart.js pour correspondre au thème Studa
+                        Chart.defaults.color = '#8c909f';
+                        Chart.defaults.font.family = 'Inter, sans-serif';
+
+                        @if(count($coursesPerSubject) > 0)
+                        // Données Matières
+                        const subjectLabels = {!! json_encode($coursesPerSubject->pluck('label')) !!};
+                        const subjectValues = {!! json_encode($coursesPerSubject->pluck('value')) !!};
+
+                        const ctxSubject = document.getElementById('subjectChart').getContext('2d');
+                        new Chart(ctxSubject, {
+                            type: 'doughnut',
+                            data: {
+                                labels: subjectLabels,
+                                datasets: [{
+                                    data: subjectValues,
+                                    backgroundColor: [
+                                        'rgba(173, 198, 255, 0.75)', // Primary
+                                        'rgba(78, 222, 163, 0.75)',  // Secondary
+                                        'rgba(255, 185, 95, 0.75)',  // Tertiary
+                                        'rgba(255, 180, 171, 0.75)', // Error
+                                        'rgba(202, 188, 255, 0.75)'  // Autre
+                                    ],
+                                    borderColor: '#191f2f',
+                                    borderWidth: 2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            boxWidth: 12,
+                                            padding: 15,
+                                            font: { size: 10 }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        @endif
+
+                        @if(count($subscribersPerCourse) > 0)
+                        // Données Popularité
+                        const popLabels = {!! json_encode($subscribersPerCourse->pluck('label')) !!};
+                        const popValues = {!! json_encode($subscribersPerCourse->pluck('value')) !!};
+
+                        const ctxPop = document.getElementById('popularityChart').getContext('2d');
+                        new Chart(ctxPop, {
+                            type: 'bar',
+                            data: {
+                                labels: popLabels.map(l => l.length > 20 ? l.substring(0, 18) + '...' : l),
+                                datasets: [{
+                                    label: 'Nombre d\'élèves abonnés',
+                                    data: popValues,
+                                    backgroundColor: 'rgba(78, 222, 163, 0.75)',
+                                    borderColor: '#4edea3',
+                                    borderWidth: 1,
+                                    borderRadius: 6
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                indexAxis: 'y',
+                                plugins: {
+                                    legend: { display: false }
+                                },
+                                scales: {
+                                    x: {
+                                        grid: { color: 'rgba(66, 71, 84, 0.2)' },
+                                        ticks: { precision: 0 }
+                                    },
+                                    y: {
+                                        grid: { display: false }
+                                    }
+                                }
+                            }
+                        });
+                        @endif
+                    });
+                </script>
+                @endif
             </div>
 
             <!-- PARAMÈTRES -->

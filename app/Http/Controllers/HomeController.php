@@ -30,6 +30,10 @@ class HomeController extends Controller
         $levels = Level::orderBy('position')->get();
         $subjects = Subject::all();
 
-        return view('home', compact('courses', 'levels', 'subjects'));
+        $allPublishedCourses = Course::where('status', 'published')
+            ->with(['subject', 'level', 'teacher'])
+            ->get();
+
+        return view('home', compact('courses', 'levels', 'subjects', 'allPublishedCourses'));
     }
 }

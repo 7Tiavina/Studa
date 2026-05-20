@@ -38,4 +38,9 @@ class Course extends Model
     {
         return $this->hasMany(Meeting::class);
     }
+
+    public function subscribers()
+    {
+        return $this->belongsToMany(User::class, 'course_user');
+    }
 }

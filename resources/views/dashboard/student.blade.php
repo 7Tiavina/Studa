@@ -6,6 +6,7 @@
     <title>Studa | Dashboard Étudiant</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -697,23 +698,180 @@
                 </div>
             </div>
 
-            <!-- Section Analytics (Placeholder) -->
+            <!-- Section Analytics -->
             <div x-show="activeTab === 'analytics'" x-cloak class="space-y-8">
-                <h3 class="text-2xl font-bold">Mes Progrès</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-surface-container rounded-xl border border-outline-variant p-8">
-                        <h4 class="font-bold mb-4 flex items-center gap-2"><span class="material-symbols-outlined">menu_book</span> Lectures par matière</h4>
-                        <div class="h-48 bg-background rounded-xl border border-dashed border-outline-variant flex items-center justify-center text-outline text-xs italic">
-                            Graphique d'apprentissage (bientôt disponible)
+                <div class="flex justify-between items-center">
+                    <h3 class="text-2xl font-bold">Mes Progrès & Analytics</h3>
+                    <span class="text-xs text-outline">Suivi de votre apprentissage</span>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-surface-container rounded-2xl border border-outline-variant p-6 flex flex-col justify-between shadow-lg">
+                        <div class="flex items-center justify-between text-outline mb-4">
+                            <span class="text-xs font-bold uppercase tracking-wider">Cours suivis</span>
+                            <span class="material-symbols-outlined text-primary text-2xl">menu_book</span>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-black text-white mb-1">{{ $stats['courses_count'] }}</p>
+                            <p class="text-[10px] text-outline">Documents abonnés</p>
                         </div>
                     </div>
-                    <div class="bg-surface-container rounded-xl border border-outline-variant p-8">
-                        <h4 class="font-bold mb-4 flex items-center gap-2"><span class="material-symbols-outlined">timer</span> Temps d'étude</h4>
-                        <div class="h-48 bg-background rounded-xl border border-dashed border-outline-variant flex items-center justify-center text-outline text-xs italic">
-                            Statistiques de temps (bientôt disponible)
+                    <div class="bg-surface-container rounded-2xl border border-outline-variant p-6 flex flex-col justify-between shadow-lg">
+                        <div class="flex items-center justify-between text-outline mb-4">
+                            <span class="text-xs font-bold uppercase tracking-wider">Professeurs</span>
+                            <span class="material-symbols-outlined text-secondary text-2xl">school</span>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-black text-white mb-1">{{ $stats['teachers_count'] }}</p>
+                            <p class="text-[10px] text-outline">Enseignants suivis</p>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container rounded-2xl border border-outline-variant p-6 flex flex-col justify-between shadow-lg">
+                        <div class="flex items-center justify-between text-outline mb-4">
+                            <span class="text-xs font-bold uppercase tracking-wider">Sessions Live</span>
+                            <span class="material-symbols-outlined text-tertiary text-2xl">video_call</span>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-black text-white mb-1">{{ $stats['meetings_count'] }}</p>
+                            <p class="text-[10px] text-outline">Visios réservées au total</p>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container rounded-2xl border border-outline-variant p-6 flex flex-col justify-between shadow-lg">
+                        <div class="flex items-center justify-between text-outline mb-4">
+                            <span class="text-xs font-bold uppercase tracking-wider">Temps de Visio</span>
+                            <span class="material-symbols-outlined text-green-500 text-2xl">timer</span>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-black text-white mb-1">{{ number_format($stats['total_hours'], 1) }}h</p>
+                            <p class="text-[10px] text-outline">Cumulées en visioconférence</p>
                         </div>
                     </div>
                 </div>
+
+                <!-- Graphiques -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Graphique répartition matières -->
+                    <div class="bg-surface-container rounded-2xl border border-outline-variant p-6 shadow-lg flex flex-col">
+                        <h4 class="font-bold text-sm mb-6 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">pie_chart</span> Répartition de mes abonnements par matière
+                        </h4>
+                        <div class="flex-1 flex items-center justify-center p-4">
+                            @if(count($subscriptionsPerSubject) > 0)
+                                <div class="w-full max-w-[280px]">
+                                    <canvas id="studentSubjectChart"></canvas>
+                                </div>
+                            @else
+                                <p class="text-xs text-outline italic">Aucun abonnement actif pour le moment</p>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Graphique historique mensuel -->
+                    <div class="bg-surface-container rounded-2xl border border-outline-variant p-6 shadow-lg flex flex-col">
+                        <h4 class="font-bold text-sm mb-6 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary">trending_up</span> Fréquence de mes cours en direct (visioconférences)
+                        </h4>
+                        <div class="flex-1 flex items-center justify-center p-4">
+                            @if(count($meetingsHistory) > 0)
+                                <canvas id="studentHistoryChart"></canvas>
+                            @else
+                                <p class="text-xs text-outline italic">Aucune visioconférence réservée</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                @if(count($subscriptionsPerSubject) > 0 || count($meetingsHistory) > 0)
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        // Configuration globale de Chart.js pour correspondre au thème Studa
+                        Chart.defaults.color = '#8c909f';
+                        Chart.defaults.font.family = 'Inter, sans-serif';
+
+                        @if(count($subscriptionsPerSubject) > 0)
+                        // Données Matières
+                        const subLabels = {!! json_encode($subscriptionsPerSubject->pluck('label')) !!};
+                        const subValues = {!! json_encode($subscriptionsPerSubject->pluck('value')) !!};
+
+                        const ctxSubSubject = document.getElementById('studentSubjectChart').getContext('2d');
+                        new Chart(ctxSubSubject, {
+                            type: 'doughnut',
+                            data: {
+                                labels: subLabels,
+                                datasets: [{
+                                    data: subValues,
+                                    backgroundColor: [
+                                        'rgba(173, 198, 255, 0.75)', // Primary
+                                        'rgba(78, 222, 163, 0.75)',  // Secondary
+                                        'rgba(255, 185, 95, 0.75)',  // Tertiary
+                                        'rgba(255, 180, 171, 0.75)', // Error
+                                        'rgba(202, 188, 255, 0.75)'  // Autre
+                                    ],
+                                    borderColor: '#191f2f',
+                                    borderWidth: 2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            boxWidth: 12,
+                                            padding: 15,
+                                            font: { size: 10 }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        @endif
+
+                        @if(count($meetingsHistory) > 0)
+                        // Données Historique
+                        const histLabels = {!! json_encode($meetingsHistory->pluck('label')) !!};
+                        const histValues = {!! json_encode($meetingsHistory->pluck('value')) !!};
+
+                        const ctxHist = document.getElementById('studentHistoryChart').getContext('2d');
+                        new Chart(ctxHist, {
+                            type: 'line',
+                            data: {
+                                labels: histLabels,
+                                datasets: [{
+                                    label: 'Nombre de sessions',
+                                    data: histValues,
+                                    backgroundColor: 'rgba(78, 222, 163, 0.1)',
+                                    borderColor: '#4edea3',
+                                    borderWidth: 2,
+                                    tension: 0.3,
+                                    fill: true,
+                                    pointBackgroundColor: '#4edea3',
+                                    pointBorderColor: '#191f2f',
+                                    pointBorderWidth: 2,
+                                    pointRadius: 4
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: { display: false }
+                                },
+                                scales: {
+                                    x: {
+                                        grid: { display: false }
+                                    },
+                                    y: {
+                                        grid: { color: 'rgba(66, 71, 84, 0.2)' },
+                                        ticks: { precision: 0 }
+                                    }
+                                }
+                            }
+                        });
+                        @endif
+                    });
+                </script>
+                @endif
             </div>
 
             <!-- Section Settings -->

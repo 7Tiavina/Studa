@@ -47,18 +47,59 @@ class StudentController extends Controller
         $levels = Level::orderBy('position')->get();
         $subjects = Subject::all();
         
-        $stats = [
-            'courses_count' => $subscribedCourses->count(),
-            'teachers_count' => $followedTeachers->count(),
-            'recent_activity' => 0,
-        ];
-
         $myMeetings = \App\Models\Meeting::where('student_id', $user->id)
             ->with(['course', 'teacher'])
             ->orderBy('start_at')
             ->get();
 
-        return view('dashboard.student', compact('user', 'subscribedCourses', 'subscribedCoursesIds', 'followedTeachers', 'allTeachers', 'levels', 'subjects', 'courses', 'stats', 'myMeetings'));
+        $stats = [
+            'courses_count' => $subscribedCourses->count(),
+            'teachers_count' => $followedTeachers->count(),
+            'meetings_count' => $myMeetings->count(),
+            'total_hours' => $myMeetings->reduce(function($carry, $meeting) {
+                $start = \Carbon\Carbon::parse($meeting->start_at);
+                $end = \Carbon\Carbon::parse($meeting->end_at);
+                return $carry + $start->diffInMinutes($end) / 60;
+            }, 0)
+        ];
+
+        // Répartition des abonnements par matière
+        $subscriptionsPerSubject = Course::whereIn('id', $subscribedCourses->pluck('id'))
+            ->selectRaw('subject_id, count(*) as count')
+            ->groupBy('subject_id')
+            ->with('subject')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'label' => $item->subject ? $item->subject->name : 'Inconnu',
+                    'value' => $item->count
+                ];
+            });
+
+        // Historique des réservations de réunions groupé par mois en PHP
+        $meetingsHistory = $myMeetings->groupBy(function($meeting) {
+            return \Carbon\Carbon::parse($meeting->start_at)->translatedFormat('F Y');
+        })->map(function($group, $key) {
+            return [
+                'label' => $key,
+                'value' => $group->count()
+            ];
+        })->values();
+
+        return view('dashboard.student', compact(
+            'user', 
+            'subscribedCourses', 
+            'subscribedCoursesIds', 
+            'followedTeachers', 
+            'allTeachers', 
+            'levels', 
+            'subjects', 
+            'courses', 
+            'stats', 
+            'myMeetings',
+            'subscriptionsPerSubject',
+            'meetingsHistory'
+        ));
     }
 
     public function toggleLevel(Level $level)

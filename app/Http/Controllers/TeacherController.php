@@ -16,11 +16,21 @@ class TeacherController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+        
+        // Récupérer les réunions du professeur
+        $meetings = \App\Models\Meeting::where('teacher_id', $user->id)
+            ->with(['course', 'student'])
+            ->orderBy('start_at', 'asc')
+            ->get();
+
         $stats = [
             'total_courses' => $user->courses()->count(),
             'published_courses' => $user->courses()->where('status', 'published')->count(),
             'pending_courses' => $user->courses()->where('status', 'pending')->count(),
-            'total_students' => 0, // Placeholder for now
+            'total_students' => $user->followers()->count(),
+            'total_meetings' => $meetings->count(),
+            'booked_meetings' => $meetings->whereNotNull('student_id')->count(),
+            'occupancy_rate' => $meetings->count() > 0 ? round(($meetings->whereNotNull('student_id')->count() / $meetings->count()) * 100) : 0,
         ];
         
         $recentCourses = $user->courses()->latest()->take(5)->get();
@@ -51,13 +61,45 @@ class TeacherController extends Controller
         // Récupérer les niveaux associés aux matières de l'enseignant pour les filtres
         $myLevels = Level::whereIn('id', $mySubjects->pluck('level_id')->unique())->orderBy('position')->get();
 
-        // Récupérer les réunions du professeur
-        $meetings = \App\Models\Meeting::where('teacher_id', $user->id)
-            ->with(['course', 'student'])
-            ->orderBy('start_at', 'asc')
-            ->get();
+        // Données d'engagement pour les graphiques
+        $coursesPerSubject = $user->courses()
+            ->selectRaw('subject_id, count(*) as count')
+            ->groupBy('subject_id')
+            ->with('subject')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'label' => $item->subject ? $item->subject->name : 'Inconnu',
+                    'value' => $item->count
+                ];
+            });
 
-        return view('dashboard.teacher', compact('user', 'stats', 'recentCourses', 'mySubjects', 'allSubjects', 'students', 'myCourses', 'myLevels', 'meetings'));
+        $subscribersPerCourse = $user->courses()
+            ->where('status', 'published')
+            ->withCount('subscribers')
+            ->orderByDesc('subscribers_count')
+            ->take(5)
+            ->get()
+            ->map(function($course) {
+                return [
+                    'label' => $course->title,
+                    'value' => $course->subscribers_count
+                ];
+            });
+
+        return view('dashboard.teacher', compact(
+            'user', 
+            'stats', 
+            'recentCourses', 
+            'mySubjects', 
+            'allSubjects', 
+            'students', 
+            'myCourses', 
+            'myLevels', 
+            'meetings',
+            'coursesPerSubject',
+            'subscribersPerCourse'
+        ));
     }
 
     public function storeCourse(Request $request)
