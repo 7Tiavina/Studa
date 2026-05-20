@@ -66,10 +66,10 @@
     <main id="jitsi-container" class="flex-1 w-full bg-slate-950"></main>
 
     <!-- Jitsi Meet API -->
-    <script src="https://meet.jit.si/external_api.js"></script>
+    <script src="https://{{ config('services.jitsi.domain') }}/external_api.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const domain = "meet.jit.si";
+            const domain = "{{ config('services.jitsi.domain') }}";
             const options = {
                 roomName: "{{ $meeting->jitsi_room }}",
                 width: "100%",
