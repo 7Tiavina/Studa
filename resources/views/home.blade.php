@@ -139,7 +139,7 @@
         <a href="#" @click.prevent="currentTab = 'courses'" :class="currentTab === 'courses' ? 'text-[#6366f1] dark:text-primary font-semibold border-b-2 border-[#6366f1] dark:border-primary pb-1 font-inter' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white pb-1 border-b-2 border-transparent transition-colors font-inter'" class="pb-1">Courses</a>
         <a href="#" @click.prevent="currentTab = 'my-learning'" :class="currentTab === 'my-learning' ? 'text-[#6366f1] dark:text-primary font-semibold border-b-2 border-[#6366f1] dark:border-primary pb-1 font-inter' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white pb-1 border-b-2 border-transparent transition-colors font-inter'" class="pb-1">My Learning</a>
         <a href="#" @click.prevent="currentTab = 'library'" :class="currentTab === 'library' ? 'text-[#6366f1] dark:text-primary font-semibold border-b-2 border-[#6366f1] dark:border-primary pb-1 font-inter' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white pb-1 border-b-2 border-transparent transition-colors font-inter'" class="pb-1">Library</a>
-        <a class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors font-inter" href="#">Mentors</a>
+        <a href="#" @click.prevent="currentTab = 'mentors'" :class="currentTab === 'mentors' ? 'text-[#6366f1] dark:text-primary font-semibold border-b-2 border-[#6366f1] dark:border-primary pb-1 font-inter' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white pb-1 border-b-2 border-transparent transition-colors font-inter'" class="pb-1">Mentors</a>
     </div>
 
     <div class="flex items-center gap-4">
@@ -471,22 +471,6 @@
         selectedLevel: '',
         selectedSubject: '',
         selectedType: '',
-        courses: {{ json_encode($allPublishedCourses) }},
-        get filteredCourses() {
-            return this.courses.filter(course => {
-                const matchesSearch = this.searchQuery === '' || 
-                    course.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                    (course.description && course.description.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
-                    (course.extracted_text && course.extracted_text.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
-                    course.teacher.name.toLowerCase().includes(this.searchQuery.toLowerCase());
-                
-                const matchesLevel = this.selectedLevel === '' || course.level_id == this.selectedLevel;
-                const matchesSubject = this.selectedSubject === '' || course.subject_id == this.selectedSubject;
-                const matchesType = this.selectedType === '' || course.type === this.selectedType;
-                
-                return matchesSearch && matchesLevel && matchesSubject && matchesType;
-            });
-        }
     }" class="space-y-8 py-6">
 
         <!-- En-tête de la Bibliothèque -->
@@ -502,7 +486,7 @@
             </div>
             <div class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2 rounded-xl text-center self-start md:self-auto">
                 <span class="text-xs text-slate-500 dark:text-outline font-medium block">Total ressources</span>
-                <span class="text-lg font-black text-[#6366f1] dark:text-primary" x-text="filteredCourses.length + ' / ' + courses.length"></span>
+                <span class="text-lg font-black text-[#6366f1] dark:text-primary">{{ count($allPublishedCourses) }}</span>
             </div>
         </div>
 
@@ -551,103 +535,212 @@
                     </select>
                 </div>
             </div>
-            
-            <!-- Quick Tags réinitialisables -->
-            <div class="flex flex-wrap items-center gap-2 pt-2 text-xs" x-show="selectedLevel || selectedSubject || selectedType || searchQuery">
-                <span class="text-slate-400 dark:text-outline font-medium">Filtres actifs :</span>
-                <template x-if="searchQuery">
-                    <span class="bg-[#6366f1]/10 text-[#6366f1] dark:text-primary px-2.5 py-1 rounded-full flex items-center gap-1">
-                        Recherche: "<span x-text="searchQuery"></span>"
-                        <button @click="searchQuery = ''"><span class="material-symbols-outlined text-[12px]">close</span></button>
-                    </span>
-                </template>
-                <template x-if="selectedLevel">
-                    <span class="bg-amber-500/10 text-amber-500 px-2.5 py-1 rounded-full flex items-center gap-1">
-                        Niveau: <span x-text="document.querySelector(`option[value='${selectedLevel}']`).text"></span>
-                        <button @click="selectedLevel = ''"><span class="material-symbols-outlined text-[12px]">close</span></button>
-                    </span>
-                </template>
-                <template x-if="selectedSubject">
-                    <span class="bg-emerald-500/10 text-emerald-500 px-2.5 py-1 rounded-full flex items-center gap-1">
-                        Matière: <span x-text="document.querySelector(`option[value='${selectedSubject}']`).text"></span>
-                        <button @click="selectedSubject = ''"><span class="material-symbols-outlined text-[12px]">close</span></button>
-                    </span>
-                </template>
-                <template x-if="selectedType">
-                    <span class="bg-purple-500/10 text-purple-500 px-2.5 py-1 rounded-full flex items-center gap-1">
-                        Type: <span x-text="selectedType === 'course' ? 'Cours' : (selectedType === 'sujet_type' ? 'Sujet Type' : 'Corrigé')"></span>
-                        <button @click="selectedType = ''"><span class="material-symbols-outlined text-[12px]">close</span></button>
-                    </span>
-                </template>
-                <button @click="searchQuery = ''; selectedLevel = ''; selectedSubject = ''; selectedType = ''" class="text-slate-400 hover:text-slate-600 dark:text-outline dark:hover:text-white underline font-semibold ml-2">
-                    Tout effacer
-                </button>
-            </div>
         </div>
 
         <!-- Liste des résultats -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <template x-for="course in filteredCourses" :key="course.id">
-                <div class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl overflow-hidden flex flex-col group hover:border-[#6366f1] dark:hover:border-primary transition-all duration-300 shadow-md hover:shadow-xl">
+            @forelse($allPublishedCourses as $course)
+                <div x-show="(searchQuery === '' || {{ json_encode(strtolower($course['title'])) }}.includes(searchQuery.toLowerCase()) || {{ json_encode(strtolower($course['description'] ?? '')) }}.includes(searchQuery.toLowerCase()) || {{ json_encode(strtolower($course['extracted_text'] ?? '')) }}.includes(searchQuery.toLowerCase()) || {{ json_encode(strtolower($course['teacher']['name'])) }}.includes(searchQuery.toLowerCase())) && (selectedLevel === '' || '{{ $course['level']['id'] }}' == selectedLevel) && (selectedSubject === '' || '{{ $course['subject']['id'] }}' == selectedSubject) && (selectedType === '' || '{{ $course['type'] }}' === selectedType)"
+                     class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl overflow-hidden flex flex-col group hover:border-[#6366f1] dark:hover:border-primary transition-all duration-300 shadow-md hover:shadow-xl">
                     <div class="h-40 relative overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                        <!-- Miniature ou icône de matière -->
-                        <template x-if="course.thumbnail_path">
-                            <img :alt="course.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" :src="'/storage/' + course.thumbnail_path"/>
-                        </template>
-                        <template x-if="!course.thumbnail_path">
+                        @if($course['thumbnail_path'])
+                            <img alt="{{ $course['title'] }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="/storage/{{ $course['thumbnail_path'] }}"/>
+                        @else
                             <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 text-slate-400 dark:text-outline">
                                 <span class="material-symbols-outlined text-4xl mb-2">menu_book</span>
-                                <span class="text-[10px] uppercase font-bold tracking-wider" x-text="course.subject.name"></span>
+                                <span class="text-[10px] uppercase font-bold tracking-wider">{{ $course['subject']['name'] }}</span>
                             </div>
-                        </template>
+                        @endif
                         <!-- Badges -->
                         <div class="absolute top-4 left-4 flex flex-wrap gap-2">
-                            <span class="bg-[#6366f1] text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider" x-text="course.subject.name"></span>
-                            <span class="bg-purple-600 text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider" x-text="course.type"></span>
-                            <span class="bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider" x-text="course.level.name"></span>
+                            <span class="bg-[#6366f1] text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">{{ $course['subject']['name'] }}</span>
+                            <span class="bg-purple-600 text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">{{ $course['type'] }}</span>
+                            <span class="bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">{{ $course['level']['name'] }}</span>
                         </div>
 
                         <!-- Badge OCR si présent -->
-                        <template x-if="course.extracted_text">
+                        @if($course['extracted_text'])
                             <div class="absolute bottom-2 right-2 bg-emerald-500/90 text-slate-950 text-[9px] font-extrabold px-2 py-0.5 rounded flex items-center gap-1 shadow-sm">
                                 <span class="material-symbols-outlined text-[10px]">pageview</span> OCR Indexé
                             </div>
-                        </template>
+                        @endif
                     </div>
                     <div class="p-5 flex-1 flex flex-col space-y-4 justify-between">
                         <div class="space-y-2">
-                            <h3 class="font-bold text-base text-slate-900 dark:text-white group-hover:text-[#6366f1] dark:group-hover:text-primary transition-colors line-clamp-2" x-text="course.title"></h3>
-                            <p class="text-slate-500 dark:text-on-surface-variant text-xs line-clamp-2" x-text="course.description || 'Aucune description fournie.'"></p>
+                            <h3 class="font-bold text-base text-slate-900 dark:text-white group-hover:text-[#6366f1] dark:group-hover:text-primary transition-colors line-clamp-2">{{ $course['title'] }}</h3>
+                            <p class="text-slate-500 dark:text-on-surface-variant text-xs line-clamp-2">{{ $course['description'] ?: 'Aucune description fournie.' }}</p>
                         </div>
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-[10px]" x-text="course.teacher.name.substring(0, 1)"></div>
-                                <span class="text-xs font-semibold text-slate-600 dark:text-slate-300" x-text="course.teacher.name"></span>
+                                <div class="w-7 h-7 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-[10px]">
+                                    {{ substr($course['teacher']['name'], 0, 1) }}
+                                </div>
+                                <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">{{ $course['teacher']['name'] }}</span>
                             </div>
-                            <span class="text-[10px] text-slate-400 dark:text-outline" x-text="new Date(course.created_at).toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'})"></span>
+                            <span class="text-[10px] text-slate-400 dark:text-outline">{{ date('d M Y', strtotime($course['created_at'])) }}</span>
                         </div>
                         <div class="flex flex-col gap-2 pt-2">
-                            <a :href="'/storage/' + course.file_path" target="_blank" class="w-full bg-[#6366f1] dark:bg-primary text-white dark:text-on-primary py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-sm">
+                            <a href="/storage/{{ $course['file_path'] }}" target="_blank" class="w-full bg-[#6366f1] dark:bg-primary text-white dark:text-on-primary py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-sm">
                                 <span class="material-symbols-outlined text-sm">visibility</span> Prévisualiser
                             </a>
-                            <a :href="'/storage/' + course.file_path" download class="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white py-2.5 rounded-xl font-medium text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
+                            <a href="/storage/{{ $course['file_path'] }}" download class="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white py-2.5 rounded-xl font-medium text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
                                 <span class="material-symbols-outlined text-sm">download</span> Télécharger
                             </a>
                         </div>
                     </div>
                 </div>
-            </template>
+            @empty
+                <p class="text-center text-slate-400 dark:text-outline italic py-12 col-span-3">Aucun cours trouvé.</p>
+            @endforelse
+        </div>
+    </div>
+
+    <!-- Onglet Mentors (Enseignants) -->
+    <div x-show="currentTab === 'mentors'" x-cloak x-data="{
+        searchQuery: '',
+        selectedSubject: '',
+    }" class="space-y-8 py-6">
+
+        <!-- En-tête -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-3xl text-[#6366f1] dark:text-primary">supervised_user_circle</span>
+                    Nos Mentors d'Excellence 🇲🇬
+                </h1>
+                <p class="text-slate-500 dark:text-outline text-sm mt-1">
+                    Découvrez et contactez les enseignants qualifiés engagés pour l'avenir de Madagascar.
+                </p>
+            </div>
+            <div class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2 rounded-xl text-center self-start md:self-auto">
+                <span class="text-xs text-slate-500 dark:text-outline font-medium block">Professeurs validés</span>
+                <span class="text-lg font-black text-[#6366f1] dark:text-primary">{{ count($allTeachers) }} connectés</span>
+            </div>
+        </div>
+
+        <!-- Recherche et Filtres -->
+        <div class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl p-6 shadow-md space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <!-- Recherche -->
+                <div class="md:col-span-8 relative">
+                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-outline">search</span>
+                    <input x-model="searchQuery" 
+                           type="text" 
+                           class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-outline-variant rounded-xl pl-12 pr-10 py-3 text-sm focus:ring-2 focus:ring-[#6366f1] focus:border-[#6366f1] dark:focus:ring-primary dark:focus:border-primary text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-outline" 
+                           placeholder="Rechercher un enseignant par son nom..."/>
+                    <button x-show="searchQuery !== ''" @click="searchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-outline dark:hover:text-white">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                    </button>
+                </div>
+
+                <!-- Matière -->
+                <div class="md:col-span-4">
+                    <select x-model="selectedSubject" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-outline-variant rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-[#6366f1] text-slate-900 dark:text-white">
+                        <option value="">Toutes les spécialités</option>
+                        @foreach($subjects as $s)
+                            <option value="{{ $s->id }}">{{ $s->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des Professeurs -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @forelse($allTeachers as $teacher)
+                @php
+                    $teacherSubjects = $teacher['subjects'] ?? [];
+                    $teacherLevels = $teacher['levels'] ?? [];
+                    $subjectIds = collect($teacherSubjects)->pluck('id')->toArray();
+                @endphp
+                <div x-show="(searchQuery === '' || {{ json_encode(strtolower($teacher['name'])) }}.includes(searchQuery.toLowerCase()) || {{ json_encode(strtolower($teacher['email'])) }}.includes(searchQuery.toLowerCase())) && (selectedSubject === '' || {{ json_encode($subjectIds) }}.includes(parseInt(selectedSubject)))"
+                     class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl overflow-hidden flex flex-col justify-between group hover:border-[#6366f1] dark:hover:border-primary transition-all duration-300 shadow-md hover:shadow-xl p-6 space-y-6">
+                    
+                    <!-- En-tête de la carte -->
+                    <div class="flex items-start gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#6366f1] to-purple-600 text-white flex items-center justify-center font-black text-xl shadow-lg shrink-0">
+                            {{ substr($teacher['name'], 0, 1) }}
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-[#6366f1] dark:group-hover:text-primary transition-colors">
+                                {{ $teacher['name'] }}
+                            </h3>
+                            <span class="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">
+                                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Agréé Studa
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Spécialités et Niveaux -->
+                    <div class="space-y-3">
+                        <div class="flex flex-wrap gap-1.5">
+                            @foreach($teacherSubjects as $sub)
+                                <span class="bg-[#6366f1]/10 text-[#6366f1] dark:text-primary text-[10px] font-semibold px-2 py-0.5 rounded">
+                                    {{ $sub['name'] }}
+                                </span>
+                            @endforeach
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            @foreach($teacherLevels as $lev)
+                                <span class="bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-bold px-2 py-0.5 rounded">
+                                    {{ $lev['name'] }}
+                                </span>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- Statistiques de l'enseignant -->
+                    <div class="grid grid-cols-3 gap-2 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800 text-center">
+                        <div>
+                            <span class="text-lg font-black text-slate-900 dark:text-white">{{ $teacher['courses_count'] }}</span>
+                            <span class="text-[9px] text-slate-400 dark:text-outline font-medium block">Cours</span>
+                        </div>
+                        <div>
+                            <span class="text-lg font-black text-slate-900 dark:text-white">{{ $teacher['followers_count'] }}</span>
+                            <span class="text-[9px] text-slate-400 dark:text-outline font-medium block">Abonnés</span>
+                        </div>
+                        <div>
+                            <span class="text-lg font-black text-slate-900 dark:text-white">{{ $teacher['meetings_count'] }}</span>
+                            <span class="text-[9px] text-slate-400 dark:text-outline font-medium block">Visios</span>
+                        </div>
+                    </div>
+
+                    <!-- Actions (Email Masqué) -->
+                    <div class="pt-2">
+                        @php
+                            $email = $teacher['email'];
+                            $parts = explode('@', $email);
+                            if(count($parts) === 2) {
+                                $local = $parts[0];
+                                $domain = $parts[1];
+                                $len = strlen($local);
+                                $keep = ceil($len / 2);
+                                $maskedLocal = substr($local, 0, $keep) . str_repeat('•', $len - $keep);
+                                $maskedEmail = $maskedLocal . '@' . $domain;
+                            } else {
+                                $maskedEmail = $email;
+                            }
+                        @endphp
+                        <div class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 py-3 px-4 rounded-xl text-center flex items-center justify-center gap-2 group-hover:border-[#6366f1] dark:group-hover:border-primary transition-all">
+                            <span class="material-symbols-outlined text-slate-400 dark:text-outline text-sm">mail</span>
+                            <span class="text-xs font-semibold text-slate-600 dark:text-slate-300 font-mono tracking-wide" title="Email protégé pour la confidentialité">{{ $maskedEmail }}</span>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <p class="text-center text-slate-400 dark:text-outline italic py-12 col-span-3">Aucun professeur trouvé.</p>
+            @endforelse
         </div>
 
         <!-- Aucun résultat (Empty State) -->
-        <div x-show="filteredCourses.length === 0" class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl p-12 text-center max-w-xl mx-auto space-y-4 shadow-md">
-            <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-outline">search_off</span>
-            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Aucun cours ne correspond à vos filtres</h3>
+        <div x-show="filteredTeachers.length === 0" class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl p-12 text-center max-w-xl mx-auto space-y-4 shadow-md">
+            <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-outline">person_off</span>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Aucun professeur trouvé</h3>
             <p class="text-slate-500 dark:text-outline text-sm">
-                Essayez d'ajuster votre recherche, de changer de niveau ou de matière.
+                Essayez d'ajuster vos termes de recherche ou de sélectionner une autre spécialité.
             </p>
-            <button @click="searchQuery = ''; selectedLevel = ''; selectedSubject = ''; selectedType = ''" class="inline-flex items-center gap-2 bg-[#6366f1] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#4f46e5] transition-all">
-                <span class="material-symbols-outlined text-sm">restart_alt</span> Réinitialiser la recherche
+            <button @click="searchQuery = ''; selectedSubject = ''" class="inline-flex items-center gap-2 bg-[#6366f1] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#4f46e5] transition-all">
+                <span class="material-symbols-outlined text-sm">restart_alt</span> Réinitialiser
             </button>
         </div>
     </div>
