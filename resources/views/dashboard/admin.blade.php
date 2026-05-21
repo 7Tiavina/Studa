@@ -5,13 +5,42 @@
     <link rel="icon" type="image/png" href="{{ asset('faviconStuda.png') }}" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ["Syne", "sans-serif"],
+                    },
                     colors: {
+                        "blue": {
+                            "50": "#f0f5ff",
+                            "100": "#e0ebff",
+                            "200": "#c0d7ff",
+                            "300": "#90b8ff",
+                            "400": "#5b93ff",
+                            "500": "#1b55db",
+                            "600": "#1b55db",
+                            "700": "#123fa3",
+                            "800": "#133580",
+                            "900": "#152e66",
+                            "950": "#0e1b3d"
+                        },
+                        "sky": {
+                            "50": "#f0f9ff",
+                            "100": "#e0f2fe",
+                            "200": "#bae6fd",
+                            "300": "#7dd3fc",
+                            "400": "#38bdf8",
+                            "500": "#38bdf8",
+                            "600": "#0284c7",
+                            "700": "#0369a1",
+                            "800": "#075985",
+                            "900": "#0c4a6e",
+                            "950": "#082f49"
+                        },
                         "primary": "var(--primary)",
                         "background": "var(--background)",
                         "surface": "var(--surface)",
@@ -33,23 +62,23 @@
     </script>
     <style>
         :root {
-            --primary: #2563eb; /* Blue 600 */
-            --background: #f8fafc; /* Slate 50 */
+            --primary: #1b55db; 
+            --background: #f8fafc; 
             --surface: #ffffff;
             --surface-container: #ffffff; 
-            --surface-container-high: #f1f5f9; /* Slate 100 */
+            --surface-container-high: #f1f5f9; 
             --surface-container-low: #f8fafc;
-            --on-background: #0f172a; /* Slate 900 */
+            --on-background: #0f172a; 
             --on-surface: #0f172a;
-            --on-surface-variant: #475569; /* Slate 600 */
+            --on-surface-variant: #475569; 
             --outline: #94a3b8;
-            --outline-variant: #e2e8f0; /* Slate 200 */
-            --secondary: #10b981; /* Emerald 500 */
-            --tertiary: #f59e0b; /* Amber 500 */
-            --error: #ef4444; /* Red 500 */
+            --outline-variant: #e2e8f0; 
+            --secondary: #38bdf8; 
+            --tertiary: #f59e0b; 
+            --error: #ef4444; 
         }
         .dark {
-            --primary: #adc6ff;
+            --primary: #38bdf8;
             --background: #0c1322;
             --surface: #0c1322;
             --surface-container: #191f2f;
@@ -60,10 +89,12 @@
             --on-surface-variant: #c2c6d6;
             --outline: #8c909f;
             --outline-variant: #424754;
-            --secondary: #4edea3;
+            --secondary: #1b55db;
             --tertiary: #ffb95f;
             --error: #ffb4ab;
         }
+
+        body { font-family: 'Syne', sans-serif; }
 
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         [x-cloak], [v-cloak] { display: none !important; }

@@ -6,7 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <style>
         .material-symbols-outlined {
@@ -38,8 +38,34 @@
             theme: {
                 extend: {
                     "colors": {
+                        "blue": {
+                            "50": "#f0f5ff",
+                            "100": "#e0ebff",
+                            "200": "#c0d7ff",
+                            "300": "#90b8ff",
+                            "400": "#5b93ff",
+                            "500": "#1b55db",
+                            "600": "#1b55db",
+                            "700": "#123fa3",
+                            "800": "#133580",
+                            "900": "#152e66",
+                            "950": "#0e1b3d"
+                        },
+                        "sky": {
+                            "50": "#f0f9ff",
+                            "100": "#e0f2fe",
+                            "200": "#bae6fd",
+                            "300": "#7dd3fc",
+                            "400": "#38bdf8",
+                            "500": "#38bdf8",
+                            "600": "#0284c7",
+                            "700": "#0369a1",
+                            "800": "#075985",
+                            "900": "#0c4a6e",
+                            "950": "#082f49"
+                        },
                         "on-secondary": "#003824",
-                        "primary-fixed-dim": "#adc6ff",
+                        "primary-fixed-dim": "#1b55db",
                         "outline-variant": "#424754",
                         "on-primary-fixed": "#001a42",
                         "on-tertiary": "#472a00",
@@ -51,14 +77,14 @@
                         "inverse-on-surface": "#293040",
                         "on-primary-container": "#00285d",
                         "tertiary-container": "#ca8100",
-                        "inverse-primary": "#005ac2",
+                        "inverse-primary": "#1b55db",
                         "error": "#ffb4ab",
-                        "primary": "#adc6ff",
-                        "secondary-container": "#00a572",
+                        "primary": "#1b55db",
+                        "secondary-container": "#38bdf8",
                         "surface-container": "#191f2f",
                         "background": "#0c1322",
                         "surface-bright": "#323949",
-                        "secondary-fixed-dim": "#4edea3",
+                        "secondary-fixed-dim": "#38bdf8",
                         "surface-container-lowest": "#070e1d",
                         "surface": "#0c1322",
                         "on-background": "#dce2f7",
@@ -69,13 +95,13 @@
                         "on-tertiary-fixed-variant": "#653e00",
                         "on-tertiary-fixed": "#2a1700",
                         "surface-container-high": "#232a3a",
-                        "on-primary": "#002e6a",
-                        "primary-container": "#4d8eff",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#1b55db",
                         "on-tertiary-container": "#3e2400",
                         "on-surface-variant": "#c2c6d6",
                         "surface-variant": "#2e3545",
-                        "surface-tint": "#adc6ff",
-                        "secondary-fixed": "#6ffbbe",
+                        "surface-tint": "#1b55db",
+                        "secondary-fixed": "#38bdf8",
                         "primary-fixed": "#d8e2ff",
                         "surface-dim": "#0c1322",
                         "tertiary-fixed-dim": "#ffb95f",
@@ -83,7 +109,7 @@
                         "inverse-surface": "#dce2f7",
                         "on-secondary-fixed": "#002113",
                         "on-error": "#690005",
-                        "secondary": "#4edea3",
+                        "secondary": "#38bdf8",
                         "tertiary": "#ffb95f"
                     },
                     "borderRadius": {
@@ -103,13 +129,13 @@
                         "sm": "8px"
                     },
                     "fontFamily": {
-                        "stat-value": ["Inter"],
-                        "display-lg": ["Inter"],
-                        "title-sm": ["Inter"],
-                        "body-base": ["Inter"],
-                        "headline-md": ["Inter"],
-                        "body-sm": ["Inter"],
-                        "label-caps": ["Inter"]
+                        "stat-value": ["Syne", "sans-serif"],
+                        "display-lg": ["Syne", "sans-serif"],
+                        "title-sm": ["Syne", "sans-serif"],
+                        "body-base": ["Syne", "sans-serif"],
+                        "headline-md": ["Syne", "sans-serif"],
+                        "body-sm": ["Syne", "sans-serif"],
+                        "label-caps": ["Syne", "sans-serif"]
                     },
                     "fontSize": {
                         "stat-value": ["28px", {"lineHeight": "1.1", "fontWeight": "700"}],

@@ -5,10 +5,45 @@
     <link rel="icon" type="image/png" href="{{ asset('faviconStuda.png') }}" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script>
         tailwind.config = {
-            darkMode: "class"
+            darkMode: "class",
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Syne", "sans-serif"],
+                    },
+                    colors: {
+                        "blue": {
+                            "50": "#f0f5ff",
+                            "100": "#e0ebff",
+                            "200": "#c0d7ff",
+                            "300": "#90b8ff",
+                            "400": "#5b93ff",
+                            "500": "#1b55db",
+                            "600": "#1b55db",
+                            "700": "#123fa3",
+                            "800": "#133580",
+                            "900": "#152e66",
+                            "950": "#0e1b3d"
+                        },
+                        "sky": {
+                            "50": "#f0f9ff",
+                            "100": "#e0f2fe",
+                            "200": "#bae6fd",
+                            "300": "#7dd3fc",
+                            "400": "#38bdf8",
+                            "500": "#38bdf8",
+                            "600": "#0284c7",
+                            "700": "#0369a1",
+                            "800": "#075985",
+                            "900": "#0c4a6e",
+                            "950": "#082f49"
+                        }
+                    }
+                }
+            }
         }
     </script>
     <script>
@@ -21,7 +56,7 @@
     </script>
     <title>En attente de validation - Studa</title>
 </head>
-<body class="bg-slate-50 dark:bg-[#0c1322] text-slate-800 dark:text-[#dce2f7] font-['Inter'] antialiased transition-colors duration-200">
+<body class="bg-slate-50 dark:bg-[#0c1322] text-slate-800 dark:text-[#dce2f7] antialiased transition-colors duration-200">
 
 <div class="absolute top-4 right-4">
     <button id="theme-toggle" class="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none flex items-center justify-center shadow-sm">
