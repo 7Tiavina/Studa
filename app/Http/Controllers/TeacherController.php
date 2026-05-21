@@ -134,20 +134,20 @@ class TeacherController extends Controller
             'status' => 'pending',
         ]);
 
-        return redirect()->back()->with('success', 'Votre cours a été envoyé pour validation.');
+        return redirect()->to(url()->previous() . (str_contains(url()->previous(), '?') ? '&' : '?') . 'tab=content')->with('success', 'Votre cours a été envoyé pour validation.');
     }
 
     public function addSubject(Request $request)
     {
         $request->validate(['subject_id' => 'required|exists:subjects,id']);
         Auth::user()->subjects()->syncWithoutDetaching([$request->subject_id]);
-        return redirect()->back()->with('success', 'Matière ajoutée à votre profil.');
+        return redirect()->to(url()->previous() . (str_contains(url()->previous(), '?') ? '&' : '?') . 'tab=subjects')->with('success', 'Matière ajoutée à votre profil.');
     }
 
     public function removeSubject(Subject $subject)
     {
         Auth::user()->subjects()->detach($subject->id);
-        return redirect()->back()->with('success', 'Matière retirée de votre profil.');
+        return redirect()->to(url()->previous() . (str_contains(url()->previous(), '?') ? '&' : '?') . 'tab=subjects')->with('success', 'Matière retirée de votre profil.');
     }
 
     public function updateSettings(Request $request)
@@ -185,6 +185,6 @@ class TeacherController extends Controller
         }
 
         $user->save();
-        return redirect()->back()->with('success', 'Profil mis à jour avec succès.');
+        return redirect()->to(url()->previous() . (str_contains(url()->previous(), '?') ? '&' : '?') . 'tab=settings')->with('success', 'Profil mis à jour avec succès.');
     }
 }

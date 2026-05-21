@@ -105,32 +105,32 @@ class StudentController extends Controller
     public function toggleLevel(Level $level)
     {
         Auth::user()->levels()->toggle([$level->id]);
-        return back()->with('success', 'Niveau mis à jour.');
+        return redirect()->to(url()->previous() . (str_contains(url()->previous(), '?') ? '&' : '?') . 'tab=levels')->with('success', 'Niveau mis à jour.');
     }
 
     public function subscribeToCourse(Course $course)
     {
         Auth::user()->subscribedCourses()->syncWithoutDetaching([$course->id]);
-        return back()->with('success', 'Vous vous êtes abonné à ce cours.');
+        return redirect()->to(url()->previous() . (str_contains(url()->previous(), '?') ? '&' : '?') . 'tab=courses')->with('success', 'Vous vous êtes abonné à ce cours.');
     }
 
     public function unsubscribeFromCourse(Course $course)
     {
         Auth::user()->subscribedCourses()->detach($course->id);
-        return back()->with('success', 'Abonnement retiré.');
+        return redirect()->to(url()->previous() . (str_contains(url()->previous(), '?') ? '&' : '?') . 'tab=subscriptions')->with('success', 'Abonnement retiré.');
     }
 
     public function followTeacher(User $teacher)
     {
         if ($teacher->role !== 'teacher') return back();
         Auth::user()->followedTeachers()->syncWithoutDetaching([$teacher->id]);
-        return back()->with('success', 'Vous suivez maintenant ce professeur.');
+        return redirect()->to(url()->previous() . (str_contains(url()->previous(), '?') ? '&' : '?') . 'tab=teachers')->with('success', 'Vous suivez maintenant ce professeur.');
     }
 
     public function unfollowTeacher(User $teacher)
     {
         Auth::user()->followedTeachers()->detach($teacher->id);
-        return back()->with('success', 'Vous ne suivez plus ce professeur.');
+        return redirect()->to(url()->previous() . (str_contains(url()->previous(), '?') ? '&' : '?') . 'tab=teachers')->with('success', 'Vous ne suivez plus ce professeur.');
     }
 
     public function updateSettings(Request $request)
@@ -162,6 +162,6 @@ class StudentController extends Controller
         }
 
         $user->save();
-        return redirect()->back()->with('success', 'Profil mis à jour avec succès.');
+        return redirect()->to(url()->previous() . (str_contains(url()->previous(), '?') ? '&' : '?') . 'tab=settings')->with('success', 'Profil mis à jour avec succès.');
     }
 }

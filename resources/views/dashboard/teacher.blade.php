@@ -145,7 +145,7 @@
 </head>
 <body class="bg-background text-on-background font-sans antialiased transition-colors duration-200" 
       x-data="{ 
-        activeTab: '{{ request('tab', 'dashboard') }}', 
+        activeTab: '{{ request()->query('tab', 'dashboard') }}', 
         showMessenger: false, 
         openChats: [],
         userStatuses: {
@@ -321,43 +321,43 @@
         </div>
 
         <nav class="flex-1 px-4 space-y-1">
-            <button @click="activeTab = 'dashboard'"
+            <button @click="activeTab = 'dashboard'; window.history.pushState({}, '', '?tab=dashboard')"
                     :class="activeTab === 'dashboard' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">dashboard</span>
                 <span>Tableau de bord</span>
             </button>
-            <button @click="activeTab = 'content'"
+            <button @click="activeTab = 'content'; window.history.pushState({}, '', '?tab=content')"
                     :class="activeTab === 'content' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">menu_book</span>
                 <span>Mes Contenus</span>
             </button>
-            <button @click="activeTab = 'subjects'"
+            <button @click="activeTab = 'subjects'; window.history.pushState({}, '', '?tab=subjects')"
                     :class="activeTab === 'subjects' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">school</span>
                 <span>Mes Spécialités</span>
             </button>
-            <button @click="activeTab = 'students'"
+            <button @click="activeTab = 'students'; window.history.pushState({}, '', '?tab=students')"
                     :class="activeTab === 'students' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">group</span>
                 <span>Étudiants</span>
             </button>
-            <button @click="activeTab = 'live'"
+            <button @click="activeTab = 'live'; window.history.pushState({}, '', '?tab=live')"
                     :class="activeTab === 'live' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">video_call</span>
                 <span>Live Courses</span>
             </button>
-            <button @click="activeTab = 'analytics'"
+            <button @click="activeTab = 'analytics'; window.history.pushState({}, '', '?tab=analytics')"
                     :class="activeTab === 'analytics' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">insights</span>
                 <span>Analytics</span>
             </button>
-            <button @click="activeTab = 'settings'"
+            <button @click="activeTab = 'settings'; window.history.pushState({}, '', '?tab=settings')"
                     :class="activeTab === 'settings' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">settings</span>

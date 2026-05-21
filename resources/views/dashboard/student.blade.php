@@ -149,8 +149,11 @@
 </head>
 <body class="bg-background text-on-background font-sans antialiased transition-colors duration-200" 
       x-data="{ 
-        activeTab: '{{ request('tab', 'dashboard') }}', 
+        activeTab: '{{ request()->query('tab', 'dashboard') }}', 
         showMessenger: false, 
+        showPdfViewer: false,
+        currentPdfUrl: '',
+        currentPdfTitle: '',
         openChats: [],
         userStatuses: {
             @foreach($followedTeachers as $t) {{ $t->id }}: {{ $t->is_online ? 'true' : 'false' }}, @endforeach
@@ -194,35 +197,35 @@
         </div>
 
         <nav class="flex-1 px-4 space-y-1">
-            <button @click="activeTab = 'dashboard'" :class="activeTab === 'dashboard' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
+            <button @click="activeTab = 'dashboard'; window.history.pushState({}, '', '?tab=dashboard')" :class="activeTab === 'dashboard' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">dashboard</span>
                 <span>Tableau de bord</span>
             </button>
-            <button @click="activeTab = 'levels'" :class="activeTab === 'levels' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
+            <button @click="activeTab = 'levels'; window.history.pushState({}, '', '?tab=levels')" :class="activeTab === 'levels' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">layers</span>
                 <span>Mon Niveau</span>
             </button>
-            <button @click="activeTab = 'courses'" :class="activeTab === 'courses' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
+            <button @click="activeTab = 'courses'; window.history.pushState({}, '', '?tab=courses')" :class="activeTab === 'courses' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">menu_book</span>
                 <span>Cours</span>
             </button>
-            <button @click="activeTab = 'subscriptions'" :class="activeTab === 'subscriptions' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
+            <button @click="activeTab = 'subscriptions'; window.history.pushState({}, '', '?tab=subscriptions')" :class="activeTab === 'subscriptions' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">subscriptions</span>
                 <span>Mes Abonnements</span>
             </button>
-            <button @click="activeTab = 'teachers'" :class="activeTab === 'teachers' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
+            <button @click="activeTab = 'teachers'; window.history.pushState({}, '', '?tab=teachers')" :class="activeTab === 'teachers' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">school</span>
                 <span>Profs</span>
             </button>
-            <button @click="activeTab = 'live'" :class="activeTab === 'live' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
+            <button @click="activeTab = 'live'; window.history.pushState({}, '', '?tab=live')" :class="activeTab === 'live' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">video_call</span>
                 <span>Live Courses</span>
             </button>
-            <button @click="activeTab = 'analytics'" :class="activeTab === 'analytics' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
+            <button @click="activeTab = 'analytics'; window.history.pushState({}, '', '?tab=analytics')" :class="activeTab === 'analytics' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">insights</span>
                 <span>Analytics</span>
             </button>
-            <button @click="activeTab = 'settings'" :class="activeTab === 'settings' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
+            <button @click="activeTab = 'settings'; window.history.pushState({}, '', '?tab=settings')" :class="activeTab === 'settings' ? 'bg-blue-600/10 text-blue-600 dark:text-blue-500 border-r-2 border-blue-600 dark:border-blue-500 font-semibold' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900'" class="flex items-center gap-3 px-4 py-3 rounded-lg w-full text-left transition-all">
                 <span class="material-symbols-outlined">settings</span>
                 <span>Paramètres</span>
             </button>
@@ -505,10 +508,10 @@
                                         <p class="text-[10px] text-outline">{{ $course->teacher->name }}</p>
                                     </div>
                                 </div>
-                                <a href="{{ asset('storage/' . $course->file_path) }}" target="_blank" class="p-2 text-primary hover:bg-primary/10 rounded-full">
+                                <button @click="currentPdfUrl = '{{ asset('storage/' . $course->file_path) }}'; currentPdfTitle = '{{ addslashes($course->title) }}'; showPdfViewer = true" 
+                                        class="p-2 text-primary hover:bg-primary/10 rounded-full transition-colors">
                                     <span class="material-symbols-outlined">visibility</span>
-                                </a>
-                            </div>
+                                </button>                            </div>
                             @empty
                             <p class="text-center text-outline italic py-8">Aucun cours suivi pour le moment.</p>
                             @endforelse
@@ -661,7 +664,10 @@
                                 </div>
                                 <span class="text-[10px] text-slate-300">{{ $course->teacher->name }}</span>
                             </div>
-                            <a href="{{ asset('storage/' . $course->file_path) }}" target="_blank" class="px-3 py-1 bg-primary text-slate-900 text-[10px] font-bold rounded-lg hover:opacity-90">Lire le cours</a>
+                            <button @click="currentPdfUrl = '{{ asset('storage/' . $course->file_path) }}'; currentPdfTitle = '{{ addslashes($course->title) }}'; showPdfViewer = true" 
+                                    class="px-3 py-1 bg-primary text-slate-900 text-[10px] font-bold rounded-lg hover:opacity-90">
+                                Lire le cours
+                            </button>
                         </div>
                     </div>
                     @empty
@@ -1087,5 +1093,52 @@
         }
     });
 </script>
+    <!-- Lecteur PDF Intégré -->
+    <div x-show="showPdfViewer" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-sm"
+         x-cloak>
+        
+        <div class="bg-surface-container w-full h-full max-w-6xl rounded-2xl border border-outline-variant shadow-2xl flex flex-col overflow-hidden"
+             @click.away="showPdfViewer = false"
+             @keydown.escape.window="showPdfViewer = false">
+            
+            <!-- Header du lecteur -->
+            <div class="px-6 py-4 bg-surface-container-high border-b border-outline-variant flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-red-500/10 text-red-500 rounded-lg">
+                        <span class="material-symbols-outlined">picture_as_pdf</span>
+                    </div>
+                    <h3 class="font-bold text-slate-100 truncate max-w-xs md:max-w-md" x-text="currentPdfTitle"></h3>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <a :href="currentPdfUrl" download class="flex items-center gap-2 px-4 py-2 bg-primary text-slate-900 rounded-xl font-bold text-xs hover:scale-105 transition-transform shadow-lg shadow-primary/20">
+                        <span class="material-symbols-outlined text-sm">download</span>
+                        Télécharger
+                    </a>
+                    <button @click="showPdfViewer = false" class="p-2 hover:bg-error/10 hover:text-error rounded-full text-outline transition-all">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Zone d'affichage PDF -->
+            <div class="flex-1 bg-slate-900 relative">
+                <div class="absolute inset-0 flex items-center justify-center text-slate-500 -z-10">
+                    <div class="text-center">
+                        <span class="material-symbols-outlined text-4xl animate-spin mb-2">progress_activity</span>
+                        <p class="text-xs">Chargement du document...</p>
+                    </div>
+                </div>
+                <iframe :src="currentPdfUrl" class="w-full h-full border-none relative z-10"></iframe>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
