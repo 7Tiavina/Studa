@@ -46,6 +46,7 @@
             }
         }
     </script>
+    <script>
         // Initialiser le thème le plus tôt possible pour éviter le flash blanc
         if (localStorage.getItem('theme') === 'light' || (!('theme' in localStorage) && !window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.remove('dark');
