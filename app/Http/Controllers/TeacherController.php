@@ -158,10 +158,24 @@ class TeacherController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'current_password' => 'nullable|required_with:new_password',
             'new_password' => 'nullable|min:8|confirmed',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'professional_title' => 'nullable|string|max:255',
+            'experience' => 'nullable|string|max:255',
+            'bio' => 'nullable|string',
         ]);
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
+        $user->professional_title = $validated['professional_title'] ?? $user->professional_title;
+        $user->experience = $validated['experience'] ?? $user->experience;
+        $user->bio = $validated['bio'] ?? $user->bio;
+
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            $user->avatar = $request->file('avatar')->store('avatars', 'public');
+        }
 
         if ($request->filled('new_password')) {
             if (!Hash::check($request->current_password, $user->password)) {

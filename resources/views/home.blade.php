@@ -684,28 +684,50 @@
                     $subjectIds = collect($teacherSubjects)->pluck('id')->toArray();
                 @endphp
                 <div x-show="(searchQuery === '' || {{ json_encode(strtolower($teacher['name'])) }}.includes(searchQuery.toLowerCase()) || {{ json_encode(strtolower($teacher['email'])) }}.includes(searchQuery.toLowerCase())) && (selectedSubject === '' || {{ json_encode($subjectIds) }}.includes(parseInt(selectedSubject)))"
-                     class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl overflow-hidden flex flex-col justify-between group hover:border-[#6366f1] dark:hover:border-primary transition-all duration-300 shadow-md hover:shadow-xl p-6 space-y-6">
+                     class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl overflow-hidden flex flex-col justify-between group hover:border-[#1b55db] dark:hover:border-primary transition-all duration-300 shadow-md hover:shadow-xl p-6 space-y-6">
                     
                     <!-- En-tête de la carte -->
                     <div class="flex items-start gap-4">
-                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#6366f1] to-purple-600 text-white flex items-center justify-center font-black text-xl shadow-lg shrink-0">
-                            {{ substr($teacher['name'], 0, 1) }}
+                        <div class="w-20 h-20 rounded-2xl overflow-hidden bg-gradient-to-br from-[#1b55db] to-[#38bdf8] text-white flex items-center justify-center font-black text-2xl shadow-lg shrink-0 border-2 border-white dark:border-slate-800">
+                            @if($teacher['avatar'])
+                                <img src="/storage/{{ $teacher['avatar'] }}" alt="{{ $teacher['name'] }}" class="w-full h-full object-cover">
+                            @else
+                                {{ substr($teacher['name'], 0, 1) }}
+                            @endif
                         </div>
                         <div class="space-y-1">
-                            <h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-[#6366f1] dark:group-hover:text-primary transition-colors">
+                            <h3 class="font-bold text-lg text-slate-900 dark:text-white group-hover:text-[#1b55db] dark:group-hover:text-primary transition-colors">
                                 {{ $teacher['name'] }}
                             </h3>
-                            <span class="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">
+                            <p class="text-[10px] text-primary dark:text-primary font-black uppercase tracking-widest">
+                                {{ $teacher['professional_title'] ?: 'Enseignant Certifié' }}
+                            </p>
+                            <span class="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full mt-1">
                                 <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Agréé Studa
                             </span>
                         </div>
+                    </div>
+
+                    <!-- Experience & Bio -->
+                    <div class="space-y-2">
+                        @if($teacher['experience'])
+                            <p class="text-[10px] font-bold text-slate-500 dark:text-outline flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-sm">workspace_premium</span>
+                                {{ $teacher['experience'] }}
+                            </p>
+                        @endif
+                        @if($teacher['bio'])
+                            <p class="text-xs text-slate-600 dark:text-on-surface-variant line-clamp-3 italic leading-relaxed">
+                                "{{ $teacher['bio'] }}"
+                            </p>
+                        @endif
                     </div>
 
                     <!-- Spécialités et Niveaux -->
                     <div class="space-y-3">
                         <div class="flex flex-wrap gap-1.5">
                             @foreach($teacherSubjects as $sub)
-                                <span class="bg-[#6366f1]/10 text-[#6366f1] dark:text-primary text-[10px] font-semibold px-2 py-0.5 rounded">
+                                <span class="bg-[#1b55db]/10 text-[#1b55db] dark:text-primary text-[10px] font-semibold px-2 py-0.5 rounded">
                                     {{ $sub['name'] }}
                                 </span>
                             @endforeach

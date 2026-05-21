@@ -307,11 +307,15 @@
         </a>
 
         <div class="px-6 mb-8 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-500 font-bold">
-                {{ substr(Auth::user()->name, 0, 1) }}
+            <div class="w-10 h-10 rounded-full overflow-hidden bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-500 font-bold border border-primary/20 shadow-sm">
+                @if(Auth::user()->avatar)
+                    <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" class="w-full h-full object-cover">
+                @else
+                    {{ substr(Auth::user()->name, 0, 1) }}
+                @endif
             </div>
             <div>
-                <p class="font-bold text-sm text-slate-800 dark:text-slate-100">{{ Auth::user()->name }}</p>
+                <p class="font-bold text-sm text-slate-800 dark:text-slate-100 truncate max-w-[140px]">{{ Auth::user()->name }}</p>
                 <p class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Professeur</p>
             </div>
         </div>
@@ -390,8 +394,20 @@
                     <span class="material-symbols-outlined">notifications</span>
                 </button>
                 <div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-800"></div>
-                <div class="flex items-center gap-2">
-                    <p class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ Auth::user()->email }}</p>
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ Auth::user()->name }}</p>
+                        <p class="text-[9px] text-outline truncate max-w-[150px]">{{ Auth::user()->email }}</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full overflow-hidden bg-blue-500/10 border border-outline-variant/50">
+                        @if(Auth::user()->avatar)
+                            <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center text-blue-500 text-[10px] font-bold">
+                                {{ substr(Auth::user()->name, 0, 1) }}
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </header>
@@ -428,8 +444,12 @@
                     "
                     class="w-full p-3 hover:bg-slate-900 flex items-center gap-3 border-b border-slate-800/40 transition-colors">
                     <div class="relative flex-shrink-0">
-                        <div class="w-10 h-10 rounded-full bg-secondary/20 text-secondary flex items-center justify-center font-bold text-xs">
-                            {{ substr($student->name, 0, 1) }}
+                        <div class="w-10 h-10 rounded-full overflow-hidden bg-secondary/20 text-secondary flex items-center justify-center font-bold text-xs border border-secondary/20">
+                            @if($student->avatar)
+                                <img src="{{ asset('storage/' . $student->avatar) }}" alt="" class="w-full h-full object-cover">
+                            @else
+                                {{ substr($student->name, 0, 1) }}
+                            @endif
                         </div>
                         <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-950"
                              :class="userStatuses[{{ $student->id }}] ? 'bg-secondary' : 'bg-error'"></div>
@@ -964,54 +984,144 @@
             </div>
 
             <!-- PARAMÈTRES -->
-            <div x-show="activeTab === 'settings'" x-cloak class="space-y-8">
-                <h3 class="text-2xl font-bold">Paramètres du Profil</h3>
-                <div class="max-w-2xl bg-surface-container rounded-xl border border-outline-variant p-8">
-                    <form action="{{ route('teacher.settings.update') }}" method="POST" class="space-y-6">
-                        @csrf
-                        @method('PUT')
-                        <div class="grid grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium mb-2 text-outline">Nom complet</label>
-                                <input type="text" name="name" value="{{ $user->name }}"
-                                       class="w-full bg-background border-outline-variant rounded-xl text-white">
+            <div x-show="activeTab === 'settings'" x-cloak class="space-y-8" x-data="{ settingsTab: 'profile' }">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-2xl font-bold">Paramètres</h3>
+                    <div class="flex bg-surface-container rounded-xl p-1 border border-outline-variant/30">
+                        <button @click="settingsTab = 'profile'" 
+                                :class="settingsTab === 'profile' ? 'bg-primary text-slate-900 shadow-lg' : 'text-outline hover:text-slate-200'"
+                                class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all">
+                            Profil Public
+                        </button>
+                        <button @click="settingsTab = 'security'" 
+                                :class="settingsTab === 'security' ? 'bg-primary text-slate-900 shadow-lg' : 'text-outline hover:text-slate-200'"
+                                class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all">
+                            Sécurité
+                        </button>
+                    </div>
+                </div>
+
+                <form action="{{ route('teacher.settings.update') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+                    @csrf
+                    @method('PUT')
+
+                    <!-- SECTION PROFIL -->
+                    <div x-show="settingsTab === 'profile'" x-transition class="space-y-6">
+                        <div class="bg-surface-container rounded-2xl border border-outline-variant p-8 shadow-xl">
+                            <h4 class="text-lg font-bold mb-8 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">person</span>
+                                Informations Personnelles
+                            </h4>
+                            
+                            <!-- Section Photo de Profil -->
+                            <div class="flex items-center gap-8 mb-10 p-6 bg-background/50 rounded-2xl border border-outline-variant/20">
+                                <div class="relative group">
+                                    <div class="w-32 h-32 rounded-full overflow-hidden bg-blue-500/10 border-4 border-primary/20 group-hover:border-primary/50 transition-all shadow-2xl">
+                                        @if($user->avatar)
+                                            <img id="avatar-preview" src="{{ asset('storage/' . $user->avatar) }}" alt="Profile" class="w-full h-full object-cover">
+                                        @else
+                                            <div id="avatar-placeholder" class="w-full h-full flex items-center justify-center text-blue-500 text-5xl font-black">
+                                                {{ substr($user->name, 0, 1) }}
+                                            </div>
+                                            <img id="avatar-preview" src="#" alt="Preview" class="w-full h-full object-cover hidden">
+                                        @endif
+                                    </div>
+                                    <label for="avatar-input" class="absolute bottom-1 right-1 p-2 bg-primary text-slate-900 rounded-full cursor-pointer shadow-2xl hover:scale-110 transition-transform border-4 border-surface-container">
+                                        <span class="material-symbols-outlined text-base">photo_camera</span>
+                                    </label>
+                                    <input type="file" id="avatar-input" name="avatar" class="hidden" accept="image/*" 
+                                           onchange="const file = this.files[0]; if(file){ const reader = new FileReader(); reader.onload = (e) => { document.getElementById('avatar-preview').src = e.target.result; document.getElementById('avatar-preview').classList.remove('hidden'); const placeholder = document.getElementById('avatar-placeholder'); if(placeholder) placeholder.classList.add('hidden'); }; reader.readAsDataURL(file); }">
+                                </div>
+                                <div class="space-y-1">
+                                    <h5 class="font-bold text-slate-100 text-lg">Photo de profil</h5>
+                                    <p class="text-xs text-outline leading-relaxed max-w-xs">Mettez à jour votre photo pour que vos étudiants puissent vous reconnaître plus facilement.</p>
+                                    <p class="text-[10px] text-primary uppercase font-black tracking-widest pt-2">JPG, PNG ou GIF • Max 2Mo</p>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2 text-outline">Email</label>
-                                <input type="email" name="email" value="{{ $user->email }}"
-                                       class="w-full bg-background border-outline-variant rounded-xl text-white">
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Nom complet</label>
+                                    <input type="text" name="name" value="{{ $user->name }}"
+                                           class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Email professionnel</label>
+                                    <input type="email" name="email" value="{{ $user->email }}"
+                                           class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Titre professionnel</label>
+                                    <input type="text" name="professional_title" value="{{ $user->professional_title }}"
+                                           placeholder="Ex: Professeur de Mathématiques"
+                                           class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Expérience</label>
+                                    <input type="text" name="experience" value="{{ $user->experience }}"
+                                           placeholder="Ex: 10 ans d'enseignement"
+                                           class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                </div>
+                                <div class="md:col-span-2 space-y-2">
+                                    <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Biographie</label>
+                                    <textarea name="bio" rows="5" 
+                                              placeholder="Présentez-vous brièvement à vos futurs étudiants..."
+                                              class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4 resize-none">{{ $user->bio }}</textarea>
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <hr class="border-outline-variant/30">
-                        <p class="text-xs font-bold text-primary uppercase tracking-widest">Changer le mot de passe</p>
+                    <!-- SECTION SÉCURITÉ -->
+                    <div x-show="settingsTab === 'security'" x-transition class="space-y-6">
+                        <div class="bg-surface-container rounded-2xl border border-outline-variant p-8 shadow-xl">
+                            <h4 class="text-lg font-bold mb-8 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">shield</span>
+                                Sécurité du Compte
+                            </h4>
 
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium mb-2 text-outline">Mot de passe actuel</label>
-                                <input type="password" name="current_password"
-                                       class="w-full bg-background border-outline-variant rounded-xl text-white">
-                            </div>
-                            <div class="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium mb-2 text-outline">Nouveau mot de passe</label>
-                                    <input type="password" name="new_password"
-                                           class="w-full bg-background border-outline-variant rounded-xl text-white">
+                            <div class="max-w-xl space-y-8">
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Mot de passe actuel</label>
+                                    <input type="password" name="current_password"
+                                           placeholder="••••••••"
+                                           class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                    <p class="text-[10px] text-outline italic">Requis pour modifier votre mot de passe.</p>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-2 text-outline">Confirmer le mot de passe</label>
-                                    <input type="password" name="new_password_confirmation"
-                                           class="w-full bg-background border-outline-variant rounded-xl text-white">
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Nouveau mot de passe</label>
+                                        <input type="password" name="new_password"
+                                               placeholder="Min. 8 caractères"
+                                               class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Confirmation</label>
+                                        <input type="password" name="new_password_confirmation"
+                                               placeholder="Confirmez"
+                                               class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                    </div>
+                                </div>
+
+                                <div class="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-primary text-sm mt-0.5">info</span>
+                                    <p class="text-[10px] text-blue-200 leading-relaxed">Assurez-vous d'utiliser un mot de passe fort et unique pour protéger l'accès à vos contenus pédagogiques et aux données de vos étudiants.</p>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
+                    <div class="flex items-center justify-end gap-4">
+                        <button type="button" @click="activeTab = 'dashboard'" class="px-8 py-3 text-sm font-bold text-outline hover:text-white transition-colors">
+                            Annuler
+                        </button>
                         <button type="submit"
-                                class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold transition-colors">
+                                class="bg-primary text-slate-900 px-12 py-3 rounded-xl font-black text-sm uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
                             Enregistrer les modifications
                         </button>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
 
         </div><!-- /p-8 -->

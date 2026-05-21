@@ -180,11 +180,15 @@
         </a>
         
         <div class="px-6 mb-8 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center text-secondary font-bold">
-                {{ substr(Auth::user()->name, 0, 1) }}
+            <div class="w-10 h-10 rounded-full overflow-hidden bg-secondary/20 flex items-center justify-center text-secondary font-bold border border-secondary/20">
+                @if(Auth::user()->avatar)
+                    <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" class="w-full h-full object-cover">
+                @else
+                    {{ substr(Auth::user()->name, 0, 1) }}
+                @endif
             </div>
             <div>
-                <p class="font-bold text-sm text-slate-800 dark:text-slate-100">{{ Auth::user()->name }}</p>
+                <p class="font-bold text-sm text-slate-800 dark:text-slate-100 truncate max-w-[140px]">{{ Auth::user()->name }}</p>
                 <p class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Étudiant</p>
             </div>
         </div>
@@ -250,7 +254,21 @@
                 </button>
                 <button class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100"><span class="material-symbols-outlined">notifications</span></button>
                 <div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-800"></div>
-                <p class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ Auth::user()->name }}</p>
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ Auth::user()->name }}</p>
+                        <p class="text-[9px] text-outline truncate max-w-[150px]">{{ Auth::user()->email }}</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full overflow-hidden bg-secondary/10 border border-outline-variant/50">
+                        @if(Auth::user()->avatar)
+                            <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center text-secondary text-[10px] font-bold">
+                                {{ substr(Auth::user()->name, 0, 1) }}
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -259,14 +277,21 @@
             <template x-for="chat in openChats" :key="chat.id">
                 <div class="w-96 bg-slate-900 rounded-t-xl shadow-2xl flex flex-col overflow-hidden text-slate-100 pointer-events-auto border border-slate-800">
                     <!-- Header -->
-                    <div class="bg-slate-950 p-3 flex justify-between items-center border-b border-slate-800 cursor-pointer shadow-sm" @click="chat.minimized = !chat.minimized">
-                        <div class="flex items-center gap-2">
-                            <div class="relative">
-                                <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-[10px]" x-text="chat.name.charAt(0)"></div>
-                                <!-- Point de statut -->
-                                <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-slate-950"
-                                     :class="userStatuses[chat.id] ? 'bg-secondary' : 'bg-error'"></div>
+                <div class="bg-slate-950 p-3 flex justify-between items-center border-b border-slate-800 cursor-pointer shadow-sm" @click="chat.minimized = !chat.minimized">
+                    <div class="flex items-center gap-2">
+                        <div class="relative">
+                            <div class="w-8 h-8 rounded-full overflow-hidden bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-[10px]">
+                                <template x-if="chat.avatar">
+                                    <img :src="'/storage/' + chat.avatar" alt="" class="w-full h-full object-cover">
+                                </template>
+                                <template x-if="!chat.avatar">
+                                    <span x-text="chat.name.charAt(0)"></span>
+                                </template>
                             </div>
+                            <!-- Point de statut -->
+                            <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-slate-950"
+                                 :class="userStatuses[chat.id] ? 'bg-secondary' : 'bg-error'"></div>
+                        </div>
                             <div class="flex flex-col">
                                 <span class="font-bold text-sm text-slate-200" x-text="chat.name"></span>
                                 <span class="text-[9px] uppercase tracking-tighter" :class="userStatuses[chat.id] ? 'text-secondary' : 'text-error'" x-text="userStatuses[chat.id] ? 'En ligne' : 'Hors ligne'"></span>
@@ -410,12 +435,19 @@
                                 minimized: false, 
                                 conversation_id: conv.id, 
                                 is_online: conv.partner_is_online,
+                                avatar: '{{ $teacher->avatar }}',
                                 messages: []
                             })
                         }                    })" 
                         class="w-full p-3 hover:bg-slate-900 flex items-center gap-3 border-b border-slate-800/40 transition-colors">
                     <div class="relative flex-shrink-0">
-                        <div class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center font-bold text-xs">{{ substr($teacher->name, 0, 1) }}</div>
+                        <div class="w-10 h-10 rounded-full overflow-hidden bg-blue-500/20 text-blue-500 flex items-center justify-center font-bold text-xs border border-primary/20">
+                            @if($teacher->avatar)
+                                <img src="{{ asset('storage/' . $teacher->avatar) }}" alt="" class="w-full h-full object-cover">
+                            @else
+                                {{ substr($teacher->name, 0, 1) }}
+                            @endif
+                        </div>
                         <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-950"
                              :class="userStatuses[{{ $teacher->id }}] ? 'bg-secondary' : 'bg-error'"></div>
                     </div>
@@ -650,30 +682,44 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     @foreach($allTeachers as $teacher)
-                    <div class="bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col items-center text-center group" x-show="'{{ strtolower($teacher->name) }}'.includes(searchQuery.toLowerCase())">
-                        <div class="w-20 h-20 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center text-2xl font-bold mb-4">
-                            {{ substr($teacher->name, 0, 1) }}
+                    <div class="bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col items-center text-center group hover:border-primary transition-all shadow-lg" x-show="'{{ strtolower($teacher->name) }}'.includes(searchQuery.toLowerCase())">
+                        <div class="w-24 h-24 rounded-full overflow-hidden bg-blue-500/10 border-2 border-primary/20 mb-4 shadow-md group-hover:scale-105 transition-transform">
+                            @if($teacher->avatar)
+                                <img src="{{ asset('storage/' . $teacher->avatar) }}" alt="{{ $teacher->name }}" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center text-blue-500 text-3xl font-black">
+                                    {{ substr($teacher->name, 0, 1) }}
+                                </div>
+                            @endif
                         </div>
-                        <h4 class="font-bold">{{ $teacher->name }}</h4>
-                        <p class="text-xs text-outline mb-2">{{ $teacher->email }}</p>
-                        <div class="flex flex-wrap justify-center gap-1 mb-6">
+                        <h4 class="font-bold text-slate-100">{{ $teacher->name }}</h4>
+                        <p class="text-[10px] text-primary uppercase font-black tracking-widest mb-1">{{ $teacher->professional_title ?: 'Professeur' }}</p>
+                        <p class="text-xs text-outline mb-4">{{ $teacher->email }}</p>
+                        
+                        @if($teacher->bio)
+                            <p class="text-xs text-slate-400 mb-6 line-clamp-3 italic">"{{ $teacher->bio }}"</p>
+                        @endif
+
+                        <div class="flex flex-wrap justify-center gap-1 mb-8">
                             @foreach($teacher->subjects as $subject)
                                 <span class="px-2 py-0.5 bg-background rounded text-[8px] font-bold text-slate-400 uppercase tracking-tighter border border-outline-variant/30">{{ $subject->name }}</span>
                             @endforeach
                         </div>
                         
-                        @if($followedTeachers->contains($teacher->id))
-                            <form action="{{ route('student.teachers.unfollow', $teacher->id) }}" method="POST" class="w-full">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="w-full py-2 border border-error text-error text-xs font-bold rounded-xl hover:bg-error/10 transition-colors">Ne plus suivre</button>
-                            </form>
-                        @else
-                            <form action="{{ route('student.teachers.follow', $teacher->id) }}" method="POST" class="w-full">
-                                @csrf
-                                <button type="submit" class="w-full py-2 bg-primary text-slate-900 text-xs font-bold rounded-xl hover:opacity-90 transition-opacity">Suivre</button>
-                            </form>
-                        @endif
+                        <div class="mt-auto w-full flex gap-3">
+                            @if($followedTeachers->contains($teacher->id))
+                                <form action="{{ route('student.teachers.unfollow', $teacher->id) }}" method="POST" class="flex-1">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="w-full py-2 border border-error text-error text-xs font-bold rounded-xl hover:bg-error/10 transition-colors">Ne plus suivre</button>
+                                </form>
+                            @else
+                                <form action="{{ route('student.teachers.follow', $teacher->id) }}" method="POST" class="flex-1">
+                                    @csrf
+                                    <button type="submit" class="w-full py-2 bg-primary text-slate-900 text-xs font-bold rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-primary/20">Suivre</button>
+                                </form>
+                            @endif
+                        </div>
                     </div>
                     @endforeach
                 </div>
@@ -909,49 +955,109 @@
             </div>
 
             <!-- Section Settings -->
-            <div x-show="activeTab === 'settings'" x-cloak class="space-y-8">
-                <h3 class="text-2xl font-bold">Paramètres du Compte</h3>
-                <div class="max-w-2xl bg-surface-container rounded-xl border border-outline-variant p-8">
-                    <form action="{{ route('student.settings.update') }}" method="POST" class="space-y-6">
-                        @csrf
-                        @method('PUT')
-                        <div class="grid grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium mb-2 text-outline">Nom complet</label>
-                                <input type="text" name="name" value="{{ $user->name }}" class="w-full bg-background border-outline-variant rounded-xl text-white">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2 text-outline">Email</label>
-                                <input type="email" name="email" value="{{ $user->email }}" class="w-full bg-background border-outline-variant rounded-xl text-white">
-                            </div>
-                        </div>
-
-                        <hr class="border-outline-variant/30">
-                        
-                        <p class="text-xs font-bold text-primary uppercase tracking-widest">Sécurité</p>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium mb-2 text-outline">Mot de passe actuel</label>
-                                <input type="password" name="current_password" class="w-full bg-background border-outline-variant rounded-xl text-white">
-                            </div>
-                            <div class="grid grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium mb-2 text-outline">Nouveau mot de passe</label>
-                                    <input type="password" name="new_password" class="w-full bg-background border-outline-variant rounded-xl text-white">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-2 text-outline">Confirmation</label>
-                                    <input type="password" name="new_password_confirmation" class="w-full bg-background border-outline-variant rounded-xl text-white">
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="bg-secondary text-slate-900 px-8 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity">
-                            Mettre à jour mon profil
+            <div x-show="activeTab === 'settings'" x-cloak class="space-y-8" x-data="{ settingsTab: 'profile' }">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-2xl font-bold">Paramètres</h3>
+                    <div class="flex bg-surface-container rounded-xl p-1 border border-outline-variant/30">
+                        <button @click="settingsTab = 'profile'" 
+                                :class="settingsTab === 'profile' ? 'bg-primary text-slate-900 shadow-lg' : 'text-outline hover:text-slate-200'"
+                                class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all">
+                            Mon Profil
                         </button>
-                    </form>
+                        <button @click="settingsTab = 'security'" 
+                                :class="settingsTab === 'security' ? 'bg-primary text-slate-900 shadow-lg' : 'text-outline hover:text-slate-200'"
+                                class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all">
+                            Sécurité
+                        </button>
+                    </div>
                 </div>
+
+                <form action="{{ route('student.settings.update') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+                    @csrf
+                    @method('PUT')
+
+                    <!-- SECTION PROFIL -->
+                    <div x-show="settingsTab === 'profile'" x-transition class="space-y-6">
+                        <div class="bg-surface-container rounded-2xl border border-outline-variant p-8 shadow-xl">
+                            <h4 class="text-lg font-bold mb-8 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">person</span>
+                                Informations Personnelles
+                            </h4>
+                            
+                            <!-- Section Photo de Profil -->
+                            <div class="flex items-center gap-8 mb-10 p-6 bg-background/50 rounded-2xl border border-outline-variant/20">
+                                <div class="relative group">
+                                    <div class="w-24 h-24 rounded-full overflow-hidden bg-secondary/10 border-4 border-primary/20 group-hover:border-primary/50 transition-all shadow-2xl">
+                                        @if($user->avatar)
+                                            <img id="avatar-preview-student" src="{{ asset('storage/' . $user->avatar) }}" alt="Profile" class="w-full h-full object-cover">
+                                        @else
+                                            <div id="avatar-placeholder-student" class="w-full h-full flex items-center justify-center text-secondary text-4xl font-black">
+                                                {{ substr($user->name, 0, 1) }}
+                                            </div>
+                                            <img id="avatar-preview-student" src="#" alt="Preview" class="w-full h-full object-cover hidden">
+                                        @endif
+                                    </div>
+                                    <label for="avatar-input-student" class="absolute bottom-0 right-0 p-1.5 bg-primary text-slate-900 rounded-full cursor-pointer shadow-2xl hover:scale-110 transition-transform border-2 border-surface-container">
+                                        <span class="material-symbols-outlined text-sm">photo_camera</span>
+                                    </label>
+                                    <input type="file" id="avatar-input-student" name="avatar" class="hidden" accept="image/*" 
+                                           onchange="const file = this.files[0]; if(file){ const reader = new FileReader(); reader.onload = (e) => { document.getElementById('avatar-preview-student').src = e.target.result; document.getElementById('avatar-preview-student').classList.remove('hidden'); const placeholder = document.getElementById('avatar-placeholder-student'); if(placeholder) placeholder.classList.add('hidden'); }; reader.readAsDataURL(file); }">
+                                </div>
+                                <div class="space-y-1">
+                                    <h5 class="font-bold text-slate-100">Photo de profil</h5>
+                                    <p class="text-[10px] text-outline uppercase tracking-widest pt-1">JPG, PNG ou GIF • Max 2Mo</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Nom complet</label>
+                                    <input type="text" name="name" value="{{ $user->name }}" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Email</label>
+                                    <input type="email" name="email" value="{{ $user->email }}" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION SÉCURITÉ -->
+                    <div x-show="settingsTab === 'security'" x-transition class="space-y-6">
+                        <div class="bg-surface-container rounded-2xl border border-outline-variant p-8 shadow-xl">
+                            <h4 class="text-lg font-bold mb-8 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">shield</span>
+                                Sécurité du Compte
+                            </h4>
+
+                            <div class="max-w-xl space-y-6">
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Mot de passe actuel</label>
+                                    <input type="password" name="current_password" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Nouveau mot de passe</label>
+                                        <input type="password" name="new_password" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Confirmation</label>
+                                        <input type="password" name="new_password_confirmation" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-4">
+                        <button type="button" @click="activeTab = 'dashboard'" class="px-8 py-3 text-sm font-bold text-outline hover:text-white transition-colors">
+                            Annuler
+                        </button>
+                        <button type="submit" class="bg-primary text-slate-900 px-12 py-3 rounded-xl font-black text-sm uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                            Mettre à jour
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </main>

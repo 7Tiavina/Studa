@@ -141,10 +141,18 @@ class StudentController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'current_password' => 'nullable|required_with:new_password',
             'new_password' => 'nullable|min:8|confirmed',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $user->name = $validated['name'];
         $user->email = $validated['email'];
+
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+            }
+            $user->avatar = $request->file('avatar')->store('avatars', 'public');
+        }
 
         if ($request->filled('new_password')) {
             if (!Hash::check($request->current_password, $user->password)) {
@@ -154,6 +162,6 @@ class StudentController extends Controller
         }
 
         $user->save();
-        return redirect()->back()->with('success', 'Profil mis à jour.');
+        return redirect()->back()->with('success', 'Profil mis à jour avec succès.');
     }
 }

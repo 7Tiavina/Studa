@@ -25,6 +25,10 @@ class User extends Authenticatable
         'role',
         'is_validated',
         'last_seen_at',
+        'avatar',
+        'professional_title',
+        'experience',
+        'bio',
     ];
 
     /**
