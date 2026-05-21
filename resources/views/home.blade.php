@@ -2,6 +2,7 @@
 <html class="dark" lang="fr">
 <head>
     <meta charset="utf-8"/>
+    <link rel="icon" type="image/png" href="{{ asset('faviconStuda.png') }}" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -128,7 +129,10 @@
 
 <nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm flex justify-between items-center px-6 h-16 transition-colors">
     <div class="flex items-center gap-8">
-        <a href="/" @click.prevent="currentTab = 'courses'" class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Studa</a>
+        <a href="/" @click.prevent="currentTab = 'courses'" class="flex items-center gap-2 text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+            <img src="{{ asset('logoStuda.png') }}" alt="Studa" class="h-8 w-auto">
+            <span class="px-2 py-0.5 text-[10px] font-bold tracking-widest uppercase rounded-full bg-red-50 text-red-600 border border-red-200/40 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/30">Beta</span>
+        </a>
         <form action="/" class="hidden md:flex items-center bg-slate-100 dark:bg-slate-800/50 rounded-lg px-3 py-1.5 border border-slate-200 dark:border-slate-700">
             <span class="material-symbols-outlined text-slate-400 dark:text-slate-500 text-sm mr-2">search</span>
             <input name="search" value="{{ request('search') }}" class="bg-transparent border-none text-sm text-slate-900 dark:text-white focus:ring-0 w-64 placeholder:text-slate-400 dark:placeholder:text-slate-500" placeholder="Rechercher un cours..." type="text"/>

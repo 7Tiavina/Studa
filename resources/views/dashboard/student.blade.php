@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8"/>
+    <link rel="icon" type="image/png" href="{{ asset('faviconStuda.png') }}" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Studa | Dashboard Étudiant</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -143,7 +144,9 @@
       ">
     <!-- Sidebar -->
     <aside class="flex flex-col h-screen fixed z-50 bg-white dark:bg-slate-950 w-[260px] border-r border-slate-200 dark:border-slate-800 transition-colors">
-        <a href="/" class="text-2xl font-black text-blue-600 dark:text-blue-500 px-6 py-8 block">Studa</a>
+        <a href="/" class="px-6 py-8 block">
+            <img src="{{ asset('logoStuda.png') }}" alt="Studa" class="h-8 w-auto">
+        </a>
         
         <div class="px-6 mb-8 flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center text-secondary font-bold">

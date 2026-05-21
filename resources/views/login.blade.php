@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8"/>
+    <link rel="icon" type="image/png" href="{{ asset('faviconStuda.png') }}" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -28,6 +29,11 @@
 </div>
 
 <div class="w-full max-w-md bg-white dark:bg-slate-900 p-8 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl transition-all duration-200">
+    <div class="flex justify-center mb-6">
+        <a href="/">
+            <img src="{{ asset('logoStuda.png') }}" alt="Studa" class="h-10 w-auto">
+        </a>
+    </div>
     <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 text-center">Connexion</h2>
     
     <form class="space-y-4" action="{{ route('login') }}" method="POST">
