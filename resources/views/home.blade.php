@@ -151,7 +151,7 @@
         }
     </script>
 </head>
-<body x-data="{ currentTab: 'courses' }" class="bg-slate-50 dark:bg-background font-body-base text-slate-800 dark:text-on-background selection:bg-primary-container selection:text-on-primary-container transition-colors duration-200">
+<body x-data="{ currentTab: 'courses', mentorSearchQuery: '' }" class="bg-slate-50 dark:bg-background font-body-base text-slate-800 dark:text-on-background selection:bg-primary-container selection:text-on-primary-container transition-colors duration-200">
 
 <nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm flex justify-between items-center px-6 h-16 transition-colors">
     <div class="flex items-center gap-8">
@@ -166,10 +166,10 @@
     </div>
     
     <div class="hidden md:flex items-center gap-6">
-        <a href="#" @click.prevent="currentTab = 'courses'" :class="currentTab === 'courses' ? 'text-[#6366f1] dark:text-primary font-semibold border-b-2 border-[#6366f1] dark:border-primary pb-1 font-inter' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white pb-1 border-b-2 border-transparent transition-colors font-inter'" class="pb-1">Courses</a>
-        <a href="#" @click.prevent="currentTab = 'my-learning'" :class="currentTab === 'my-learning' ? 'text-[#6366f1] dark:text-primary font-semibold border-b-2 border-[#6366f1] dark:border-primary pb-1 font-inter' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white pb-1 border-b-2 border-transparent transition-colors font-inter'" class="pb-1">My Learning</a>
-        <a href="#" @click.prevent="currentTab = 'library'" :class="currentTab === 'library' ? 'text-[#6366f1] dark:text-primary font-semibold border-b-2 border-[#6366f1] dark:border-primary pb-1 font-inter' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white pb-1 border-b-2 border-transparent transition-colors font-inter'" class="pb-1">Library</a>
-        <a href="#" @click.prevent="currentTab = 'mentors'" :class="currentTab === 'mentors' ? 'text-[#6366f1] dark:text-primary font-semibold border-b-2 border-[#6366f1] dark:border-primary pb-1 font-inter' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white pb-1 border-b-2 border-transparent transition-colors font-inter'" class="pb-1">Mentors</a>
+        <a href="#" @click.prevent="currentTab = 'courses'" :class="currentTab === 'courses' ? 'text-[#1b55db] dark:text-primary font-semibold border-b-2 border-[#1b55db] dark:border-primary pb-1 font-inter' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white pb-1 border-b-2 border-transparent transition-colors font-inter'" class="pb-1">Courses</a>
+        <a href="#" @click.prevent="currentTab = 'my-learning'" :class="currentTab === 'my-learning' ? 'text-[#1b55db] dark:text-primary font-semibold border-b-2 border-[#1b55db] dark:border-primary pb-1 font-inter' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white pb-1 border-b-2 border-transparent transition-colors font-inter'" class="pb-1">My Learning</a>
+        <a href="#" @click.prevent="currentTab = 'library'" :class="currentTab === 'library' ? 'text-[#1b55db] dark:text-primary font-semibold border-b-2 border-[#1b55db] dark:border-primary pb-1 font-inter' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white pb-1 border-b-2 border-transparent transition-colors font-inter'" class="pb-1">Library</a>
+        <a href="#" @click.prevent="currentTab = 'mentors'" :class="currentTab === 'mentors' ? 'text-[#1b55db] dark:text-primary font-semibold border-b-2 border-[#1b55db] dark:border-primary pb-1 font-inter' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white pb-1 border-b-2 border-transparent transition-colors font-inter'" class="pb-1">Mentors</a>
     </div>
 
     <div class="flex items-center gap-4">
@@ -186,13 +186,13 @@
                     $dashboardRoute = 'admin.dashboard';
                 }
             @endphp
-            <a href="{{ route($dashboardRoute) }}" class="text-slate-700 dark:text-white hover:text-blue-600 dark:hover:text-primary transition-colors text-sm font-semibold">Portal</a>
+            <a href="{{ route($dashboardRoute) }}" class="text-slate-700 dark:text-white hover:text-[#1b55db] dark:hover:text-primary transition-colors text-sm font-semibold">Portal</a>
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-white px-4 py-2 rounded-lg font-semibold text-sm active:scale-95 duration-150 hover:bg-slate-300 dark:hover:bg-slate-700">Logout</button>
             </form>
         @else
-            <a href="/login" class="bg-blue-600 dark:bg-primary-container text-white dark:text-on-primary-container px-4 py-2 rounded-lg font-semibold text-sm active:scale-95 duration-150 hover:bg-blue-700 dark:hover:opacity-90">Login</a>
+            <a href="/login" class="bg-[#1b55db] dark:bg-primary-container text-white dark:text-on-primary-container px-4 py-2 rounded-lg font-semibold text-sm active:scale-95 duration-150 hover:bg-[#123fa3] dark:hover:opacity-90">Login</a>
         @endauth
     </div>
 </nav>
@@ -215,7 +215,7 @@
                         <span class="material-symbols-outlined text-slate-400 mr-2">search</span>
                         <input name="search" value="{{ request('search') }}" class="bg-transparent border-none text-slate-900 dark:text-white focus:ring-0 w-full placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm" placeholder="Quel sujet souhaites-tu réviser ?" type="text"/>
                     </div>
-                    <button type="submit" class="bg-blue-600 dark:bg-primary text-white dark:text-on-primary px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 dark:hover:bg-primary/90 transition-all text-sm whitespace-nowrap">
+                    <button type="submit" class="bg-[#1b55db] dark:bg-primary text-white dark:text-on-primary px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#123fa3] dark:hover:bg-primary/90 transition-all text-sm whitespace-nowrap">
                         Rechercher
                     </button>
                 </form>
@@ -237,16 +237,16 @@
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-4 mt-6">
-                    <a href="{{ route('register') }}" class="inline-block bg-[#6366f1] hover:bg-[#4f46e5] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm">
+                    <a href="{{ route('register') }}" class="inline-block bg-[#1b55db] hover:bg-[#4f46e5] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm">
                         Démarrer mon inscription
                     </a>
-                    <a href="#levels" class="text-[#6366f1] dark:text-blue-400 font-semibold text-sm hover:underline">
+                    <a href="#levels" class="text-[#1b55db] dark:text-blue-400 font-semibold text-sm hover:underline">
                         Explorer les ressources et professeurs
                     </a>
                 </div>
             </div>
 
-            <div class="bg-blue-50/40 dark:bg-slate-800/40 border-t-4 border-blue-400 dark:border-blue-500 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+            <div class="bg-blue-50/40 dark:bg-slate-800/40 border-t-4 border-blue-400 dark:border-[#1b55db] rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
                 <div class="space-y-3">
                     <h3 class="text-xl font-bold text-slate-900 dark:text-white">Professeurs</h3>
                     <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
@@ -254,10 +254,10 @@
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-4 mt-6">
-                    <a href="{{ route('register') }}?role=teacher" class="inline-block bg-[#6366f1] hover:bg-[#4f46e5] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm">
+                    <a href="{{ route('register') }}?role=teacher" class="inline-block bg-[#1b55db] hover:bg-[#4f46e5] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm">
                         Créer mon espace professeur
                     </a>
-                    <a href="#" class="text-[#6366f1] dark:text-blue-400 font-semibold text-sm hover:underline">
+                    <a href="#" class="text-[#1b55db] dark:text-blue-400 font-semibold text-sm hover:underline">
                         Découvrir les avantages exclusifs
                     </a>
                 </div>
@@ -268,15 +268,15 @@
     <section class="space-y-md">
         <div class="flex items-center justify-between">
             <h2 class="font-headline-md text-headline-md text-slate-900 dark:text-white flex items-center gap-2">
-                <span class="w-2 h-6 bg-blue-600 dark:bg-primary rounded-full"></span>
+                <span class="w-2 h-6 bg-[#1b55db] dark:bg-primary rounded-full"></span>
                 Ton Niveau Académique
             </h2>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-gutter">
             @foreach($levels as $l)
                 <a href="?level_id={{ $l->id }}&subject_id={{ request('subject_id') }}&search={{ request('search') }}" 
-                   class="{{ request('level_id') == $l->id ? 'bg-blue-600/10 dark:bg-blue-600/20 border-blue-500 shadow-lg' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-primary hover:bg-slate-50 dark:hover:bg-slate-800' }} p-4 rounded-xl text-center border transition-all group">
-                    <p class="text-slate-400 dark:text-slate-500 font-label-caps group-hover:text-blue-600 dark:group-hover:text-primary transition-colors">{{ $l->category }}</p>
+                   class="{{ request('level_id') == $l->id ? 'bg-[#1b55db]/10 dark:bg-[#1b55db]/20 border-[#1b55db] shadow-lg' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-[#1b55db] dark:hover:border-primary hover:bg-slate-50 dark:hover:bg-slate-800' }} p-4 rounded-xl text-center border transition-all group">
+                    <p class="text-slate-400 dark:text-slate-500 font-label-caps group-hover:text-[#1b55db] dark:group-hover:text-primary transition-colors">{{ $l->category }}</p>
                     <p class="text-slate-900 dark:text-white font-title-sm mt-1">{{ $l->name }}</p>
                 </a>
             @endforeach
@@ -286,13 +286,13 @@
     <section class="space-y-md">
         <div class="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar">
             <a href="?level_id={{ request('level_id') }}&search={{ request('search') }}" 
-               class="flex items-center gap-2 {{ !request('subject_id') ? 'bg-blue-600 dark:bg-primary text-white dark:text-on-primary' : 'bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high border border-slate-200 dark:border-outline-variant text-slate-700 dark:text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap font-medium text-sm transition-all shadow-sm">
+               class="flex items-center gap-2 {{ !request('subject_id') ? 'bg-[#1b55db] dark:bg-primary text-white dark:text-on-primary' : 'bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high border border-slate-200 dark:border-outline-variant text-slate-700 dark:text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap font-medium text-sm transition-all shadow-sm">
                 <span class="material-symbols-outlined text-lg">all_inclusive</span>
                 Tous les sujets
             </a>
             @foreach($subjects as $s)
                 <a href="?subject_id={{ $s->id }}&level_id={{ request('level_id') }}&search={{ request('search') }}" 
-                   class="flex items-center gap-2 {{ request('subject_id') == $s->id ? 'bg-blue-600 dark:bg-primary text-white dark:text-on-primary' : 'bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high border border-slate-200 dark:border-outline-variant text-slate-700 dark:text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-all shadow-sm">
+                   class="flex items-center gap-2 {{ request('subject_id') == $s->id ? 'bg-[#1b55db] dark:bg-primary text-white dark:text-on-primary' : 'bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high border border-slate-200 dark:border-outline-variant text-slate-700 dark:text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-all shadow-sm">
                     <span class="material-symbols-outlined text-lg">{{ $s->icon ?: 'book' }}</span>
                     {{ $s->name }}
                 </a>
@@ -303,19 +303,19 @@
     <section class="space-y-md">
         <div class="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar">
             <a href="?level_id={{ request('level_id') }}&search={{ request('search') }}" 
-               class="flex items-center gap-2 {{ !request('type') ? 'bg-blue-600 dark:bg-primary text-white dark:text-on-primary' : 'bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high border border-slate-200 dark:border-outline-variant text-slate-700 dark:text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-all shadow-sm">
+               class="flex items-center gap-2 {{ !request('type') ? 'bg-[#1b55db] dark:bg-primary text-white dark:text-on-primary' : 'bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high border border-slate-200 dark:border-outline-variant text-slate-700 dark:text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-all shadow-sm">
                 Tous les types
             </a>
             <a href="?type=course&level_id={{ request('level_id') }}&subject_id={{ request('subject_id') }}&search={{ request('search') }}" 
-               class="flex items-center gap-2 {{ request('type') == 'course' ? 'bg-blue-600 dark:bg-primary text-white dark:text-on-primary' : 'bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high border border-slate-200 dark:border-outline-variant text-slate-700 dark:text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-all shadow-sm">
+               class="flex items-center gap-2 {{ request('type') == 'course' ? 'bg-[#1b55db] dark:bg-primary text-white dark:text-on-primary' : 'bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high border border-slate-200 dark:border-outline-variant text-slate-700 dark:text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-all shadow-sm">
                 Cours
             </a>
             <a href="?type=sujet_type&level_id={{ request('level_id') }}&subject_id={{ request('subject_id') }}&search={{ request('search') }}" 
-               class="flex items-center gap-2 {{ request('type') == 'sujet_type' ? 'bg-blue-600 dark:bg-primary text-white dark:text-on-primary' : 'bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high border border-slate-200 dark:border-outline-variant text-slate-700 dark:text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-all shadow-sm">
+               class="flex items-center gap-2 {{ request('type') == 'sujet_type' ? 'bg-[#1b55db] dark:bg-primary text-white dark:text-on-primary' : 'bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high border border-slate-200 dark:border-outline-variant text-slate-700 dark:text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-all shadow-sm">
                 Sujets Types
             </a>
             <a href="?type=correction&level_id={{ request('level_id') }}&subject_id={{ request('subject_id') }}&search={{ request('search') }}" 
-               class="flex items-center gap-2 {{ request('type') == 'correction' ? 'bg-blue-600 dark:bg-primary text-white dark:text-on-primary' : 'bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high border border-slate-200 dark:border-outline-variant text-slate-700 dark:text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-all shadow-sm">
+               class="flex items-center gap-2 {{ request('type') == 'correction' ? 'bg-[#1b55db] dark:bg-primary text-white dark:text-on-primary' : 'bg-white dark:bg-surface-container hover:bg-slate-50 dark:hover:bg-surface-container-high border border-slate-200 dark:border-outline-variant text-slate-700 dark:text-on-surface-variant' }} px-5 py-2.5 rounded-full whitespace-nowrap text-sm transition-all shadow-sm">
                 Corrigés
             </a>
         </div>
@@ -323,30 +323,35 @@
 
     <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter pb-xl">
         @forelse($courses as $course)
-            <div class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl overflow-hidden flex flex-col group hover:border-blue-500 dark:hover:border-primary transition-all duration-300 shadow-md hover:shadow-xl">
+            <div class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl overflow-hidden flex flex-col group hover:border-[#1b55db] dark:hover:border-primary transition-all duration-300 shadow-md hover:shadow-xl">
                 <div class="h-48 relative overflow-hidden bg-slate-100 dark:bg-slate-800">
                     <img alt="{{ $course->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="{{ $course->thumbnail_path ? asset('storage/' . $course->thumbnail_path) : 'https://picsum.photos/400/300' }}"/>
                     <div class="absolute top-4 left-4 flex flex-wrap gap-2">
-                        <span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">{{ $course->subject->name }}</span>
+                        <span class="bg-[#1b55db] text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">{{ $course->subject->name }}</span>
                         <span class="bg-purple-600 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">{{ $course->type }}</span>
                         <span class="bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">{{ $course->level->name }}</span>
                     </div>
                 </div>
                 <div class="p-6 flex-1 flex flex-col space-y-4">
                     <div>
-                        <h3 class="font-title-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-primary transition-colors line-clamp-2">{{ $course->title }}</h3>
+                        <h3 class="font-title-sm text-slate-900 dark:text-white group-hover:text-[#1b55db] dark:group-hover:text-primary transition-colors line-clamp-2">{{ $course->title }}</h3>
                         <p class="text-slate-500 dark:text-on-surface-variant text-body-sm mt-1 line-clamp-2">{{ Str::limit($course->description, 100) }}</p>
                     </div>
                     <div class="flex items-center justify-between mt-auto">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-[10px]">
-                                {{ substr($course->teacher->name, 0, 1) }}
+                        <button @click="currentTab = 'mentors'; mentorSearchQuery = '{{ $course->teacher->name }}'" 
+                                class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                            <div class="w-8 h-8 rounded-full overflow-hidden bg-[#1b55db]/20 text-[#1b55db] dark:text-blue-400 flex items-center justify-center font-bold text-[10px] border border-primary/20">
+                                @if($course->teacher->avatar)
+                                    <img src="{{ asset('storage/' . $course->teacher->avatar) }}" alt="" class="w-full h-full object-cover">
+                                @else
+                                    {{ substr($course->teacher->name, 0, 1) }}
+                                @endif
                             </div>
-                            <span class="text-xs font-medium text-slate-600 dark:text-slate-300">{{ $course->teacher->name }}</span>
-                        </div>
+                            <span class="text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">{{ $course->teacher->name }}</span>
+                        </button>
                     </div>
                     <div class="flex flex-col gap-2 pt-2">
-                        <a href="{{ asset('storage/' . $course->file_path) }}" target="_blank" class="w-full bg-blue-600 dark:bg-primary text-white dark:text-on-primary py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-sm">
+                        <a href="{{ asset('storage/' . $course->file_path) }}" target="_blank" class="w-full bg-[#1b55db] dark:bg-primary text-white dark:text-on-primary py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-sm">
                             <span class="material-symbols-outlined text-sm">visibility</span> Prévisualiser
                         </a>
                         <a href="{{ asset('storage/' . $course->file_path) }}" download class="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white py-2.5 rounded-xl font-medium text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
@@ -366,7 +371,7 @@
         <!-- Hero Section du Blog -->
         <section class="bg-gradient-to-br from-[#fcfbf7] to-amber-50/30 dark:from-slate-900/40 dark:to-slate-950/20 rounded-3xl overflow-hidden p-8 md:p-12 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center gap-8">
             <div class="flex-1 space-y-6">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[#6366f1] dark:text-primary text-xs font-bold uppercase tracking-wider">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[#1b55db] dark:text-primary text-xs font-bold uppercase tracking-wider">
                     <span class="material-symbols-outlined text-sm">local_library</span> Blog & Conseils Studa
                 </div>
                 <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
@@ -377,10 +382,10 @@
                     Que vous soyez élève à Tananarive, enseignant à Majunga, ou parent d'élève à Fianarantsoa, retrouvez nos dossiers exclusifs sur l'éducation et la réussite scolaire à Madagascar.
                 </p>
                 <div class="flex flex-wrap items-center gap-4">
-                    <button @click="currentTab = 'courses'" class="bg-[#6366f1] hover:bg-[#4f46e5] text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95 flex items-center gap-2">
+                    <button @click="currentTab = 'courses'" class="bg-[#1b55db] hover:bg-[#4f46e5] text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95 flex items-center gap-2">
                         <span class="material-symbols-outlined text-sm">school</span> Commencer à apprendre
                     </button>
-                    <a href="#articles" class="text-[#6366f1] dark:text-primary font-semibold text-sm hover:underline flex items-center gap-1">
+                    <a href="#articles" class="text-[#1b55db] dark:text-primary font-semibold text-sm hover:underline flex items-center gap-1">
                         Lire nos dossiers <span class="material-symbols-outlined text-sm">arrow_downward</span>
                     </a>
                 </div>
@@ -394,14 +399,14 @@
         <section id="articles" class="space-y-8">
             <div class="flex items-center justify-between">
                 <h2 class="font-headline-md text-headline-md text-slate-900 dark:text-white flex items-center gap-2">
-                    <span class="w-2 h-6 bg-[#6366f1] dark:bg-primary rounded-full"></span>
+                    <span class="w-2 h-6 bg-[#1b55db] dark:bg-primary rounded-full"></span>
                     Dernières publications pour Madagascar
                 </h2>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Article 1 -->
-                <article class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-md flex flex-col group hover:border-[#6366f1] dark:hover:border-primary transition-all duration-300">
+                <article class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-md flex flex-col group hover:border-[#1b55db] dark:hover:border-primary transition-all duration-300">
                     <div class="h-48 relative overflow-hidden bg-slate-100 dark:bg-slate-800">
                         <img alt="Réussite aux examens" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=600&auto=format&fit=crop"/>
                         <span class="absolute top-4 left-4 bg-amber-500 text-slate-900 text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">Conseils d'étude</span>
@@ -409,43 +414,43 @@
                     <div class="p-6 flex-1 flex flex-col space-y-4 justify-between">
                         <div class="space-y-2">
                             <span class="text-xs text-slate-400 dark:text-slate-500">20 Mai 2026 • Par Rabe Harison</span>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#6366f1] dark:group-hover:text-primary transition-colors">
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#1b55db] dark:group-hover:text-primary transition-colors">
                                 Comment réviser efficacement pour le BACC et le BEPC à Madagascar ?
                             </h3>
                             <p class="text-slate-600 dark:text-slate-300 text-sm line-clamp-3">
                                 Les examens nationaux malgaches approchent à grands pas. Découvrez des techniques d'organisation adaptées au contexte local, comment s'organiser face aux défis quotidiens et optimiser l'utilisation des sujets types disponibles sur Studa.
                             </p>
                         </div>
-                        <a href="#" @click.prevent="alert('Cet article sera disponible dans sa version complète très prochainement. Restez connectés !')" class="text-[#6366f1] dark:text-primary font-bold text-sm flex items-center gap-1 hover:underline">
+                        <a href="#" @click.prevent="alert('Cet article sera disponible dans sa version complète très prochainement. Restez connectés !')" class="text-[#1b55db] dark:text-primary font-bold text-sm flex items-center gap-1 hover:underline">
                             Lire la suite <span class="material-symbols-outlined text-sm">arrow_forward</span>
                         </a>
                     </div>
                 </article>
 
                 <!-- Article 2 -->
-                <article class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-md flex flex-col group hover:border-[#6366f1] dark:hover:border-primary transition-all duration-300">
+                <article class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-md flex flex-col group hover:border-[#1b55db] dark:hover:border-primary transition-all duration-300">
                     <div class="h-48 relative overflow-hidden bg-slate-100 dark:bg-slate-800">
                         <img alt="Technologie éducation" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=600&auto=format&fit=crop"/>
-                        <span class="absolute top-4 left-4 bg-blue-500 text-white text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">Technologie</span>
+                        <span class="absolute top-4 left-4 bg-[#1b55db] text-white text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">Technologie</span>
                     </div>
                     <div class="p-6 flex-1 flex flex-col space-y-4 justify-between">
                         <div class="space-y-2">
                             <span class="text-xs text-slate-400 dark:text-slate-500">18 Mai 2026 • Par l'équipe Studa</span>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#6366f1] dark:group-hover:text-primary transition-colors">
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#1b55db] dark:group-hover:text-primary transition-colors">
                                 Le rôle des cours en direct dans la démocratisation du savoir
                             </h3>
                             <p class="text-slate-600 dark:text-slate-300 text-sm line-clamp-3">
                                 Grâce à l'intégration de salons de visioconférence légers comme Jitsi, des enseignants basés à Antananarivo peuvent donner des cours de soutien en temps réel à des élèves à Tuléar ou Morondava, réduisant ainsi la fracture éducative.
                             </p>
                         </div>
-                        <a href="#" @click.prevent="alert('Cet article sera disponible dans sa version complète très prochainement. Restez connectés !')" class="text-[#6366f1] dark:text-primary font-bold text-sm flex items-center gap-1 hover:underline">
+                        <a href="#" @click.prevent="alert('Cet article sera disponible dans sa version complète très prochainement. Restez connectés !')" class="text-[#1b55db] dark:text-primary font-bold text-sm flex items-center gap-1 hover:underline">
                             Lire la suite <span class="material-symbols-outlined text-sm">arrow_forward</span>
                         </a>
                     </div>
                 </article>
 
                 <!-- Article 3 -->
-                <article class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-md flex flex-col group hover:border-[#6366f1] dark:hover:border-primary transition-all duration-300">
+                <article class="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-md flex flex-col group hover:border-[#1b55db] dark:hover:border-primary transition-all duration-300">
                     <div class="h-48 relative overflow-hidden bg-slate-100 dark:bg-slate-800">
                         <img alt="OCR et Éducation" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=600&auto=format&fit=crop"/>
                         <span class="absolute top-4 left-4 bg-purple-500 text-white text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">Innovation</span>
@@ -453,14 +458,14 @@
                     <div class="p-6 flex-1 flex flex-col space-y-4 justify-between">
                         <div class="space-y-2">
                             <span class="text-xs text-slate-400 dark:text-slate-500">15 Mai 2026 • Par Rakoto Tech</span>
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#6366f1] dark:group-hover:text-primary transition-colors">
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-[#1b55db] dark:group-hover:text-primary transition-colors">
                                 OCR & Indexation PDF : Comment Studa indexe les vieux polycopiés
                             </h3>
                             <p class="text-slate-600 dark:text-slate-300 text-sm line-clamp-3">
                                 De nombreux cours et exercices précieux ne sont disponibles que sous forme de polycopiés scannés. Découvrez comment notre moteur OCR Tesseract extrait automatiquement le texte pour rendre chaque formule et chaque mot-clé instantanément recherchable.
                             </p>
                         </div>
-                        <a href="#" @click.prevent="alert('Cet article sera disponible dans sa version complète très prochainement. Restez connectés !')" class="text-[#6366f1] dark:text-primary font-bold text-sm flex items-center gap-1 hover:underline">
+                        <a href="#" @click.prevent="alert('Cet article sera disponible dans sa version complète très prochainement. Restez connectés !')" class="text-[#1b55db] dark:text-primary font-bold text-sm flex items-center gap-1 hover:underline">
                             Lire la suite <span class="material-symbols-outlined text-sm">arrow_forward</span>
                         </a>
                     </div>
@@ -471,7 +476,7 @@
         <!-- Section Témoignages et Focus Madagascar -->
         <section class="bg-slate-100 dark:bg-slate-900/30 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center gap-8 shadow-inner">
             <div class="space-y-4 md:w-2/3">
-                <span class="text-xs text-[#6366f1] dark:text-primary font-bold tracking-widest uppercase">Éducation inclusive</span>
+                <span class="text-xs text-[#1b55db] dark:text-primary font-bold tracking-widest uppercase">Éducation inclusive</span>
                 <h3 class="text-2xl font-black text-slate-900 dark:text-white leading-snug">
                     « Inspirer le changement et l'excellence de Tana à Fort-Dauphin, en passant par Majunga, Diego-Suarez et Fianarantsoa. »
                 </h3>
@@ -507,7 +512,7 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                    <span class="material-symbols-outlined text-3xl text-[#6366f1] dark:text-primary">local_library</span>
+                    <span class="material-symbols-outlined text-3xl text-[#1b55db] dark:text-primary">local_library</span>
                     Bibliothèque Numérique 🇲🇬
                 </h1>
                 <p class="text-slate-500 dark:text-outline text-sm mt-1">
@@ -516,7 +521,7 @@
             </div>
             <div class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2 rounded-xl text-center self-start md:self-auto">
                 <span class="text-xs text-slate-500 dark:text-outline font-medium block">Total ressources</span>
-                <span class="text-lg font-black text-[#6366f1] dark:text-primary">{{ count($allPublishedCourses) }}</span>
+                <span class="text-lg font-black text-[#1b55db] dark:text-primary">{{ count($allPublishedCourses) }}</span>
             </div>
         </div>
 
@@ -528,7 +533,7 @@
                     <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-outline">search</span>
                     <input x-model="searchQuery" 
                            type="text" 
-                           class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-outline-variant rounded-xl pl-12 pr-10 py-3 text-sm focus:ring-2 focus:ring-[#6366f1] focus:border-[#6366f1] dark:focus:ring-primary dark:focus:border-primary text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-outline" 
+                           class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-outline-variant rounded-xl pl-12 pr-10 py-3 text-sm focus:ring-2 focus:ring-[#1b55db] focus:border-[#1b55db] dark:focus:ring-primary dark:focus:border-primary text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-outline" 
                            placeholder="Rechercher par titre, enseignant, théorème, mot-clé..."/>
                     <button x-show="searchQuery !== ''" @click="searchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-outline dark:hover:text-white">
                         <span class="material-symbols-outlined text-sm">close</span>
@@ -537,7 +542,7 @@
 
                 <!-- Filtre Niveau -->
                 <div class="lg:col-span-2">
-                    <select x-model="selectedLevel" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-outline-variant rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-[#6366f1] text-slate-900 dark:text-white">
+                    <select x-model="selectedLevel" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-outline-variant rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-[#1b55db] text-slate-900 dark:text-white">
                         <option value="">Tous les niveaux</option>
                         @foreach($levels as $l)
                             <option value="{{ $l->id }}">{{ $l->name }}</option>
@@ -547,7 +552,7 @@
 
                 <!-- Filtre Matière -->
                 <div class="lg:col-span-2">
-                    <select x-model="selectedSubject" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-outline-variant rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-[#6366f1] text-slate-900 dark:text-white">
+                    <select x-model="selectedSubject" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-outline-variant rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-[#1b55db] text-slate-900 dark:text-white">
                         <option value="">Toutes les matières</option>
                         @foreach($subjects as $s)
                             <option value="{{ $s->id }}">{{ $s->name }}</option>
@@ -557,7 +562,7 @@
 
                 <!-- Filtre Type -->
                 <div class="lg:col-span-2">
-                    <select x-model="selectedType" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-outline-variant rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-[#6366f1] text-slate-900 dark:text-white">
+                    <select x-model="selectedType" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-outline-variant rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-[#1b55db] text-slate-900 dark:text-white">
                         <option value="">Tous les types</option>
                         <option value="course">Cours</option>
                         <option value="sujet_type">Sujet Type</option>
@@ -571,7 +576,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($allPublishedCourses as $course)
                 <div x-show="(searchQuery === '' || {{ json_encode(strtolower($course['title'])) }}.includes(searchQuery.toLowerCase()) || {{ json_encode(strtolower($course['description'] ?? '')) }}.includes(searchQuery.toLowerCase()) || {{ json_encode(strtolower($course['extracted_text'] ?? '')) }}.includes(searchQuery.toLowerCase()) || {{ json_encode(strtolower($course['teacher']['name'])) }}.includes(searchQuery.toLowerCase())) && (selectedLevel === '' || '{{ $course['level']['id'] }}' == selectedLevel) && (selectedSubject === '' || '{{ $course['subject']['id'] }}' == selectedSubject) && (selectedType === '' || '{{ $course['type'] }}' === selectedType)"
-                     class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl overflow-hidden flex flex-col group hover:border-[#6366f1] dark:hover:border-primary transition-all duration-300 shadow-md hover:shadow-xl">
+                     class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl overflow-hidden flex flex-col group hover:border-[#1b55db] dark:hover:border-primary transition-all duration-300 shadow-md hover:shadow-xl">
                     <div class="h-40 relative overflow-hidden bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                         @if($course['thumbnail_path'])
                             <img alt="{{ $course['title'] }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="/storage/{{ $course['thumbnail_path'] }}"/>
@@ -583,7 +588,7 @@
                         @endif
                         <!-- Badges -->
                         <div class="absolute top-4 left-4 flex flex-wrap gap-2">
-                            <span class="bg-[#6366f1] text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">{{ $course['subject']['name'] }}</span>
+                            <span class="bg-[#1b55db] text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">{{ $course['subject']['name'] }}</span>
                             <span class="bg-purple-600 text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">{{ $course['type'] }}</span>
                             <span class="bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">{{ $course['level']['name'] }}</span>
                         </div>
@@ -597,20 +602,25 @@
                     </div>
                     <div class="p-5 flex-1 flex flex-col space-y-4 justify-between">
                         <div class="space-y-2">
-                            <h3 class="font-bold text-base text-slate-900 dark:text-white group-hover:text-[#6366f1] dark:group-hover:text-primary transition-colors line-clamp-2">{{ $course['title'] }}</h3>
+                            <h3 class="font-bold text-base text-slate-900 dark:text-white group-hover:text-[#1b55db] dark:group-hover:text-primary transition-colors line-clamp-2">{{ $course['title'] }}</h3>
                             <p class="text-slate-500 dark:text-on-surface-variant text-xs line-clamp-2">{{ $course['description'] ?: 'Aucune description fournie.' }}</p>
                         </div>
                         <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-[10px]">
-                                    {{ substr($course['teacher']['name'], 0, 1) }}
+                            <button @click="currentTab = 'mentors'; mentorSearchQuery = '{{ $course['teacher']['name'] }}'" 
+                                    class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                                <div class="w-7 h-7 rounded-full overflow-hidden bg-[#1b55db]/20 text-[#1b55db] dark:text-blue-400 flex items-center justify-center font-bold text-[10px] border border-primary/20">
+                                    @if($course['teacher']['avatar'] ?? null)
+                                        <img src="/storage/{{ $course['teacher']['avatar'] }}" alt="" class="w-full h-full object-cover">
+                                    @else
+                                        {{ substr($course['teacher']['name'], 0, 1) }}
+                                    @endif
                                 </div>
-                                <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">{{ $course['teacher']['name'] }}</span>
-                            </div>
+                                <span class="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">{{ $course['teacher']['name'] }}</span>
+                            </button>
                             <span class="text-[10px] text-slate-400 dark:text-outline">{{ date('d M Y', strtotime($course['created_at'])) }}</span>
                         </div>
                         <div class="flex flex-col gap-2 pt-2">
-                            <a href="/storage/{{ $course['file_path'] }}" target="_blank" class="w-full bg-[#6366f1] dark:bg-primary text-white dark:text-on-primary py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-sm">
+                            <a href="/storage/{{ $course['file_path'] }}" target="_blank" class="w-full bg-[#1b55db] dark:bg-primary text-white dark:text-on-primary py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-sm">
                                 <span class="material-symbols-outlined text-sm">visibility</span> Prévisualiser
                             </a>
                             <a href="/storage/{{ $course['file_path'] }}" download class="w-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-white py-2.5 rounded-xl font-medium text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
@@ -627,7 +637,6 @@
 
     <!-- Onglet Mentors (Enseignants) -->
     <div x-show="currentTab === 'mentors'" x-cloak x-data="{
-        searchQuery: '',
         selectedSubject: '',
     }" class="space-y-8 py-6">
 
@@ -635,7 +644,7 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                    <span class="material-symbols-outlined text-3xl text-[#6366f1] dark:text-primary">supervised_user_circle</span>
+                    <span class="material-symbols-outlined text-3xl text-[#1b55db] dark:text-primary">supervised_user_circle</span>
                     Nos Mentors d'Excellence 🇲🇬
                 </h1>
                 <p class="text-slate-500 dark:text-outline text-sm mt-1">
@@ -644,7 +653,7 @@
             </div>
             <div class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2 rounded-xl text-center self-start md:self-auto">
                 <span class="text-xs text-slate-500 dark:text-outline font-medium block">Professeurs validés</span>
-                <span class="text-lg font-black text-[#6366f1] dark:text-primary">{{ count($allTeachers) }} connectés</span>
+                <span class="text-lg font-black text-[#1b55db] dark:text-primary">{{ count($allTeachers) }} connectés</span>
             </div>
         </div>
 
@@ -654,18 +663,18 @@
                 <!-- Recherche -->
                 <div class="md:col-span-8 relative">
                     <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-outline">search</span>
-                    <input x-model="searchQuery" 
+                    <input x-model="mentorSearchQuery" 
                            type="text" 
-                           class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-outline-variant rounded-xl pl-12 pr-10 py-3 text-sm focus:ring-2 focus:ring-[#6366f1] focus:border-[#6366f1] dark:focus:ring-primary dark:focus:border-primary text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-outline" 
+                           class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-outline-variant rounded-xl pl-12 pr-10 py-3 text-sm focus:ring-2 focus:ring-[#1b55db] focus:border-[#1b55db] dark:focus:ring-primary dark:focus:border-primary text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-outline" 
                            placeholder="Rechercher un enseignant par son nom..."/>
-                    <button x-show="searchQuery !== ''" @click="searchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-outline dark:hover:text-white">
+                    <button x-show="mentorSearchQuery !== ''" @click="mentorSearchQuery = ''" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-outline dark:hover:text-white">
                         <span class="material-symbols-outlined text-sm">close</span>
                     </button>
                 </div>
 
                 <!-- Matière -->
                 <div class="md:col-span-4">
-                    <select x-model="selectedSubject" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-outline-variant rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-[#6366f1] text-slate-900 dark:text-white">
+                    <select x-model="selectedSubject" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-outline-variant rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-[#1b55db] text-slate-900 dark:text-white">
                         <option value="">Toutes les spécialités</option>
                         @foreach($subjects as $s)
                             <option value="{{ $s->id }}">{{ $s->name }}</option>
@@ -683,7 +692,7 @@
                     $teacherLevels = $teacher['levels'] ?? [];
                     $subjectIds = collect($teacherSubjects)->pluck('id')->toArray();
                 @endphp
-                <div x-show="(searchQuery === '' || {{ json_encode(strtolower($teacher['name'])) }}.includes(searchQuery.toLowerCase()) || {{ json_encode(strtolower($teacher['email'])) }}.includes(searchQuery.toLowerCase())) && (selectedSubject === '' || {{ json_encode($subjectIds) }}.includes(parseInt(selectedSubject)))"
+                <div x-show="(mentorSearchQuery === '' || {{ json_encode(strtolower($teacher['name'])) }}.includes(mentorSearchQuery.toLowerCase()) || {{ json_encode(strtolower($teacher['email'])) }}.includes(mentorSearchQuery.toLowerCase())) && (selectedSubject === '' || {{ json_encode($subjectIds) }}.includes(parseInt(selectedSubject)))"
                      class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl overflow-hidden flex flex-col justify-between group hover:border-[#1b55db] dark:hover:border-primary transition-all duration-300 shadow-md hover:shadow-xl p-6 space-y-6">
                     
                     <!-- En-tête de la carte -->
@@ -773,7 +782,7 @@
                                 $maskedEmail = $email;
                             }
                         @endphp
-                        <div class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 py-3 px-4 rounded-xl text-center flex items-center justify-center gap-2 group-hover:border-[#6366f1] dark:group-hover:border-primary transition-all">
+                        <div class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 py-3 px-4 rounded-xl text-center flex items-center justify-center gap-2 group-hover:border-[#1b55db] dark:group-hover:border-primary transition-all">
                             <span class="material-symbols-outlined text-slate-400 dark:text-outline text-sm">mail</span>
                             <span class="text-xs font-semibold text-slate-600 dark:text-slate-300 font-mono tracking-wide" title="Email protégé pour la confidentialité">{{ $maskedEmail }}</span>
                         </div>
@@ -785,13 +794,14 @@
         </div>
 
         <!-- Aucun résultat (Empty State) -->
-        <div x-show="filteredTeachers.length === 0" class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl p-12 text-center max-w-xl mx-auto space-y-4 shadow-md">
+        <div x-show="mentorSearchQuery !== '' && !{{ json_encode($allTeachers->pluck('name')->map(fn($n) => strtolower($n))) }}.some(name => name.includes(mentorSearchQuery.toLowerCase()))" 
+             class="bg-white dark:bg-surface-container border border-slate-200 dark:border-outline-variant rounded-2xl p-12 text-center max-w-xl mx-auto space-y-4 shadow-md">
             <span class="material-symbols-outlined text-6xl text-slate-300 dark:text-outline">person_off</span>
             <h3 class="text-lg font-bold text-slate-900 dark:text-white">Aucun professeur trouvé</h3>
             <p class="text-slate-500 dark:text-outline text-sm">
                 Essayez d'ajuster vos termes de recherche ou de sélectionner une autre spécialité.
             </p>
-            <button @click="searchQuery = ''; selectedSubject = ''" class="inline-flex items-center gap-2 bg-[#6366f1] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#4f46e5] transition-all">
+            <button @click="mentorSearchQuery = ''; selectedSubject = ''" class="inline-flex items-center gap-2 bg-[#1b55db] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:opacity-90 transition-all">
                 <span class="material-symbols-outlined text-sm">restart_alt</span> Réinitialiser
             </button>
         </div>
@@ -801,10 +811,10 @@
 <footer class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 w-full py-12 px-8 flex flex-col md:flex-row justify-between items-center gap-4 transition-colors">
     <p class="text-xs text-slate-500 font-inter">© 2026 Studa Education. Empowerment through precision.</p>
     <div class="flex items-center gap-8">
-        <a class="text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 text-xs transition-colors" href="#">Privacy Policy</a>
-        <a class="text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 text-xs transition-colors" href="#">Terms of Service</a>
-        <a class="text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 text-xs transition-colors" href="#">Support</a>
-        <a class="text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 text-xs transition-colors" href="#">Contact Us</a>
+        <a class="text-slate-500 hover:text-[#1b55db] dark:hover:text-blue-400 text-xs transition-colors" href="#">Privacy Policy</a>
+        <a class="text-slate-500 hover:text-[#1b55db] dark:hover:text-blue-400 text-xs transition-colors" href="#">Terms of Service</a>
+        <a class="text-slate-500 hover:text-[#1b55db] dark:hover:text-blue-400 text-xs transition-colors" href="#">Support</a>
+        <a class="text-slate-500 hover:text-[#1b55db] dark:hover:text-blue-400 text-xs transition-colors" href="#">Contact Us</a>
     </div>
 </footer>
 

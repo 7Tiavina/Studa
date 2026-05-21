@@ -54,6 +54,7 @@ class HomeController extends Controller
                     'teacher' => [
                         'id' => $course->teacher?->id,
                         'name' => $course->teacher?->name,
+                        'avatar' => $course->teacher?->avatar,
                     ]
                 ];
             });
