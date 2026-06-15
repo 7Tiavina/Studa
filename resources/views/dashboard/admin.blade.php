@@ -967,7 +967,7 @@
                 @csrf
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Catégorie</label>
-                    <select name="category" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-1 focus:ring-primary" required>
+                    <select name="category" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary" required>
                         <option value="">Sélectionner une catégorie</option>
                         <template x-for="cat in availableCategories" :key="cat">
                             <option :value="cat" x-text="cat"></option>
@@ -976,11 +976,11 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Nom du niveau (ex: Seconde)</label>
-                    <input type="text" name="name" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-1 focus:ring-primary" required placeholder="Seconde">
+                    <input type="text" name="name" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary" required placeholder="Seconde">
                 </div>
                 <div class="mb-6">
                     <label class="block text-sm font-medium mb-2">Position</label>
-                    <input type="number" name="position" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-1 focus:ring-primary" value="0">
+                    <input type="number" name="position" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary" value="0">
                     <p class="text-[10px] text-outline mt-1">Sert à ordonner les niveaux (ex: 1 pour Seconde, 2 pour Première...). Plus le chiffre est petit, plus il apparaît haut.</p>
                 </div>
                 <div class="flex gap-4">
@@ -1000,7 +1000,7 @@
                 @method('PUT')
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Catégorie</label>
-                    <select name="category" x-model="level.category" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-1 focus:ring-primary" required>
+                    <select name="category" x-model="level.category" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary" required>
                         <template x-for="cat in availableCategories" :key="cat">
                             <option :value="cat" x-text="cat" :selected="level.category == cat"></option>
                         </template>
@@ -1008,11 +1008,11 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Nom du niveau</label>
-                    <input type="text" name="name" x-model="level.name" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-1 focus:ring-primary" required>
+                    <input type="text" name="name" x-model="level.name" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary" required>
                 </div>
                 <div class="mb-6">
                     <label class="block text-sm font-medium mb-2">Position</label>
-                    <input type="number" name="position" x-model="level.position" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-1 focus:ring-primary">
+                    <input type="number" name="position" x-model="level.position" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary">
                     <p class="text-[10px] text-outline mt-1">Plus le chiffre est petit, plus il apparaît haut.</p>
                 </div>
                 <div class="flex gap-4">
@@ -1032,11 +1032,11 @@
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">Nom de la matière</label>
-                        <input type="text" name="name" class="w-full bg-background border-outline-variant rounded-xl text-white" required placeholder="Ex: Algèbre">
+                        <input type="text" name="name" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white" required placeholder="Ex: Algèbre">
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Niveau</label>
-                        <select name="level_id" class="w-full bg-background border-outline-variant rounded-xl text-white" required>
+                        <select name="level_id" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white" required>
                             <option value="">Choisir un niveau</option>
                             @foreach($levels->groupBy('category') as $cat => $catLevels)
                                 <optgroup label="{{ $cat ?: 'Non classé' }}" class="bg-slate-900 text-primary">
@@ -1079,11 +1079,11 @@
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">Nom de la matière</label>
-                        <input type="text" name="name" x-model="subject.name" class="w-full bg-background border-outline-variant rounded-xl text-white" required>
+                        <input type="text" name="name" x-model="subject.name" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white" required>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Niveau</label>
-                        <select name="level_id" x-model="subject.level_id" class="w-full bg-background border-outline-variant rounded-xl text-white" required>
+                        <select name="level_id" x-model="subject.level_id" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white" required>
                             @foreach($levels->groupBy('category') as $cat => $catLevels)
                                 <optgroup label="{{ $cat ?: 'Non classé' }}" class="bg-slate-900 text-primary">
                                     @foreach($catLevels as $l)

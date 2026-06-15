@@ -14,18 +14,49 @@ class NotificationController extends Controller
     public function index()
     {
         $notifications = Notification::where('user_id', Auth::id())
+            ->where('type', '!=', 'new_message')
             ->latest()
             ->take(20)
             ->get();
 
         $unreadCount = Notification::where('user_id', Auth::id())
+            ->where('type', '!=', 'new_message')
             ->where('is_read', false)
             ->count();
+
+        $unreadMessagesCount = Notification::where('user_id', Auth::id())
+            ->where('type', 'new_message')
+            ->where('is_read', false)
+            ->count();
+
+        $unreadMessagesBySender = Notification::where('user_id', Auth::id())
+            ->where('type', 'new_message')
+            ->where('is_read', false)
+            ->selectRaw('sender_id, count(*) as count')
+            ->groupBy('sender_id')
+            ->pluck('count', 'sender_id')
+            ->toArray();
 
         return response()->json([
             'notifications' => $notifications,
             'unread_count' => $unreadCount,
+            'unread_messages_count' => $unreadMessagesCount,
+            'unread_messages_by_sender' => (object) $unreadMessagesBySender,
         ]);
+    }
+
+    /**
+     * Marquer comme lues toutes les notifications de nouveaux messages d'un expéditeur spécifique.
+     */
+    public function markMessagesAsReadFromSender($senderId)
+    {
+        Notification::where('user_id', Auth::id())
+            ->where('type', 'new_message')
+            ->where('sender_id', $senderId)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return response()->json(['success' => true]);
     }
 
     /**

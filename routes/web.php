@@ -57,6 +57,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
         Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
         Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+        Route::post('/notifications/messages/read/{senderId}', [NotificationController::class, 'markMessagesAsReadFromSender'])->name('notifications.messages.read');
         
         // Teacher routes
         Route::get('/dashboard/teacher', [TeacherController::class, 'index'])->name('teacher.dashboard');

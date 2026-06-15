@@ -171,6 +171,86 @@
         userStatuses: {
             @foreach($followedTeachers as $t) {{ $t->id }}: {{ $t->is_online ? 'true' : 'false' }}, @endforeach
         },
+        unreadMessagesCount: 0,
+        unreadMessagesBySender: {},
+        notifications: [],
+        unreadNotificationsCount: 0,
+        toasts: [],
+        fetchNotifications() {
+            fetch('{{ route('notifications.index') }}')
+                .then(res => res.json())
+                .then(data => {
+                    let newNotifications = data.notifications.filter(n => {
+                        return !n.is_read && !this.notifications.some(existing => existing.id === n.id);
+                    });
+                    if (this.notifications.length > 0 && newNotifications.length > 0) {
+                        newNotifications.forEach(n => {
+                            if (n.type !== 'new_message') {
+                                this.showToast(n);
+                            }
+                        });
+                    }
+                    this.notifications = data.notifications;
+                    this.unreadNotificationsCount = data.unread_count;
+                    this.unreadMessagesCount = data.unread_messages_count;
+                    this.unreadMessagesBySender = data.unread_messages_by_sender;
+
+                    this.openChats.forEach(chat => {
+                        if (!chat.minimized && (this.unreadMessagesBySender[chat.id] || 0) > 0) {
+                            this.markMessagesAsRead(chat.id);
+                        }
+                    });
+                });
+        },
+        showToast(n) {
+            let id = Date.now() + Math.random();
+            this.toasts.push({ id, title: n.title, message: n.message, type: n.type, action_url: n.action_url, sender_id: n.sender_id, sender: n.sender });
+            setTimeout(() => {
+                this.toasts = this.toasts.filter(t => t.id !== id);
+            }, 5000);
+        },
+        markNotificationAsRead(n) {
+            fetch(`/notifications/${n.id}/read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            }).then(() => {
+                this.fetchNotifications();
+                if (n.action_url) {
+                    window.location.href = n.action_url;
+                }
+            });
+        },
+        markAllNotificationsAsRead() {
+            fetch('{{ route('notifications.read-all') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            }).then(() => {
+                this.fetchNotifications();
+            });
+        },
+        markMessagesAsRead(senderId) {
+            // Mise à jour optimiste locale pour une réactivité instantanée
+            const count = this.unreadMessagesBySender[senderId] || 0;
+            if (count > 0) {
+                this.unreadMessagesBySender[senderId] = 0;
+                this.unreadMessagesCount = Math.max(0, this.unreadMessagesCount - count);
+            }
+            fetch(`/notifications/messages/read/${senderId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            }).then(() => {
+                this.fetchNotifications();
+            });
+        },
         updateAllStatuses() {
             let ids = [...new Set([
                 ...Object.keys(this.userStatuses),
@@ -187,7 +267,10 @@
         }
       }"
       x-init="
+        updateAllStatuses();
         setInterval(() => { updateAllStatuses(); }, 8000);
+        fetchNotifications();
+        setInterval(() => { fetchNotifications(); }, 8000);
       ">
     <!-- Sidebar -->
     <aside class="flex flex-col h-screen fixed z-50 bg-white dark:bg-slate-950 w-[260px] border-r border-slate-200 dark:border-slate-800 transition-colors">
@@ -266,90 +349,19 @@
                 </button>
                 <button @click="showMessenger = !showMessenger" class="p-2 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors relative">
                     <span class="material-symbols-outlined">chat</span>
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-secondary rounded-full"></span>
+                    <template x-if="unreadMessagesCount > 0">
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full animate-ping"></span>
+                    </template>
+                    <template x-if="unreadMessagesCount > 0">
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    </template>
                 </button>
                 <!-- Composant de Notification Alpine.js -->
-                <div x-data="{ 
-                    open: false, 
-                    notifications: [], 
-                    unreadCount: 0,
-                    toasts: [],
-                    fetchNotifications() {
-                        fetch('{{ route('notifications.index') }}')
-                            .then(res => res.json())
-                            .then(data => {
-                                let newNotifications = data.notifications.filter(n => {
-                                    return !n.is_read && !this.notifications.some(existing => existing.id === n.id);
-                                });
-                                
-                                if (this.notifications.length > 0 && newNotifications.length > 0) {
-                                    newNotifications.forEach(n => {
-                                        this.showToast(n);
-                                    });
-                                }
-                                
-                                this.notifications = data.notifications;
-                                this.unreadCount = data.unread_count;
-                            });
-                    },
-                    markAsRead(n) {
-                        fetch(`/notifications/${n.id}/read`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            }
-                        }).then(() => {
-                            this.fetchNotifications();
-                            if (n.type === 'new_message' && n.sender_id) {
-                                fetch('/messages/start/' + n.sender_id)
-                                    .then(r => r.json())
-                                    .then(conv => {
-                                        if(!openChats.find(c => c.id === n.sender_id)) {
-                                            openChats.push({
-                                                id: n.sender_id,
-                                                name: n.sender ? n.sender.name : 'Contact',
-                                                minimized: false,
-                                                conversation_id: conv.id,
-                                                is_online: conv.partner_is_online,
-                                                avatar: n.sender ? n.sender.avatar : null,
-                                                messages: []
-                                            });
-                                        }
-                                    });
-                            } else if (n.action_url) {
-                                window.location.href = n.action_url;
-                            }
-                        });
-                    },
-                    markAllAsRead() {
-                        fetch('{{ route('notifications.read-all') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            }
-                        }).then(() => {
-                            this.fetchNotifications();
-                        });
-                    },
-                    showToast(n) {
-                        let id = Date.now() + Math.random();
-                        this.toasts.push({ id, title: n.title, message: n.message, type: n.type, action_url: n.action_url, sender_id: n.sender_id, sender: n.sender });
-                        setTimeout(() => {
-                            this.toasts = this.toasts.filter(t => t.id !== id);
-                        }, 5000);
-                    }
-                }" 
-                x-init="
-                    fetchNotifications();
-                    setInterval(() => fetchNotifications(), 8000);
-                "
-                class="relative">
+                <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open" class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 relative focus:outline-none flex items-center justify-center">
                         <span class="material-symbols-outlined">notifications</span>
-                        <template x-if="unreadCount > 0">
-                            <span class="absolute top-1 right-1 min-w-[16px] h-[16px] px-1 bg-error text-slate-900 text-[9px] font-extrabold rounded-full flex items-center justify-center border border-white dark:border-slate-900" x-text="unreadCount"></span>
+                        <template x-if="unreadNotificationsCount > 0">
+                            <span class="absolute top-1 right-1 min-w-[16px] h-[16px] px-1 bg-error text-slate-900 text-[9px] font-extrabold rounded-full flex items-center justify-center border border-white dark:border-slate-900" x-text="unreadNotificationsCount"></span>
                         </template>
                     </button>
 
@@ -364,21 +376,18 @@
                         
                         <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                            <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">Notifications</h4>
-                           <template x-if="unreadCount > 0">
-                               <button @click="markAllAsRead()" class="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold">Tout lire</button>
+                           <template x-if="unreadNotificationsCount > 0">
+                               <button @click="markAllNotificationsAsRead()" class="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold">Tout lire</button>
                            </template>
                         </div>
                         
                         <div class="max-h-80 overflow-y-auto custom-scrollbar divide-y divide-slate-100 dark:divide-slate-800/50">
                             <template x-for="n in notifications" :key="n.id">
-                                <div @click="markAsRead(n); open = false" 
+                                <div @click="markNotificationAsRead(n); open = false" 
                                      :class="n.is_read ? 'opacity-60' : 'bg-blue-600/5 font-semibold'" 
                                      class="p-4 hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer transition-colors flex gap-3 text-left">
                                     
                                     <div class="flex-shrink-0 mt-0.5">
-                                        <template x-if="n.type === 'new_message'">
-                                            <span class="material-symbols-outlined text-blue-500 text-lg">chat</span>
-                                        </template>
                                         <template x-if="n.type === 'meeting_booked' || n.type === 'meeting_cancelled' || n.type === 'meeting_deleted'">
                                             <span class="material-symbols-outlined text-tertiary text-lg">video_call</span>
                                         </template>
@@ -412,7 +421,7 @@
                     <!-- Global Toast Container (Fixed bottom left) -->
                     <div class="fixed bottom-4 left-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm">
                         <template x-for="t in toasts" :key="t.id">
-                            <div @click="markAsRead(t)"
+                            <div @click="markNotificationAsRead(t)"
                                  class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl flex items-start gap-3 pointer-events-auto cursor-pointer transform hover:scale-105 transition-all duration-300 border-l-4 border-l-blue-600 animate-slide-in">
                                 <div class="flex-shrink-0">
                                     <span class="material-symbols-outlined text-blue-500">notifications_active</span>
@@ -449,7 +458,7 @@
             <template x-for="chat in openChats" :key="chat.id">
                 <div class="w-96 bg-slate-900 rounded-t-xl shadow-2xl flex flex-col overflow-hidden text-slate-100 pointer-events-auto border border-slate-800">
                     <!-- Header -->
-                <div class="bg-slate-950 p-3 flex justify-between items-center border-b border-slate-800 cursor-pointer shadow-sm" @click="chat.minimized = !chat.minimized">
+                <div class="bg-slate-950 p-3 flex justify-between items-center border-b border-slate-800 cursor-pointer shadow-sm" @click="chat.minimized = !chat.minimized; if(!chat.minimized) { markMessagesAsRead(chat.id); }">
                     <div class="flex items-center gap-2">
                         <div class="relative">
                             <div class="w-8 h-8 rounded-full overflow-hidden bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-[10px]">
@@ -470,7 +479,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-1">
-                            <button @click.stop="chat.minimized = !chat.minimized" class="p-1 hover:bg-slate-800 rounded-full">
+                            <button @click.stop="chat.minimized = !chat.minimized; if(!chat.minimized) { markMessagesAsRead(chat.id); }" class="p-1 hover:bg-slate-800 rounded-full">
                                 <span class="material-symbols-outlined text-[16px] text-slate-400">remove</span>
                             </button>
                             <button @click.stop="openChats = openChats.filter(c => c.id !== chat.id)" class="p-1 hover:bg-slate-800 rounded-full text-slate-400">
@@ -482,7 +491,22 @@
                     <!-- Messages Body -->
                     <div x-show="!chat.minimized" 
                          class="h-96 overflow-y-auto p-4 bg-slate-900 flex flex-col gap-3 custom-scrollbar"
-                         x-init="fetch(`/messages/${chat.conversation_id}`).then(r => r.json()).then(data => { chat.messages = data; });">
+                         x-init="
+                             fetch(`/messages/${chat.conversation_id}`).then(r => r.json()).then(data => { chat.messages = data; });
+                             setInterval(() => {
+                                 if (!chat.minimized) {
+                                     fetch(`/messages/${chat.conversation_id}`)
+                                         .then(r => r.json())
+                                         .then(data => {
+                                             if (data.length !== chat.messages.length) {
+                                                 chat.messages = data;
+                                                 $nextTick(() => { $el.scrollTop = $el.scrollHeight; });
+                                                 markMessagesAsRead(chat.id);
+                                             }
+                                         });
+                                 }
+                             }, 4000);
+                          ">
                     <template x-for="msg in chat.messages" :key="msg.id">
                         <div x-data="{ showPicker: false }" 
                              :class="msg.user_id === {{ Auth::id() }} ? 'self-end' : 'self-start'" 
@@ -597,10 +621,12 @@
                 @foreach($followedTeachers as $teacher)
                 <button @click="
                     showMessenger = false; 
+                    markMessagesAsRead({{ $teacher->id }});
                     fetch('/messages/start/{{ $teacher->id }}')
                     .then(r => r.json())
                     .then(conv => {
-                        if(!openChats.find(c => c.id === {{ $teacher->id }})) {
+                        let existingChat = openChats.find(c => c.id === {{ $teacher->id }});
+                        if(!existingChat) {
                             openChats.push({
                                 id: {{ $teacher->id }}, 
                                 name: {{ json_encode($teacher->name) }}, 
@@ -608,9 +634,13 @@
                                 conversation_id: conv.id, 
                                 is_online: conv.partner_is_online,
                                 avatar: '{{ $teacher->avatar }}',
-                                messages: []
-                            })
-                        }                    })" 
+                                messages: [],
+                                newMessage: ''
+                            });
+                        } else {
+                            existingChat.minimized = false;
+                        }
+                    })" 
                         class="w-full p-3 hover:bg-slate-900 flex items-center gap-3 border-b border-slate-800/40 transition-colors">
                     <div class="relative flex-shrink-0">
                         <div class="w-10 h-10 rounded-full overflow-hidden bg-blue-500/20 text-blue-500 flex items-center justify-center font-bold text-xs border border-primary/20">
@@ -624,7 +654,12 @@
                              :class="userStatuses[{{ $teacher->id }}] ? 'bg-secondary' : 'bg-error'"></div>
                     </div>
                     <div class="text-left flex-1 min-w-0">
-                        <span class="text-sm font-semibold text-slate-200 block truncate">{{ $teacher->name }}</span>
+                        <div class="flex justify-between items-center gap-2">
+                            <span class="text-sm font-semibold text-slate-200 block truncate">{{ $teacher->name }}</span>
+                            <template x-if="(unreadMessagesBySender[{{ $teacher->id }}] || 0) > 0">
+                                <span class="bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full" x-text="unreadMessagesBySender[{{ $teacher->id }}]"></span>
+                            </template>
+                        </div>
                         <p class="text-[10px] text-outline truncate">
                             @if($teacher->last_message)
                                 <span class="text-blue-400 font-bold">{{ $teacher->last_message->user_id === Auth::id() ? 'Vous : ' : '' }}</span>
@@ -1179,7 +1214,7 @@
                                            onchange="const file = this.files[0]; if(file){ const reader = new FileReader(); reader.onload = (e) => { document.getElementById('avatar-preview-student').src = e.target.result; document.getElementById('avatar-preview-student').classList.remove('hidden'); const placeholder = document.getElementById('avatar-placeholder-student'); if(placeholder) placeholder.classList.add('hidden'); }; reader.readAsDataURL(file); }">
                                 </div>
                                 <div class="space-y-1">
-                                    <h5 class="font-bold text-slate-100">Photo de profil</h5>
+                                    <h5 class="font-bold text-slate-800 dark:text-slate-100">Photo de profil</h5>
                                     <p class="text-[10px] text-outline uppercase tracking-widest pt-1">JPG, PNG ou GIF • Max 2Mo</p>
                                 </div>
                             </div>
@@ -1187,11 +1222,11 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="space-y-2">
                                     <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Nom complet</label>
-                                    <input type="text" name="name" value="{{ $user->name }}" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                    <input type="text" name="name" value="{{ $user->name }}" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
                                 </div>
                                 <div class="space-y-2">
                                     <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Email</label>
-                                    <input type="email" name="email" value="{{ $user->email }}" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                    <input type="email" name="email" value="{{ $user->email }}" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
                                 </div>
                             </div>
                         </div>
@@ -1208,16 +1243,16 @@
                             <div class="max-w-xl space-y-6">
                                 <div class="space-y-2">
                                     <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Mot de passe actuel</label>
-                                    <input type="password" name="current_password" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                    <input type="password" name="current_password" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div class="space-y-2">
                                         <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Nouveau mot de passe</label>
-                                        <input type="password" name="new_password" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                        <input type="password" name="new_password" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
                                     </div>
                                     <div class="space-y-2">
                                         <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Confirmation</label>
-                                        <input type="password" name="new_password_confirmation" class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                        <input type="password" name="new_password_confirmation" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
                                     </div>
                                 </div>
                             </div>
@@ -1283,7 +1318,7 @@
                     <div class="p-2 bg-red-500/10 text-red-500 rounded-lg">
                         <span class="material-symbols-outlined">picture_as_pdf</span>
                     </div>
-                    <h3 class="font-bold text-slate-100 truncate max-w-xs md:max-w-md" x-text="currentPdfTitle"></h3>
+                    <h3 class="font-bold text-slate-800 dark:text-slate-100 truncate max-w-xs md:max-w-md" x-text="currentPdfTitle"></h3>
                 </div>
                 
                 <div class="flex items-center gap-4">

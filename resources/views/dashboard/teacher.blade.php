@@ -164,6 +164,86 @@
         userStatuses: {
             @foreach($students as $s) {{ $s->id }}: {{ $s->is_online ? 'true' : 'false' }}, @endforeach
         },
+        unreadMessagesCount: 0,
+        unreadMessagesBySender: {},
+        notifications: [],
+        unreadNotificationsCount: 0,
+        toasts: [],
+        fetchNotifications() {
+            fetch('{{ route('notifications.index') }}')
+                .then(res => res.json())
+                .then(data => {
+                    let newNotifications = data.notifications.filter(n => {
+                        return !n.is_read && !this.notifications.some(existing => existing.id === n.id);
+                    });
+                    if (this.notifications.length > 0 && newNotifications.length > 0) {
+                        newNotifications.forEach(n => {
+                            if (n.type !== 'new_message') {
+                                this.showToast(n);
+                            }
+                        });
+                    }
+                    this.notifications = data.notifications;
+                    this.unreadNotificationsCount = data.unread_count;
+                    this.unreadMessagesCount = data.unread_messages_count;
+                    this.unreadMessagesBySender = data.unread_messages_by_sender;
+
+                    this.openChats.forEach(chat => {
+                        if (!chat.minimized && (this.unreadMessagesBySender[chat.id] || 0) > 0) {
+                            this.markMessagesAsRead(chat.id);
+                        }
+                    });
+                });
+        },
+        showToast(n) {
+            let id = Date.now() + Math.random();
+            this.toasts.push({ id, title: n.title, message: n.message, type: n.type, action_url: n.action_url, sender_id: n.sender_id, sender: n.sender });
+            setTimeout(() => {
+                this.toasts = this.toasts.filter(t => t.id !== id);
+            }, 5000);
+        },
+        markNotificationAsRead(n) {
+            fetch(`/notifications/${n.id}/read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            }).then(() => {
+                this.fetchNotifications();
+                if (n.action_url) {
+                    window.location.href = n.action_url;
+                }
+            });
+        },
+        markAllNotificationsAsRead() {
+            fetch('{{ route('notifications.read-all') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            }).then(() => {
+                this.fetchNotifications();
+            });
+        },
+        markMessagesAsRead(senderId) {
+            // Mise à jour optimiste locale pour une réactivité instantanée
+            const count = this.unreadMessagesBySender[senderId] || 0;
+            if (count > 0) {
+                this.unreadMessagesBySender[senderId] = 0;
+                this.unreadMessagesCount = Math.max(0, this.unreadMessagesCount - count);
+            }
+            fetch(`/notifications/messages/read/${senderId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            }).then(() => {
+                this.fetchNotifications();
+            });
+        },
         updateAllStatuses() {
             let ids = [...new Set([
                 ...Object.keys(this.userStatuses),
@@ -180,14 +260,17 @@
         }
       }"
       x-init="
+        updateAllStatuses();
         setInterval(() => { updateAllStatuses(); }, 8000);
+        fetchNotifications();
+        setInterval(() => { fetchNotifications(); }, 8000);
       ">
 
     <div class="fixed bottom-0 right-4 flex gap-3 z-50 items-end pointer-events-none">
         <template x-for="chat in openChats" :key="chat.id">
             <div class="w-96 bg-white dark:bg-slate-900 rounded-t-xl shadow-2xl flex flex-col overflow-hidden text-slate-800 dark:text-slate-100 pointer-events-auto border border-slate-200 dark:border-slate-800 transition-colors">
                 <div class="bg-slate-50 dark:bg-slate-950 p-3 flex justify-between items-center border-b border-slate-200 dark:border-slate-800 cursor-pointer shadow-sm transition-colors"
-                     @click="chat.minimized = !chat.minimized">
+                     @click="chat.minimized = !chat.minimized; if(!chat.minimized) { markMessagesAsRead(chat.id); }">
                     <div class="flex items-center gap-2">
                         <div class="relative">
                             <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-500 dark:text-blue-400 flex items-center justify-center font-bold text-[10px]"
@@ -201,7 +284,7 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-1">
-                        <button @click.stop="chat.minimized = !chat.minimized"
+                        <button @click.stop="chat.minimized = !chat.minimized; if(!chat.minimized) { markMessagesAsRead(chat.id); }"
                                 class="p-1 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400">
                             <span class="material-symbols-outlined text-[16px]">remove</span>
                         </button>
@@ -214,7 +297,22 @@
 
                 <div x-show="!chat.minimized"
                      class="h-96 overflow-y-auto p-4 bg-white dark:bg-slate-900 flex flex-col gap-3 custom-scrollbar transition-colors"
-                     x-init="fetch(`/messages/${chat.conversation_id}`).then(r => r.json()).then(data => { chat.messages = data; });">
+                     x-init="
+                        fetch(`/messages/${chat.conversation_id}`).then(r => r.json()).then(data => { chat.messages = data; });
+                        setInterval(() => {
+                            if (!chat.minimized) {
+                                fetch(`/messages/${chat.conversation_id}`)
+                                    .then(r => r.json())
+                                    .then(data => {
+                                        if (data.length !== chat.messages.length) {
+                                            chat.messages = data;
+                                            $nextTick(() => { $el.scrollTop = $el.scrollHeight; });
+                                            markMessagesAsRead(chat.id);
+                                        }
+                                    });
+                            }
+                        }, 4000);
+                     ">
                     <template x-for="msg in chat.messages" :key="msg.id">
                         <div x-data="{ showPicker: false }" 
                              :class="msg.user_id === {{ Auth::id() }} ? 'self-end' : 'self-start'" 
@@ -401,90 +499,19 @@
                 <button @click="showMessenger = !showMessenger"
                         class="p-2 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors relative">
                     <span class="material-symbols-outlined">chat</span>
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-secondary rounded-full"></span>
+                    <template x-if="unreadMessagesCount > 0">
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full animate-ping"></span>
+                    </template>
+                    <template x-if="unreadMessagesCount > 0">
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    </template>
                 </button>
                 <!-- Composant de Notification Alpine.js -->
-                <div x-data="{ 
-                    open: false, 
-                    notifications: [], 
-                    unreadCount: 0,
-                    toasts: [],
-                    fetchNotifications() {
-                        fetch('{{ route('notifications.index') }}')
-                            .then(res => res.json())
-                            .then(data => {
-                                let newNotifications = data.notifications.filter(n => {
-                                    return !n.is_read && !this.notifications.some(existing => existing.id === n.id);
-                                });
-                                
-                                if (this.notifications.length > 0 && newNotifications.length > 0) {
-                                    newNotifications.forEach(n => {
-                                        this.showToast(n);
-                                    });
-                                }
-                                
-                                this.notifications = data.notifications;
-                                this.unreadCount = data.unread_count;
-                            });
-                    },
-                    markAsRead(n) {
-                        fetch(`/notifications/${n.id}/read`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            }
-                        }).then(() => {
-                            this.fetchNotifications();
-                            if (n.type === 'new_message' && n.sender_id) {
-                                fetch('/messages/start/' + n.sender_id)
-                                    .then(r => r.json())
-                                    .then(conv => {
-                                        if(!openChats.find(c => c.id === n.sender_id)) {
-                                            openChats.push({
-                                                id: n.sender_id,
-                                                name: n.sender ? n.sender.name : 'Contact',
-                                                minimized: false,
-                                                conversation_id: conv.id,
-                                                is_online: conv.partner_is_online,
-                                                avatar: n.sender ? n.sender.avatar : null,
-                                                messages: []
-                                            });
-                                        }
-                                    });
-                            } else if (n.action_url) {
-                                window.location.href = n.action_url;
-                            }
-                        });
-                    },
-                    markAllAsRead() {
-                        fetch('{{ route('notifications.read-all') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            }
-                        }).then(() => {
-                            this.fetchNotifications();
-                        });
-                    },
-                    showToast(n) {
-                        let id = Date.now() + Math.random();
-                        this.toasts.push({ id, title: n.title, message: n.message, type: n.type, action_url: n.action_url, sender_id: n.sender_id, sender: n.sender });
-                        setTimeout(() => {
-                            this.toasts = this.toasts.filter(t => t.id !== id);
-                        }, 5000);
-                    }
-                }" 
-                x-init="
-                    fetchNotifications();
-                    setInterval(() => fetchNotifications(), 8000);
-                "
-                class="relative">
+                <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open" class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 relative focus:outline-none flex items-center justify-center">
                         <span class="material-symbols-outlined">notifications</span>
-                        <template x-if="unreadCount > 0">
-                            <span class="absolute top-1 right-1 min-w-[16px] h-[16px] px-1 bg-error text-slate-900 text-[9px] font-extrabold rounded-full flex items-center justify-center border border-white dark:border-slate-900" x-text="unreadCount"></span>
+                        <template x-if="unreadNotificationsCount > 0">
+                            <span class="absolute top-1 right-1 min-w-[16px] h-[16px] px-1 bg-error text-slate-900 text-[9px] font-extrabold rounded-full flex items-center justify-center border border-white dark:border-slate-900" x-text="unreadNotificationsCount"></span>
                         </template>
                     </button>
 
@@ -499,21 +526,18 @@
                         
                         <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                            <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">Notifications</h4>
-                           <template x-if="unreadCount > 0">
-                               <button @click="markAllAsRead()" class="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold">Tout lire</button>
+                           <template x-if="unreadNotificationsCount > 0">
+                               <button @click="markAllNotificationsAsRead()" class="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold">Tout lire</button>
                            </template>
                         </div>
                         
                         <div class="max-h-80 overflow-y-auto custom-scrollbar divide-y divide-slate-100 dark:divide-slate-800/50">
                             <template x-for="n in notifications" :key="n.id">
-                                <div @click="markAsRead(n); open = false" 
+                                <div @click="markNotificationAsRead(n); open = false" 
                                      :class="n.is_read ? 'opacity-60' : 'bg-blue-600/5 font-semibold'" 
                                      class="p-4 hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer transition-colors flex gap-3 text-left">
                                     
                                     <div class="flex-shrink-0 mt-0.5">
-                                        <template x-if="n.type === 'new_message'">
-                                            <span class="material-symbols-outlined text-blue-500 text-lg">chat</span>
-                                        </template>
                                         <template x-if="n.type === 'meeting_booked' || n.type === 'meeting_cancelled' || n.type === 'meeting_deleted'">
                                             <span class="material-symbols-outlined text-tertiary text-lg">video_call</span>
                                         </template>
@@ -547,7 +571,7 @@
                     <!-- Global Toast Container (Fixed bottom left) -->
                     <div class="fixed bottom-4 left-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm">
                         <template x-for="t in toasts" :key="t.id">
-                            <div @click="markAsRead(t)"
+                            <div @click="markNotificationAsRead(t)"
                                  class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl flex items-start gap-3 pointer-events-auto cursor-pointer transform hover:scale-105 transition-all duration-300 border-l-4 border-l-blue-600 animate-slide-in">
                                 <div class="flex-shrink-0">
                                     <span class="material-symbols-outlined text-blue-500">notifications_active</span>
@@ -593,10 +617,12 @@
                 <button
                     @click="
                         showMessenger = false;
+                        markMessagesAsRead({{ $student->id }});
                         fetch('/messages/start/{{ $student->id }}')
                             .then(r => r.json())
                             .then(conv => {
-                                if(!openChats.find(c => c.id === {{ $student->id }})) {
+                                let existingChat = openChats.find(c => c.id === {{ $student->id }});
+                                if(!existingChat) {
                                     openChats.push({
                                         id: {{ $student->id }},
                                         name: {{ json_encode($student->name) }},
@@ -605,7 +631,9 @@
                                         is_online: conv.partner_is_online,
                                         messages: [],
                                         newMessage: ''
-                                    })
+                                    });
+                                } else {
+                                    existingChat.minimized = false;
                                 }
                             })
                     "
@@ -622,8 +650,11 @@
                              :class="userStatuses[{{ $student->id }}] ? 'bg-secondary' : 'bg-error'"></div>
                     </div>
                     <div class="text-left flex-1 min-w-0">
-                        <div class="flex justify-between items-baseline gap-2">
+                        <div class="flex justify-between items-center gap-2">
                             <span class="text-sm font-semibold text-slate-200 block truncate">{{ $student->name }}</span>
+                            <template x-if="(unreadMessagesBySender[{{ $student->id }}] || 0) > 0">
+                                <span class="bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full" x-text="unreadMessagesBySender[{{ $student->id }}]"></span>
+                            </template>
                         </div>
                         <p class="text-[10px] text-outline truncate">
                             @if($student->last_message)
@@ -728,7 +759,7 @@
                     <input type="hidden" name="tab" value="content">
                     <div class="flex-1 min-w-[200px]">
                         <label class="block text-xs font-semibold text-outline mb-1.5 uppercase">Matière</label>
-                        <select name="subject_id" class="w-full bg-background border-outline-variant rounded-xl text-white text-xs">
+                        <select name="subject_id" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-slate-200 text-xs">
                             <option value="">Toutes mes matières</option>
                             @foreach($mySubjects as $s)
                                 <option value="{{ $s->id }}" {{ request('subject_id') == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
@@ -737,7 +768,7 @@
                     </div>
                     <div class="flex-1 min-w-[200px]">
                         <label class="block text-xs font-semibold text-outline mb-1.5 uppercase">Niveau</label>
-                        <select name="level_id" class="w-full bg-background border-outline-variant rounded-xl text-white text-xs">
+                        <select name="level_id" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-slate-200 text-xs">
                             <option value="">Tous les niveaux</option>
                             @foreach($myLevels as $l)
                                 <option value="{{ $l->id }}" {{ request('level_id') == $l->id ? 'selected' : '' }}>{{ $l->name }} ({{ $l->category }})</option>
@@ -756,62 +787,118 @@
                     </div>
                 </form>
 
-                <div class="bg-surface-container rounded-xl border border-outline-variant overflow-hidden">
-                    <table class="w-full text-left">
-                        <thead class="bg-surface-container-low text-[10px] uppercase text-outline font-black">
+                <div class="bg-surface-container rounded-xl border border-outline-variant overflow-hidden shadow-lg transition-colors">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-surface-container-low text-[10px] uppercase text-outline font-black border-b border-outline-variant/30">
                             <tr>
                                 <th class="px-6 py-4">Aperçu</th>
-                                <th class="px-6 py-4">Titre</th>
-                                <th class="px-6 py-4">Matière</th>
+                                <th class="px-6 py-4">Détails du cours</th>
+                                <th class="px-6 py-4">Matière & Niveau</th>
                                 <th class="px-6 py-4">Type</th>
                                 <th class="px-6 py-4">Statut</th>
-                                <th class="px-6 py-4">Date</th>
+                                <th class="px-6 py-4">Date d'envoi</th>
                                 <th class="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-outline-variant/20">
                             @forelse($myCourses as $course)
-                            <tr class="hover:bg-slate-800/40 transition-colors">
+                            <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
                                 <td class="px-6 py-4">
-                                    <div class="w-10 h-10 rounded-lg bg-slate-800 overflow-hidden border border-outline-variant/30">
+                                    <div class="w-12 h-12 rounded-xl overflow-hidden border border-outline-variant/30 flex items-center justify-center shadow-sm bg-white dark:bg-slate-950">
                                         @if($course->thumbnail_path)
                                             <img src="{{ asset('storage/' . $course->thumbnail_path) }}" alt="" class="w-full h-full object-cover">
                                         @else
-                                            <div class="w-full h-full flex items-center justify-center text-outline">
-                                                <span class="material-symbols-outlined text-lg">image</span>
+                                            <div class="w-full h-full flex items-center justify-center bg-red-500/10 text-red-500 dark:text-red-400">
+                                                <span class="material-symbols-outlined text-2xl">picture_as_pdf</span>
                                             </div>
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 font-bold text-sm">{{ $course->title }}</td>
-                                <td class="px-6 py-4 text-sm">{{ $course->subject->name }}</td>
-                                <td class="px-6 py-4">
-                                    <span class="text-[10px] font-bold uppercase px-2 py-1 bg-slate-800 rounded">{{ $course->type }}</span>
+                                <td class="px-6 py-4 min-w-[200px]">
+                                    <button data-url="{{ asset('storage/' . $course->file_path) }}"
+                                            data-title="{{ $course->title }}"
+                                            @click="$dispatch('open-preview', { url: $el.dataset.url, title: $el.dataset.title })"
+                                            class="font-bold text-sm text-slate-800 dark:text-white hover:text-primary dark:hover:text-secondary transition-colors text-left truncate max-w-xs block focus:outline-none">
+                                        {{ $course->title }}
+                                    </button>
+                                    <p class="text-[11px] text-outline truncate max-w-xs mt-0.5" title="{{ $course->description }}">{{ $course->description ?: 'Aucune description fournie' }}</p>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="text-[10px] font-bold uppercase {{ $course->status === 'published' ? 'text-secondary' : ($course->status === 'rejected' ? 'text-error' : 'text-tertiary') }}">
-                                        {{ $course->status }}
-                                    </span>
+                                    <div class="flex flex-col gap-1 items-start">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                                            {{ $course->subject->name }}
+                                        </span>
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20">
+                                            {{ $course->level ? $course->level->name : 'N/A' }}
+                                        </span>
+                                    </div>
                                 </td>
-                                <td class="px-6 py-4 text-xs text-outline">{{ $course->created_at->format('d/m/Y') }}</td>
+                                <td class="px-6 py-4">
+                                    @if($course->type === 'course')
+                                        <span class="px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                                            Cours
+                                        </span>
+                                    @elseif($course->type === 'sujet_type')
+                                        <span class="px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                                            Sujet Type
+                                        </span>
+                                    @elseif($course->type === 'correction')
+                                        <span class="px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
+                                            Corrigé
+                                        </span>
+                                    @else
+                                        <span class="px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20">
+                                            {{ $course->type }}
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4">
+                                    @if($course->status === 'published')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase bg-secondary/15 text-secondary border border-secondary/35">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                                            Publié
+                                        </span>
+                                    @elseif($course->status === 'rejected')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase bg-error/15 text-error border border-error/35">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                            Rejeté
+                                        </span>
+                                    @elseif($course->status === 'suspended')
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase bg-amber-500/15 text-amber-500 border border-amber-500/35">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                            Suspendu
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase bg-tertiary/15 text-tertiary border border-tertiary/35">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
+                                            En attente
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-xs text-outline font-semibold">
+                                    {{ $course->created_at->format('d/m/Y') }}
+                                </td>
                                 <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-4">
+                                    <div class="flex items-center justify-end gap-2">
                                         <button data-url="{{ asset('storage/' . $course->file_path) }}"
                                                 data-title="{{ $course->title }}"
                                                 @click="$dispatch('open-preview', { url: $el.dataset.url, title: $el.dataset.title })"
-                                                class="text-secondary hover:text-secondary/80 flex items-center gap-1 text-xs font-bold transition-colors">
-                                            <span class="material-symbols-outlined text-sm">visibility</span> Aperçu
+                                                class="w-8 h-8 rounded-lg border border-outline-variant/30 flex items-center justify-center text-slate-500 hover:text-secondary hover:bg-secondary/10 hover:border-secondary/35 transition-all"
+                                                title="Aperçu rapide">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
                                         </button>
                                         <a href="{{ asset('storage/' . $course->file_path) }}" target="_blank"
-                                           class="text-primary hover:text-primary/80 flex items-center gap-1 text-xs font-bold transition-colors">
-                                            <span class="material-symbols-outlined text-sm">download</span> Télécharger
+                                           class="w-8 h-8 rounded-lg border border-outline-variant/30 flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 hover:border-primary/35 transition-all"
+                                           title="Télécharger">
+                                            <span class="material-symbols-outlined text-[18px]">download</span>
                                         </a>
                                         @if($course->status === 'published')
                                             <button data-course-id="{{ $course->id }}"
                                                     data-course-title="{{ $course->title }}"
                                                     @click="$dispatch('open-create-meeting', { courseId: $el.dataset.courseId, courseTitle: $el.dataset.courseTitle })"
-                                                    class="text-tertiary hover:text-tertiary/80 flex items-center gap-1 text-xs font-bold transition-colors">
-                                                <span class="material-symbols-outlined text-sm">video_call</span> Créer réunion
+                                                    class="w-8 h-8 rounded-lg border border-outline-variant/30 flex items-center justify-center text-slate-500 hover:text-tertiary hover:bg-tertiary/10 hover:border-tertiary/35 transition-all"
+                                                    title="Créer une réunion live">
+                                                <span class="material-symbols-outlined text-[18px]">video_call</span>
                                             </button>
                                         @endif
                                     </div>
@@ -890,6 +977,7 @@
                         <!-- Bouton chat direct depuis la carte étudiant -->
                         <button
                             @click="
+                                markMessagesAsRead({{ $student->id }});
                                 fetch('/messages/start/{{ $student->id }}')
                                     .then(r => r.json())
                                     .then(conv => {
@@ -1249,10 +1337,11 @@
 
                             <div class="max-w-xl space-y-8">
                                 <div class="space-y-2">
+                                <div class="space-y-2">
                                     <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Mot de passe actuel</label>
                                     <input type="password" name="current_password"
                                            placeholder="••••••••"
-                                           class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                           class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
                                     <p class="text-[10px] text-outline italic">Requis pour modifier votre mot de passe.</p>
                                 </div>
 
@@ -1261,19 +1350,19 @@
                                         <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Nouveau mot de passe</label>
                                         <input type="password" name="new_password"
                                                placeholder="Min. 8 caractères"
-                                               class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                               class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
                                     </div>
                                     <div class="space-y-2">
                                         <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Confirmation</label>
                                         <input type="password" name="new_password_confirmation"
                                                placeholder="Confirmez"
-                                               class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                               class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
                                     </div>
                                 </div>
 
                                 <div class="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
                                     <span class="material-symbols-outlined text-primary text-sm mt-0.5">info</span>
-                                    <p class="text-[10px] text-blue-200 leading-relaxed">Assurez-vous d'utiliser un mot de passe fort et unique pour protéger l'accès à vos contenus pédagogiques et aux données de vos étudiants.</p>
+                                    <p class="text-[10px] text-blue-700 dark:text-blue-200 leading-relaxed">Assurez-vous d'utiliser un mot de passe fort et unique pour protéger l'accès à vos contenus pédagogiques et aux données de vos étudiants.</p>
                                 </div>
                             </div>
                         </div>
@@ -1336,14 +1425,14 @@
                 @csrf
                 <div>
                     <label class="block text-sm font-medium mb-2">Titre du cours</label>
-                    <input type="text" name="title" class="w-full bg-background border-outline-variant rounded-xl text-white" required
+                    <input type="text" name="title" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white" required
                            placeholder="Ex: Introduction à la thermodynamique">
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">Matière</label>
-                        <select name="subject_id" class="w-full bg-background border-outline-variant rounded-xl text-white" required>
+                        <select name="subject_id" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white" required>
                             @foreach($mySubjects as $s)
                                 <option value="{{ $s->id }}">{{ $s->name }} ({{ $s->level ? $s->level->name : 'N/A' }})</option>
                             @endforeach
@@ -1351,7 +1440,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">Type</label>
-                        <select name="type" class="w-full bg-background border-outline-variant rounded-xl text-white" required>
+                        <select name="type" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white" required>
                             <option value="course">Cours (PDF/Texte)</option>
                             <option value="sujet_type">Sujets Types</option>
                             <option value="correction">Corrigé</option>
@@ -1368,7 +1457,7 @@
 
                 <div>
                     <label class="block text-sm font-medium mb-2">Description (optionnel)</label>
-                    <textarea name="description" rows="3" class="w-full bg-background border-outline-variant rounded-xl text-white"></textarea>
+                    <textarea name="description" rows="3" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white"></textarea>
                 </div>
 
                 <div class="p-8 border-2 border-dashed border-outline-variant rounded-xl text-center hover:border-primary transition-colors bg-background/50 relative overflow-hidden">
@@ -1387,7 +1476,7 @@
                             <div class="flex items-center gap-3 mb-4 w-full">
                                 <span class="material-symbols-outlined text-3xl text-primary">description</span>
                                 <div class="text-left flex-1 min-w-0">
-                                    <p class="text-sm font-bold text-white truncate" x-text="fileName"></p>
+                                    <p class="text-sm font-bold text-slate-800 dark:text-white truncate" x-text="fileName"></p>
                                     <p class="text-[10px] text-outline uppercase tracking-widest" x-text="progress < 100 ? 'Importation en cours...' : 'Fichier prêt'"></p>
                                 </div>
                                 <button type="button" @click="reset(); document.getElementById('file').value = ''" class="text-error hover:bg-error/10 p-1 rounded-full">
@@ -1428,7 +1517,7 @@
                 @csrf
                 <div class="mb-6">
                     <label class="block text-sm font-medium mb-2">Matière à ajouter</label>
-                    <select name="subject_id" class="w-full bg-background border-outline-variant rounded-xl text-white" required>
+                    <select name="subject_id" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white" required>
                         @foreach($allSubjects->groupBy(fn($s) => $s->level->name ?? 'Autre') as $levelName => $levelSubjects)
                             <optgroup label="{{ $levelName }}" class="bg-slate-900 text-primary">
                                 @foreach($levelSubjects as $s)
@@ -1490,11 +1579,11 @@
                 <input type="hidden" name="course_id" :value="courseId">
                 <div class="mb-4">
                     <label class="block text-sm font-medium mb-2">Date et Heure de début</label>
-                    <input type="datetime-local" name="start_at" class="w-full bg-background border-outline-variant rounded-xl text-white" required>
+                    <input type="datetime-local" name="start_at" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white" required>
                 </div>
                 <div class="mb-6">
                     <label class="block text-sm font-medium mb-2">Date et Heure de fin</label>
-                    <input type="datetime-local" name="end_at" class="w-full bg-background border-outline-variant rounded-xl text-white" required>
+                    <input type="datetime-local" name="end_at" class="w-full bg-background border-outline-variant rounded-xl text-slate-800 dark:text-white" required>
                 </div>
                 <div class="flex gap-4">
                     <button type="submit" class="flex-1 bg-secondary text-slate-900 font-bold py-3 rounded-xl hover:opacity-90">Créer le créneau</button>
