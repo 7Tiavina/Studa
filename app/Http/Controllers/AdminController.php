@@ -8,6 +8,7 @@ use App\Models\Subject;
 use App\Models\Course;
 use App\Models\Conversation;
 use Illuminate\Http\Request;
+use App\Services\NotificationService;
 
 class AdminController extends Controller
 {
@@ -26,6 +27,16 @@ class AdminController extends Controller
     public function validateUser(User $user)
     {
         $user->update(['is_validated' => !$user->is_validated]);
+
+        $status = $user->is_validated ? 'validé' : 'désactivé';
+        NotificationService::send(
+            $user->id,
+            'account_status',
+            'Statut de compte mis à jour',
+            "Votre compte a été {$status} par l'administrateur.",
+            $user->role === 'teacher' ? route('teacher.dashboard') : route('student.dashboard')
+        );
+
         return redirect()->route('admin.dashboard', ['tab' => 'users'])->with('success', 'Statut de l\'utilisateur mis à jour.');
     }
 
@@ -56,12 +67,44 @@ class AdminController extends Controller
     public function approveCourse(Course $course)
     {
         $course->update(['status' => 'published']);
+
+        NotificationService::send(
+            $course->user_id,
+            'course_approved',
+            'Cours approuvé',
+            "Votre cours '{$course->title}' a été validé et publié par l'administrateur.",
+            route('teacher.dashboard', ['tab' => 'content'])
+        );
+
+        $teacher = $course->teacher;
+        if ($teacher) {
+            $students = $teacher->followers()->get();
+            foreach ($students as $student) {
+                NotificationService::send(
+                    $student->id,
+                    'new_course',
+                    'Nouveau cours disponible',
+                    "Le professeur {$teacher->name} a publié un nouveau cours : '{$course->title}'.",
+                    route('student.dashboard', ['tab' => 'courses'])
+                );
+            }
+        }
+
         return redirect()->route('admin.dashboard', ['tab' => 'courses'])->with('success', 'Cours publié avec succès.');
     }
 
     public function rejectCourse(Course $course)
     {
         $course->update(['status' => 'rejected']);
+
+        NotificationService::send(
+            $course->user_id,
+            'course_rejected',
+            'Cours rejeté',
+            "Votre cours '{$course->title}' a été rejeté par l'administrateur.",
+            route('teacher.dashboard', ['tab' => 'content'])
+        );
+
         return redirect()->route('admin.dashboard', ['tab' => 'courses'])->with('success', 'Cours rejeté.');
     }
 
@@ -169,6 +212,15 @@ class AdminController extends Controller
     public function suspendCourse(Course $course)
     {
         $course->update(['status' => 'suspended']);
+
+        NotificationService::send(
+            $course->user_id,
+            'course_suspended',
+            'Cours suspendu',
+            "Votre cours '{$course->title}' a été suspendu par l'administrateur.",
+            route('teacher.dashboard', ['tab' => 'content'])
+        );
+
         return redirect()->route('admin.dashboard', ['tab' => 'teachers'])->with('success', 'Le cours a été suspendu.');
     }
 }

@@ -120,6 +120,19 @@
             background: #cbd5e1;
             border-radius: 10px;
         }
+        @keyframes slide-in {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .animate-slide-in {
+            animation: slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
     <script>
         // Initialiser le thème le plus tôt possible pour éviter le flash blanc
@@ -255,7 +268,163 @@
                     <span class="material-symbols-outlined">chat</span>
                     <span class="absolute top-1 right-1 w-2 h-2 bg-secondary rounded-full"></span>
                 </button>
-                <button class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100"><span class="material-symbols-outlined">notifications</span></button>
+                <!-- Composant de Notification Alpine.js -->
+                <div x-data="{ 
+                    open: false, 
+                    notifications: [], 
+                    unreadCount: 0,
+                    toasts: [],
+                    fetchNotifications() {
+                        fetch('{{ route('notifications.index') }}')
+                            .then(res => res.json())
+                            .then(data => {
+                                let newNotifications = data.notifications.filter(n => {
+                                    return !n.is_read && !this.notifications.some(existing => existing.id === n.id);
+                                });
+                                
+                                if (this.notifications.length > 0 && newNotifications.length > 0) {
+                                    newNotifications.forEach(n => {
+                                        this.showToast(n);
+                                    });
+                                }
+                                
+                                this.notifications = data.notifications;
+                                this.unreadCount = data.unread_count;
+                            });
+                    },
+                    markAsRead(n) {
+                        fetch(`/notifications/${n.id}/read`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        }).then(() => {
+                            this.fetchNotifications();
+                            if (n.type === 'new_message' && n.sender_id) {
+                                fetch('/messages/start/' + n.sender_id)
+                                    .then(r => r.json())
+                                    .then(conv => {
+                                        if(!openChats.find(c => c.id === n.sender_id)) {
+                                            openChats.push({
+                                                id: n.sender_id,
+                                                name: n.sender ? n.sender.name : 'Contact',
+                                                minimized: false,
+                                                conversation_id: conv.id,
+                                                is_online: conv.partner_is_online,
+                                                avatar: n.sender ? n.sender.avatar : null,
+                                                messages: []
+                                            });
+                                        }
+                                    });
+                            } else if (n.action_url) {
+                                window.location.href = n.action_url;
+                            }
+                        });
+                    },
+                    markAllAsRead() {
+                        fetch('{{ route('notifications.read-all') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        }).then(() => {
+                            this.fetchNotifications();
+                        });
+                    },
+                    showToast(n) {
+                        let id = Date.now() + Math.random();
+                        this.toasts.push({ id, title: n.title, message: n.message, type: n.type, action_url: n.action_url, sender_id: n.sender_id, sender: n.sender });
+                        setTimeout(() => {
+                            this.toasts = this.toasts.filter(t => t.id !== id);
+                        }, 5000);
+                    }
+                }" 
+                x-init="
+                    fetchNotifications();
+                    setInterval(() => fetchNotifications(), 8000);
+                "
+                class="relative">
+                    <button @click="open = !open" class="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 relative focus:outline-none flex items-center justify-center">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <template x-if="unreadCount > 0">
+                            <span class="absolute top-1 right-1 min-w-[16px] h-[16px] px-1 bg-error text-slate-900 text-[9px] font-extrabold rounded-full flex items-center justify-center border border-white dark:border-slate-900" x-text="unreadCount"></span>
+                        </template>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div x-show="open" 
+                         @click.away="open = false"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-cloak
+                         class="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 overflow-hidden text-slate-800 dark:text-slate-100 transition-colors">
+                        
+                        <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+                           <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">Notifications</h4>
+                           <template x-if="unreadCount > 0">
+                               <button @click="markAllAsRead()" class="text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-bold">Tout lire</button>
+                           </template>
+                        </div>
+                        
+                        <div class="max-h-80 overflow-y-auto custom-scrollbar divide-y divide-slate-100 dark:divide-slate-800/50">
+                            <template x-for="n in notifications" :key="n.id">
+                                <div @click="markAsRead(n); open = false" 
+                                     :class="n.is_read ? 'opacity-60' : 'bg-blue-600/5 font-semibold'" 
+                                     class="p-4 hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer transition-colors flex gap-3 text-left">
+                                    
+                                    <div class="flex-shrink-0 mt-0.5">
+                                        <template x-if="n.type === 'new_message'">
+                                            <span class="material-symbols-outlined text-blue-500 text-lg">chat</span>
+                                        </template>
+                                        <template x-if="n.type === 'meeting_booked' || n.type === 'meeting_cancelled' || n.type === 'meeting_deleted'">
+                                            <span class="material-symbols-outlined text-tertiary text-lg">video_call</span>
+                                        </template>
+                                        <template x-if="n.type === 'course_approved' || n.type === 'new_course'">
+                                            <span class="material-symbols-outlined text-secondary text-lg">check_circle</span>
+                                        </template>
+                                        <template x-if="n.type === 'course_rejected' || n.type === 'course_suspended'">
+                                            <span class="material-symbols-outlined text-error text-lg">block</span>
+                                        </template>
+                                        <template x-if="n.type === 'new_follower' || n.type === 'new_subscription'">
+                                            <span class="material-symbols-outlined text-blue-500 text-lg">person_add</span>
+                                        </template>
+                                        <template x-if="n.type === 'account_status'">
+                                            <span class="material-symbols-outlined text-indigo-500 text-lg">manage_accounts</span>
+                                        </template>
+                                    </div>
+                                    
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate" x-text="n.title"></p>
+                                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed" x-text="n.message"></p>
+                                        <span class="text-[8px] text-outline mt-1 block" x-text="new Date(n.created_at).toLocaleString('fr-FR', {dateStyle: 'short', timeStyle: 'short'})"></span>
+                                    </div>
+                                </div>
+                            </template>
+                            <template x-if="notifications.length === 0">
+                                <p class="p-6 text-center text-xs text-outline italic">Aucune notification pour le moment.</p>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Global Toast Container (Fixed bottom left) -->
+                    <div class="fixed bottom-4 left-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm">
+                        <template x-for="t in toasts" :key="t.id">
+                            <div @click="markAsRead(t)"
+                                 class="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl flex items-start gap-3 pointer-events-auto cursor-pointer transform hover:scale-105 transition-all duration-300 border-l-4 border-l-blue-600 animate-slide-in">
+                                <div class="flex-shrink-0">
+                                    <span class="material-symbols-outlined text-blue-500">notifications_active</span>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100" x-text="t.title"></p>
+                                    <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5" x-text="t.message"></p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
                 <div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-800"></div>
                 <div class="flex items-center gap-3">
                     <div class="text-right hidden sm:block">

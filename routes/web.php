@@ -8,6 +8,7 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
@@ -51,6 +52,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/student/teachers/{teacher}/follow', [StudentController::class, 'followTeacher'])->name('student.teachers.follow');
         Route::delete('/student/teachers/{teacher}/unfollow', [StudentController::class, 'unfollowTeacher'])->name('student.teachers.unfollow');
         Route::put('/student/settings', [StudentController::class, 'updateSettings'])->name('student.settings.update');
+        
+        // Notification routes
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+        Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
         
         // Teacher routes
         Route::get('/dashboard/teacher', [TeacherController::class, 'index'])->name('teacher.dashboard');

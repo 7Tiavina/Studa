@@ -6,6 +6,7 @@ use App\Models\Meeting;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\NotificationService;
 
 class MeetingController extends Controller
 {
@@ -48,6 +49,17 @@ class MeetingController extends Controller
             abort(403, 'Action non autorisée.');
         }
 
+        if ($meeting->student_id) {
+            NotificationService::send(
+                $meeting->student_id,
+                'meeting_deleted',
+                'Visioconférence annulée',
+                "Le professeur " . Auth::user()->name . " a annulé la réunion du " . $meeting->start_at->format('d/m/Y à H:i') . " pour le cours '{$meeting->course->title}'.",
+                route('student.dashboard', ['tab' => 'live']),
+                Auth::id()
+            );
+        }
+
         $meeting->delete();
 
         return redirect()->back()->with('success', 'Réunion supprimée avec succès.');
@@ -74,6 +86,15 @@ class MeetingController extends Controller
             'student_id' => Auth::id(),
         ]);
 
+        NotificationService::send(
+            $meeting->teacher_id,
+            'meeting_booked',
+            'Visioconférence réservée',
+            "L'étudiant " . Auth::user()->name . " a réservé un créneau pour le cours '{$meeting->course->title}' le " . $meeting->start_at->format('d/m/Y à H:i') . ".",
+            route('teacher.dashboard', ['tab' => 'live']),
+            Auth::id()
+        );
+
         return redirect()->back()->with('success', 'Votre réservation pour cette visioconférence a été enregistrée.');
     }
 
@@ -86,9 +107,23 @@ class MeetingController extends Controller
             abort(403, 'Action non autorisée.');
         }
 
+        $studentName = Auth::user()->name;
+        $teacherId = $meeting->teacher_id;
+        $courseTitle = $meeting->course->title;
+        $startAt = $meeting->start_at->format('d/m/Y à H:i');
+
         $meeting->update([
             'student_id' => null,
         ]);
+
+        NotificationService::send(
+            $teacherId,
+            'meeting_cancelled',
+            'Réservation annulée',
+            "L'étudiant " . $studentName . " a annulé sa réservation pour le cours '{$courseTitle}' du " . $startAt . ".",
+            route('teacher.dashboard', ['tab' => 'live']),
+            Auth::id()
+        );
 
         return redirect()->back()->with('success', 'Votre réservation a été annulée. Le créneau est de nouveau libre.');
     }

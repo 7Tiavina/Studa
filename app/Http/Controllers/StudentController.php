@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Services\NotificationService;
 
 class StudentController extends Controller
 {
@@ -111,6 +112,16 @@ class StudentController extends Controller
     public function subscribeToCourse(Course $course)
     {
         Auth::user()->subscribedCourses()->syncWithoutDetaching([$course->id]);
+
+        NotificationService::send(
+            $course->user_id,
+            'new_subscription',
+            'Nouvel abonnement',
+            "L'étudiant " . Auth::user()->name . " s'est abonné à votre cours '{$course->title}'.",
+            route('teacher.dashboard', ['tab' => 'content']),
+            Auth::id()
+        );
+
         return redirect()->to(url()->previous() . (str_contains(url()->previous(), '?') ? '&' : '?') . 'tab=courses')->with('success', 'Vous vous êtes abonné à ce cours.');
     }
 
@@ -124,6 +135,16 @@ class StudentController extends Controller
     {
         if ($teacher->role !== 'teacher') return back();
         Auth::user()->followedTeachers()->syncWithoutDetaching([$teacher->id]);
+
+        NotificationService::send(
+            $teacher->id,
+            'new_follower',
+            'Nouveau follower',
+            "L'étudiant " . Auth::user()->name . " a commencé à vous suivre.",
+            route('teacher.dashboard', ['tab' => 'students']),
+            Auth::id()
+        );
+
         return redirect()->to(url()->previous() . (str_contains(url()->previous(), '?') ? '&' : '?') . 'tab=teachers')->with('success', 'Vous suivez maintenant ce professeur.');
     }
 

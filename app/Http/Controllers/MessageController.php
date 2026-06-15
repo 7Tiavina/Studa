@@ -7,6 +7,7 @@ use App\Models\Conversation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\NotificationService;
 
 class MessageController extends Controller
 {
@@ -80,6 +81,17 @@ class MessageController extends Controller
             'user_id' => Auth::id(),
             'body' => $validated['body'],
         ]);
+
+        $recipientId = $conversation->user_one_id === Auth::id() ? $conversation->user_two_id : $conversation->user_one_id;
+
+        NotificationService::send(
+            $recipientId,
+            'new_message',
+            'Nouveau message',
+            Auth::user()->name . " vous a envoyé un message : " . substr($message->body, 0, 50) . (strlen($message->body) > 50 ? '...' : ''),
+            null,
+            Auth::id()
+        );
 
         return response()->json($message->load('user'));
     }
