@@ -492,7 +492,15 @@
                     <div x-show="!chat.minimized" 
                          class="h-96 overflow-y-auto p-4 bg-slate-900 flex flex-col gap-3 custom-scrollbar"
                          x-init="
-                             fetch(`/messages/${chat.conversation_id}`).then(r => r.json()).then(data => { chat.messages = data; });
+                             chat.loading = true;
+                             fetch(`/messages/${chat.conversation_id}`)
+                                 .then(r => r.json())
+                                 .then(data => { 
+                                     chat.messages = data; 
+                                     chat.loading = false;
+                                     $nextTick(() => { $el.scrollTop = $el.scrollHeight; });
+                                 })
+                                 .catch(() => { chat.loading = false; });
                              setInterval(() => {
                                  if (!chat.minimized) {
                                      fetch(`/messages/${chat.conversation_id}`)
@@ -507,6 +515,21 @@
                                  }
                              }, 4000);
                           ">
+                    <!-- Animation de chargement des messages -->
+                    <template x-if="chat.loading">
+                        <div class="flex flex-col gap-3 w-full">
+                            <div class="self-start max-w-[75%] w-2/3 animate-pulse">
+                                <div class="bg-slate-800/50 h-10 rounded-2xl"></div>
+                            </div>
+                            <div class="self-end max-w-[75%] w-1/2 animate-pulse">
+                                <div class="bg-blue-600/30 h-10 rounded-2xl"></div>
+                            </div>
+                            <div class="self-start max-w-[75%] w-3/4 animate-pulse">
+                                <div class="bg-slate-800/50 h-12 rounded-2xl"></div>
+                            </div>
+                        </div>
+                    </template>
+
                     <template x-for="msg in chat.messages" :key="msg.id">
                         <div x-data="{ showPicker: false }" 
                              :class="msg.user_id === {{ Auth::id() }} ? 'self-end' : 'self-start'" 
@@ -598,6 +621,12 @@
                                 if(msg.id) {
                                     chat.messages.push(msg);
                                     chat.newMessage = '';
+                                    $nextTick(() => {
+                                        const container = $el.closest('.w-96').querySelector('.h-96');
+                                        if (container) {
+                                            container.scrollTop = container.scrollHeight;
+                                        }
+                                    });
                                 }
                             })
                             .catch(e => console.error(e));
@@ -635,7 +664,8 @@
                                 is_online: conv.partner_is_online,
                                 avatar: '{{ $teacher->avatar }}',
                                 messages: [],
-                                newMessage: ''
+                                newMessage: '',
+                                loading: true
                             });
                         } else {
                             existingChat.minimized = false;
