@@ -56,7 +56,7 @@
     </script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body class="bg-slate-50 dark:bg-[#0c1322] text-slate-800 dark:text-[#dce2f7] font-sans antialiased flex items-center justify-center min-h-screen transition-colors duration-200 p-4" x-data="{ role: 'student' }">
+<body class="bg-slate-50 dark:bg-[#0c1322] text-slate-800 dark:text-[#dce2f7] font-sans antialiased flex items-center justify-center min-h-screen transition-colors duration-200 p-4" x-data="{ role: '{{ old('role', request('role', 'student')) }}' }">
 
 <div class="absolute top-4 right-4">
     <button id="theme-toggle" class="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none flex items-center justify-center shadow-sm">

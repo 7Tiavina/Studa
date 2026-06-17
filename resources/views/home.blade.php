@@ -237,7 +237,7 @@
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-4 mt-6">
-                    <a href="{{ route('register') }}" class="inline-block bg-[#1b55db] hover:bg-[#4f46e5] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm">
+                    <a href="{{ route('register') }}?role=student" class="inline-block bg-[#1b55db] hover:bg-[#4f46e5] text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-sm">
                         Démarrer mon inscription
                     </a>
                     <a href="#levels" class="text-[#1b55db] dark:text-blue-400 font-semibold text-sm hover:underline">
