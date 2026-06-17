@@ -75,11 +75,22 @@
         @csrf
         <div>
             <label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Email</label>
-            <input type="email" name="email" class="w-full bg-slate-50 border border-slate-300 dark:bg-slate-950 dark:border-slate-700 rounded-lg p-2.5 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-blue-500 transition-colors" placeholder="email@exemple.com" required>
+            <input type="email" name="email" value="{{ old('email') }}" class="w-full bg-slate-50 border border-slate-300 dark:bg-slate-950 dark:border-slate-700 rounded-lg p-2.5 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-blue-500 transition-colors @error('email') border-red-500 dark:border-red-500 @enderror" placeholder="email@exemple.com" required>
+            @error('email')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
         </div>
         <div>
             <label class="block text-sm mb-1 text-slate-600 dark:text-slate-400">Mot de passe</label>
-            <input type="password" name="password" class="w-full bg-slate-50 border border-slate-300 dark:bg-slate-950 dark:border-slate-700 rounded-lg p-2.5 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-blue-500 transition-colors" required>
+            <div class="relative">
+                <input type="password" id="password-input" name="password" class="w-full bg-slate-50 border border-slate-300 dark:bg-slate-950 dark:border-slate-700 rounded-lg p-2.5 pr-10 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-blue-500 transition-colors @error('password') border-red-500 dark:border-red-500 @enderror" required>
+                <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <span id="password-icon" class="material-symbols-outlined select-none">visibility</span>
+                </button>
+            </div>
+            @error('password')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
         </div>
         <div class="flex justify-between items-center text-sm">
             <a href="#" class="text-blue-600 dark:text-blue-400 hover:underline">Mot de passe oublié ?</a>
@@ -116,6 +127,23 @@
             localStorage.setItem('theme', 'dark');
         }
     });
+
+    // Password visibility toggle
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    const passwordInput = document.getElementById('password-input');
+    const passwordIcon = document.getElementById('password-icon');
+
+    if (togglePasswordBtn && passwordInput && passwordIcon) {
+        togglePasswordBtn.addEventListener('click', () => {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.textContent = 'visibility_off';
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.textContent = 'visibility';
+            }
+        });
+    }
 </script>
 
 </body>

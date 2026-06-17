@@ -70,12 +70,22 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (!$user) {
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => 'Cet e-mail n\'est pas enregistré dans le système.']);
+        }
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             return $this->redirectByRole(Auth::user()->role);
         }
 
-        return back()->withErrors(['email' => 'Les identifiants sont incorrects.']);
+        return back()
+            ->withInput($request->only('email'))
+            ->withErrors(['password' => 'Le mot de passe est incorrect.']);
     }
 
     public function logout(Request $request)
