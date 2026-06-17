@@ -1269,7 +1269,7 @@
                                            onchange="const file = this.files[0]; if(file){ const reader = new FileReader(); reader.onload = (e) => { document.getElementById('avatar-preview').src = e.target.result; document.getElementById('avatar-preview').classList.remove('hidden'); const placeholder = document.getElementById('avatar-placeholder'); if(placeholder) placeholder.classList.add('hidden'); }; reader.readAsDataURL(file); }">
                                 </div>
                                 <div class="space-y-1">
-                                    <h5 class="font-bold text-slate-100 text-lg">Photo de profil</h5>
+                                    <h5 class="font-bold text-slate-900 dark:text-white text-lg">Photo de profil</h5>
                                     <p class="text-xs text-outline leading-relaxed max-w-xs">Mettez à jour votre photo pour que vos étudiants puissent vous reconnaître plus facilement.</p>
                                     <p class="text-[10px] text-primary uppercase font-black tracking-widest pt-2">JPG, PNG ou GIF • Max 2Mo</p>
                                 </div>
@@ -1279,30 +1279,30 @@
                                 <div class="space-y-2">
                                     <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Nom complet</label>
                                     <input type="text" name="name" value="{{ $user->name }}"
-                                           class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                           class="w-full bg-background border-outline-variant rounded-xl text-slate-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
                                 </div>
                                 <div class="space-y-2">
                                     <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Email professionnel</label>
                                     <input type="email" name="email" value="{{ $user->email }}"
-                                           class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                           class="w-full bg-background border-outline-variant rounded-xl text-slate-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
                                 </div>
                                 <div class="space-y-2">
                                     <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Titre professionnel</label>
                                     <input type="text" name="professional_title" value="{{ $user->professional_title }}"
                                            placeholder="Ex: Professeur de Mathématiques"
-                                           class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                           class="w-full bg-background border-outline-variant rounded-xl text-slate-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
                                 </div>
                                 <div class="space-y-2">
                                     <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Expérience</label>
                                     <input type="text" name="experience" value="{{ $user->experience }}"
                                            placeholder="Ex: 10 ans d'enseignement"
-                                           class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
+                                           class="w-full bg-background border-outline-variant rounded-xl text-slate-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4">
                                 </div>
                                 <div class="md:col-span-2 space-y-2">
                                     <label class="block text-xs font-black text-outline uppercase tracking-widest ml-1">Biographie</label>
                                     <textarea name="bio" rows="5" 
                                               placeholder="Présentez-vous brièvement à vos futurs étudiants..."
-                                              class="w-full bg-background border-outline-variant rounded-xl text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4 resize-none">{{ $user->bio }}</textarea>
+                                              class="w-full bg-background border-outline-variant rounded-xl text-slate-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all py-3 px-4 resize-none">{{ $user->bio }}</textarea>
                                 </div>
                             </div>
                         </div>

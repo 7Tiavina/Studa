@@ -152,7 +152,6 @@
                     <span id="theme-toggle-icon" class="material-symbols-outlined">dark_mode</span>
                 </button>
                 
-                <!-- Composant de Notification Alpine.js -->
                 <div x-data="{ 
                     open: false, 
                     notifications: [], 

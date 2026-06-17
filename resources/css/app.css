@@ -5,6 +5,49 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+@variant dark (&:where(.dark, .dark *));
+
+/* Variables CSS par défaut pour le thème clair et sombre */
+:root {
+    --primary: #1b55db;
+    --secondary: #38bdf8;
+    --tertiary: #ffb95f;
+    --error: #ffb4ab;
+    --background: #f8fafc;
+    --surface: #ffffff;
+    --surface-container: #ffffff;
+    --surface-container-high: #f1f5f9;
+    --surface-container-low: #f8fafc;
+    --surface-container-lowest: #ffffff;
+    --surface-container-highest: #e2e8f0;
+    --on-background: #0f172a;
+    --on-surface: #0f172a;
+    --on-surface-variant: #475569;
+    --outline: #94a3b8;
+    --outline-variant: #e2e8f0;
+    --on-primary: #ffffff;
+}
+
+.dark {
+    --primary: #38bdf8;
+    --secondary: #1b55db;
+    --tertiary: #ffb95f;
+    --error: #ffb4ab;
+    --background: #0c1322;
+    --surface: #0c1322;
+    --surface-container: #191f2f;
+    --surface-container-high: #232a3a;
+    --surface-container-low: #141b2b;
+    --surface-container-lowest: #070e1d;
+    --surface-container-highest: #2e3545;
+    --on-background: #dce2f7;
+    --on-surface: #dce2f7;
+    --on-surface-variant: #c2c6d6;
+    --outline: #8c909f;
+    --outline-variant: #424754;
+    --on-primary: #000000;
+}
+
 @theme {
     --font-sans: 'Syne', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     
@@ -65,14 +108,39 @@
     --spacing-margin: 24px;
     --spacing-sm: 8px;
 
-    /* Palette de couleurs */
-    --color-primary: #1b55db;
-    --color-secondary: #38bdf8;
-    --color-tertiary: #ffb95f;
-    --color-error: #ffb4ab;
-    --color-background: #0c1322;
-    --color-surface: #0c1322;
+    /* Widths / Max Widths pour préserver les classes max-w-* standard */
+    --width-xs: 20rem;
+    --width-sm: 24rem;
+    --width-md: 28rem;
+    --width-lg: 32rem;
+    --width-xl: 36rem;
+    --width-2xl: 42rem;
+    --width-3xl: 48rem;
+    --width-4xl: 56rem;
+    --width-5xl: 64rem;
+    --width-6xl: 72rem;
+    --width-7xl: 80rem;
 
+
+    /* Palette de couleurs dynamiques */
+    --color-primary: var(--primary);
+    --color-secondary: var(--secondary);
+    --color-tertiary: var(--tertiary);
+    --color-error: var(--error);
+    --color-background: var(--background);
+    --color-surface: var(--surface);
+    --color-surface-container: var(--surface-container);
+    --color-surface-container-high: var(--surface-container-high);
+    --color-surface-container-low: var(--surface-container-low);
+    --color-surface-container-lowest: var(--surface-container-lowest);
+    --color-surface-container-highest: var(--surface-container-highest);
+    --color-on-background: var(--on-background);
+    --color-on-surface: var(--on-surface);
+    --color-on-surface-variant: var(--on-surface-variant);
+    --color-outline: var(--outline);
+    --color-outline-variant: var(--outline-variant);
+
+    /* Palette de couleurs fixes */
     --color-blue-50: #f0f5ff;
     --color-blue-100: #e0ebff;
     --color-blue-200: #c0d7ff;
@@ -98,44 +166,47 @@
     --color-sky-950: #082f49;
 
     --color-on-secondary: #003824;
-    --color-primary-fixed-dim: #1b55db;
-    --color-outline-variant: #424754;
+    --color-primary-fixed-dim: var(--primary);
     --color-on-primary-fixed: #001a42;
     --color-on-tertiary: #472a00;
-    --color-on-surface: #dce2f7;
     --color-on-secondary-container: #00311f;
-    --color-outline: #8c909f;
     --color-on-error-container: #ffdad6;
     --color-error-container: #93000a;
     --color-inverse-on-surface: #293040;
     --color-on-primary-container: #00285d;
     --color-tertiary-container: #ca8100;
-    --color-inverse-primary: #1b55db;
-    --color-secondary-container: #38bdf8;
-    --color-surface-container: #191f2f;
+    --color-inverse-primary: var(--primary);
+    --color-secondary-container: var(--secondary);
     --color-surface-bright: #323949;
-    --color-secondary-fixed-dim: #38bdf8;
-    --color-surface-container-lowest: #070e1d;
-    --color-on-background: #dce2f7;
+    --color-secondary-fixed-dim: var(--secondary);
     --color-tertiary-fixed: #ffddb8;
     --color-on-secondary-fixed-variant: #005236;
     --color-on-primary-fixed-variant: #004395;
-    --color-surface-container-highest: #2e3545;
     --color-on-tertiary-fixed-variant: #653e00;
     --color-on-tertiary-fixed: #2a1700;
-    --color-surface-container-high: #232a3a;
-    --color-on-primary: #ffffff;
-    --color-primary-container: #1b55db;
+    --color-on-primary: var(--on-primary);
+    --color-primary-container: var(--primary);
     --color-on-tertiary-container: #3e2400;
-    --color-on-surface-variant: #c2c6d6;
     --color-surface-variant: #2e3545;
-    --color-surface-tint: #1b55db;
-    --color-secondary-fixed: #38bdf8;
+    --color-surface-tint: var(--primary);
+    --color-secondary-fixed: var(--secondary);
     --color-primary-fixed: #d8e2ff;
     --color-surface-dim: #0c1322;
     --color-tertiary-fixed-dim: #ffb95f;
-    --color-surface-container-low: #141b2b;
     --color-inverse-surface: #dce2f7;
     --color-on-secondary-fixed: #002113;
     --color-on-error: #690005;
 }
+
+/* Restauration des classes max-w-* standard de Tailwind */
+.max-w-xs { max-width: 20rem !important; }
+.max-w-sm { max-width: 24rem !important; }
+.max-w-md { max-width: 28rem !important; }
+.max-w-lg { max-width: 32rem !important; }
+.max-w-xl { max-width: 36rem !important; }
+.max-w-2xl { max-width: 42rem !important; }
+.max-w-3xl { max-width: 48rem !important; }
+.max-w-4xl { max-width: 56rem !important; }
+.max-w-5xl { max-width: 64rem !important; }
+.max-w-6xl { max-width: 72rem !important; }
+.max-w-7xl { max-width: 80rem !important; }
