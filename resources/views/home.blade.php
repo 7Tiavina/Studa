@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <link rel="icon" type="image/png" href="{{ asset('faviconStuda.png') }}" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -32,124 +32,6 @@
             border-radius: 10px;
         }
     </style>
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "blue": {
-                            "50": "#f0f5ff",
-                            "100": "#e0ebff",
-                            "200": "#c0d7ff",
-                            "300": "#90b8ff",
-                            "400": "#5b93ff",
-                            "500": "#1b55db",
-                            "600": "#1b55db",
-                            "700": "#123fa3",
-                            "800": "#133580",
-                            "900": "#152e66",
-                            "950": "#0e1b3d"
-                        },
-                        "sky": {
-                            "50": "#f0f9ff",
-                            "100": "#e0f2fe",
-                            "200": "#bae6fd",
-                            "300": "#7dd3fc",
-                            "400": "#38bdf8",
-                            "500": "#38bdf8",
-                            "600": "#0284c7",
-                            "700": "#0369a1",
-                            "800": "#075985",
-                            "900": "#0c4a6e",
-                            "950": "#082f49"
-                        },
-                        "on-secondary": "#003824",
-                        "primary-fixed-dim": "#1b55db",
-                        "outline-variant": "#424754",
-                        "on-primary-fixed": "#001a42",
-                        "on-tertiary": "#472a00",
-                        "on-surface": "#dce2f7",
-                        "on-secondary-container": "#00311f",
-                        "outline": "#8c909f",
-                        "on-error-container": "#ffdad6",
-                        "error-container": "#93000a",
-                        "inverse-on-surface": "#293040",
-                        "on-primary-container": "#00285d",
-                        "tertiary-container": "#ca8100",
-                        "inverse-primary": "#1b55db",
-                        "error": "#ffb4ab",
-                        "primary": "#1b55db",
-                        "secondary-container": "#38bdf8",
-                        "surface-container": "#191f2f",
-                        "background": "#0c1322",
-                        "surface-bright": "#323949",
-                        "secondary-fixed-dim": "#38bdf8",
-                        "surface-container-lowest": "#070e1d",
-                        "surface": "#0c1322",
-                        "on-background": "#dce2f7",
-                        "tertiary-fixed": "#ffddb8",
-                        "on-secondary-fixed-variant": "#005236",
-                        "on-primary-fixed-variant": "#004395",
-                        "surface-container-highest": "#2e3545",
-                        "on-tertiary-fixed-variant": "#653e00",
-                        "on-tertiary-fixed": "#2a1700",
-                        "surface-container-high": "#232a3a",
-                        "on-primary": "#ffffff",
-                        "primary-container": "#1b55db",
-                        "on-tertiary-container": "#3e2400",
-                        "on-surface-variant": "#c2c6d6",
-                        "surface-variant": "#2e3545",
-                        "surface-tint": "#1b55db",
-                        "secondary-fixed": "#38bdf8",
-                        "primary-fixed": "#d8e2ff",
-                        "surface-dim": "#0c1322",
-                        "tertiary-fixed-dim": "#ffb95f",
-                        "surface-container-low": "#141b2b",
-                        "inverse-surface": "#dce2f7",
-                        "on-secondary-fixed": "#002113",
-                        "on-error": "#690005",
-                        "secondary": "#38bdf8",
-                        "tertiary": "#ffb95f"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    "spacing": {
-                        "lg": "24px",
-                        "xs": "4px",
-                        "md": "16px",
-                        "xl": "32px",
-                        "gutter": "20px",
-                        "base": "4px",
-                        "margin": "24px",
-                        "sm": "8px"
-                    },
-                    "fontFamily": {
-                        "stat-value": ["Syne", "sans-serif"],
-                        "display-lg": ["Syne", "sans-serif"],
-                        "title-sm": ["Syne", "sans-serif"],
-                        "body-base": ["Syne", "sans-serif"],
-                        "headline-md": ["Syne", "sans-serif"],
-                        "body-sm": ["Syne", "sans-serif"],
-                        "label-caps": ["Syne", "sans-serif"]
-                    },
-                    "fontSize": {
-                        "stat-value": ["28px", {"lineHeight": "1.1", "fontWeight": "700"}],
-                        "display-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-                        "title-sm": ["18px", {"lineHeight": "1.4", "fontWeight": "600"}],
-                        "body-base": ["15px", {"lineHeight": "1.6", "fontWeight": "400"}],
-                        "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
-                        "body-sm": ["13px", {"lineHeight": "1.5", "fontWeight": "400"}],
-                        "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}]
-                    }
-                },
-            },
-        }
-    </script>
 </head>
 <body x-data="{ currentTab: 'courses', mentorSearchQuery: '' }" class="bg-slate-50 dark:bg-background font-body-base text-slate-800 dark:text-on-background selection:bg-primary-container selection:text-on-primary-container transition-colors duration-200">
 

@@ -5,33 +5,8 @@
     <link rel="icon" type="image/png" href="{{ asset('faviconStuda.png') }}" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Studa | Live - {{ $meeting->course->title }}</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#adc6ff",
-                        "background": "#0c1322",
-                        "surface": "#0c1322",
-                        "surface-container": "#191f2f",
-                        "surface-container-high": "#232a3a",
-                        "surface-container-low": "#141b2b",
-                        "on-background": "#dce2f7",
-                        "on-surface": "#dce2f7",
-                        "on-surface-variant": "#c2c6d6",
-                        "outline": "#8c909f",
-                        "outline-variant": "#424754",
-                        "secondary": "#4edea3",
-                        "tertiary": "#ffb95f",
-                        "error": "#ffb4ab",
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
